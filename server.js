@@ -841,7 +841,12 @@ function serveStaticFile(req, res, pathname) {
 
 // Master HTTP Server
 const server = http.createServer(async (req, res) => {
-  const parsedUrl = url.parse(req.url, true);
+  const reqUrl = new URL(req.url, `http://${req.headers.host || 'localhost:8080'}`);
+  const parsedUrl = {
+    pathname: reqUrl.pathname,
+    query: Object.fromEntries(reqUrl.searchParams),
+    search: reqUrl.search
+  };
 
   try {
     // If request starts with /api/, route to REST API
