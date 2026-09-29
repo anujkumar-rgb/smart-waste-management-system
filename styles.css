@@ -1,0 +1,1189 @@
+/* ==========================================================================
+   SMART WASTE MANAGEMENT SYSTEM - CIVIC UTILITY DESIGN SYSTEM
+   Municipal Services Architecture & Multi-Role Operational Interface
+   ========================================================================== */
+
+/* --- Civic Token Architecture & Root Variables --- */
+:root {
+  /* Municipal Signage & Civic Color Palette (Light Mode) */
+  --civic-forest-ink: #122620;        /* Deep authoritative base text / brand ink */
+  --civic-paper-bg: #f4f5f2;          /* Anti-glare civic paper backdrop */
+  --civic-surface: #ffffff;           /* Clean solid white panels */
+  --civic-surface-muted: #eaece8;     /* Inset sub-panels & table headers */
+  --civic-border: #d0d7d2;            /* Sharp architectural 1px divider */
+  --civic-border-strong: #788a80;     /* Active borders & focus indicators */
+  
+  --civic-cobalt-accent: #1c52d8;     /* Transit cobalt: primary dispatch actions */
+  --civic-cobalt-hover: #143fa8;
+  --civic-cobalt-soft: #e8effd;
+
+  --civic-spruce-green: #166534;      /* Operational cleared / on-track */
+  --civic-spruce-soft: #e8f5ec;
+
+  --civic-signal-amber: #b45309;      /* Pending dispatch / caution */
+  --civic-signal-amber-soft: #fef3c7;
+
+  --civic-signal-crimson: #b91c1c;    /* Emergency hazard / SLA escalation */
+  --civic-signal-crimson-soft: #fee2e2;
+
+  /* Biomedical Waste Rules 2016 Regulatory Tokens (Strict Legal Standard) */
+  --bmw-yellow: #ca8a04;
+  --bmw-yellow-bg: #fef08a;
+  --bmw-yellow-text: #78350f;
+
+  --bmw-red: #dc2626;
+  --bmw-red-bg: #fee2e2;
+  --bmw-red-text: #7f1d1d;
+
+  --bmw-white: #475569;
+  --bmw-white-bg: #f8fafc;
+  --bmw-white-border: #94a3b8;
+  --bmw-white-text: #0f172a;
+
+  --bmw-black-blue: #1e3a8a;
+  --bmw-black-bg: #1e293b;
+  --bmw-black-text: #ffffff;
+
+  /* Typography Roles */
+  --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-ui: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* Geometry & Spacing */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-full: 9999px;
+
+  /* Purposeful Transitions */
+  --transition-quick: 0.15s ease-out;
+  --transition-flow: 0.22s ease-in-out;
+}
+
+/* Dark Mode Theme Tokens */
+[data-theme="dark"] {
+  --civic-forest-ink: #e2ece7;
+  --civic-paper-bg: #0b1310;
+  --civic-surface: #121e19;
+  --civic-surface-muted: #182821;
+  --civic-border: #24382f;
+  --civic-border-strong: #3f5e50;
+
+  --civic-cobalt-accent: #3b82f6;
+  --civic-cobalt-hover: #60a5fa;
+  --civic-cobalt-soft: rgba(59, 130, 246, 0.18);
+
+  --civic-spruce-green: #22c55e;
+  --civic-spruce-soft: rgba(34, 197, 94, 0.18);
+
+  --civic-signal-amber: #f59e0b;
+  --civic-signal-amber-soft: rgba(245, 158, 11, 0.18);
+
+  --civic-signal-crimson: #ef4444;
+  --civic-signal-crimson-soft: rgba(239, 68, 68, 0.22);
+
+  --bmw-yellow-bg: #422006;
+  --bmw-yellow-text: #fde047;
+
+  --bmw-red-bg: #450a0a;
+  --bmw-red-text: #fca5a5;
+
+  --bmw-white-bg: #1e293b;
+  --bmw-white-border: #475569;
+  --bmw-white-text: #f8fafc;
+
+  --bmw-black-bg: #0f172a;
+  --bmw-black-text: #93c5fd;
+}
+
+/* --- Base & Reset --- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  font-variant-numeric: tabular-nums;
+}
+
+body {
+  font-family: var(--font-ui);
+  background-color: var(--civic-paper-bg);
+  color: var(--civic-forest-ink);
+  line-height: 1.55;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--civic-forest-ink);
+  line-height: 1.25;
+}
+
+a {
+  color: var(--civic-cobalt-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--civic-cobalt-accent);
+  outline-offset: 2px;
+}
+
+/* --- Layout Containers --- */
+.container {
+  width: 94%;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.dashboard-view {
+  display: none;
+  padding: 2rem 0 4rem 0;
+}
+
+.dashboard-view.active {
+  display: block;
+}
+
+/* --- Sticky Municipal Header --- */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: var(--civic-surface);
+  border-bottom: 2px solid var(--civic-border);
+}
+
+.nav-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 4.25rem;
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.brand-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  background: var(--civic-forest-ink);
+  color: #ffffff;
+  border-radius: var(--radius-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.15rem;
+}
+
+[data-theme="dark"] .brand-icon {
+  background: var(--civic-cobalt-accent);
+}
+
+.nav-user-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.user-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--civic-surface-muted);
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--civic-border);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.role-pill {
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-xs);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.role-citizen { background: var(--civic-spruce-soft); color: var(--civic-spruce-green); }
+.role-institution { background: var(--civic-cobalt-soft); color: var(--civic-cobalt-accent); }
+.role-hospital { background: var(--bmw-yellow-bg); color: var(--bmw-yellow-text); }
+.role-worker { background: var(--civic-signal-amber-soft); color: var(--civic-signal-amber); }
+.role-admin { background: var(--civic-signal-crimson-soft); color: var(--civic-signal-crimson); }
+
+.theme-toggle-btn {
+  background: var(--civic-surface-muted);
+  border: 1px solid var(--civic-border);
+  color: var(--civic-forest-ink);
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+/* --- Buttons & Action Controls --- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  line-height: 1.2;
+}
+
+.btn-primary {
+  background: var(--civic-cobalt-accent);
+  color: #ffffff;
+  border-color: var(--civic-cobalt-accent);
+}
+
+.btn-primary:hover {
+  background: var(--civic-cobalt-hover);
+}
+
+.btn-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-outline {
+  background: var(--civic-surface);
+  color: var(--civic-forest-ink);
+  border-color: var(--civic-border-strong);
+}
+
+.btn-outline:hover {
+  background: var(--civic-surface-muted);
+  border-color: var(--civic-forest-ink);
+}
+
+.btn-danger {
+  background: var(--civic-signal-crimson);
+  color: #ffffff;
+  border-color: var(--civic-signal-crimson);
+}
+
+.btn-emergency {
+  background: var(--civic-signal-crimson);
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  outline: 2px solid var(--civic-signal-crimson);
+}
+
+.btn-sm {
+  padding: 0.4rem 0.85rem;
+  font-size: 0.82rem;
+}
+
+.btn-xs {
+  padding: 0.25rem 0.55rem;
+  font-size: 0.75rem;
+}
+
+/* --- Cards, Panels & Forms --- */
+.card {
+  background: var(--civic-surface);
+  border: 1px solid var(--civic-border);
+  border-radius: var(--radius-sm);
+  padding: 1.5rem;
+  position: relative;
+}
+
+.form-group {
+  margin-bottom: 1.15rem;
+}
+
+.form-label {
+  display: block;
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: 0.35rem;
+  color: var(--civic-forest-ink);
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--civic-border);
+  border-radius: var(--radius-xs);
+  background: var(--civic-surface);
+  color: var(--civic-forest-ink);
+  outline: none;
+}
+
+.form-control:focus {
+  border-color: var(--civic-cobalt-accent);
+  box-shadow: 0 0 0 2px var(--civic-cobalt-soft);
+}
+
+/* --- Auth View --- */
+.auth-container {
+  max-width: 980px;
+  margin: 2.5rem auto;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 1.75rem;
+  align-items: stretch;
+}
+
+.auth-hero-card {
+  background: var(--civic-forest-ink);
+  color: #ffffff;
+  border: 1px solid var(--civic-forest-ink);
+  border-radius: var(--radius-md);
+  padding: 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+[data-theme="dark"] .auth-hero-card {
+  background: #101c17;
+  border-color: var(--civic-border);
+}
+
+.auth-hero-card h1 {
+  color: #ffffff;
+}
+
+.auth-card {
+  background: var(--civic-surface);
+  border: 1px solid var(--civic-border);
+  border-radius: var(--radius-md);
+  padding: 2rem;
+}
+
+.auth-tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 2px solid var(--civic-border);
+  padding-bottom: 0.5rem;
+}
+
+.auth-tab {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #64748b;
+  cursor: pointer;
+  position: relative;
+}
+
+.auth-tab.active {
+  color: var(--civic-cobalt-accent);
+}
+
+.auth-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -0.6rem;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--civic-cobalt-accent);
+}
+
+.demo-account-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 0.4rem;
+  margin-top: 1rem;
+}
+
+.demo-btn {
+  padding: 0.5rem 0.4rem;
+  background: var(--civic-surface-muted);
+  border: 1px solid var(--civic-border);
+  border-radius: var(--radius-xs);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+}
+
+.demo-btn:hover {
+  border-color: var(--civic-cobalt-accent);
+  color: var(--civic-cobalt-accent);
+}
+
+/* --- Dashboard Header Banners --- */
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.75rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--civic-border);
+}
+
+.dashboard-title {
+  font-size: 1.75rem;
+  line-height: 1.2;
+}
+
+.dashboard-subtitle {
+  font-size: 0.9rem;
+  color: #556960;
+}
+
+[data-theme="dark"] .dashboard-subtitle {
+  color: #9cb0a6;
+}
+
+/* --- Stats Counters Grid --- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+.stat-card {
+  background: var(--civic-surface);
+  border: 1px solid var(--civic-border);
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.stat-icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-xs);
+  background: var(--civic-surface-muted);
+  color: var(--civic-forest-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  border: 1px solid var(--civic-border);
+}
+
+.stat-number {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* --- Leaflet Map Location Picker Component --- */
+.leaflet-map-picker {
+  height: 220px;
+  width: 100%;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--civic-border);
+  margin-bottom: 0.65rem;
+  position: relative;
+  z-index: 1;
+}
+
+.location-picker-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.coord-display-badge {
+  font-family: monospace;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.6rem;
+  background: var(--civic-surface-muted);
+  border: 1px solid var(--civic-border);
+  border-radius: var(--radius-xs);
+  color: var(--civic-forest-ink);
+}
+
+.location-status-text {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-top: 0.25rem;
+}
+
+/* --- Severity Level Selector (Interactive Button Group) --- */
+.severity-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.severity-btn {
+  padding: 0.65rem 0.5rem;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border: 2px solid var(--civic-border);
+  border-radius: var(--radius-xs);
+  background: var(--civic-surface);
+  cursor: pointer;
+  transition: border-color var(--transition-quick), background var(--transition-quick);
+  user-select: none;
+}
+
+.severity-btn:hover {
+  border-color: var(--civic-border-strong);
+}
+
+.severity-btn.active[data-severity="getting_full"] {
+  border-color: var(--civic-signal-amber);
+  background: var(--civic-signal-amber-soft);
+  color: var(--civic-signal-amber);
+}
+
+.severity-btn.active[data-severity="full"] {
+  border-color: #d97706;
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.severity-btn.active[data-severity="overflowing"] {
+  border-color: var(--civic-signal-crimson);
+  background: var(--civic-signal-crimson-soft);
+  color: var(--civic-signal-crimson);
+}
+
+/* --- Voice Recorder Component & Player --- */
+.voice-recorder-box {
+  background: var(--civic-surface-muted);
+  border: 1px dashed var(--civic-border-strong);
+  border-radius: var(--radius-xs);
+  padding: 1rem;
+  text-align: center;
+  margin-bottom: 1.15rem;
+}
+
+.mic-btn {
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--radius-full);
+  background: var(--civic-forest-ink);
+  color: white;
+  border: none;
+  font-size: 1.3rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 0.5rem auto;
+}
+
+[data-theme="dark"] .mic-btn {
+  background: var(--civic-cobalt-accent);
+}
+
+.mic-btn.recording {
+  background: var(--civic-signal-crimson);
+}
+
+.custom-player-wrapper {
+  margin-top: 0.75rem;
+  padding: 0.5rem;
+  background: var(--civic-surface);
+  border: 1px solid var(--civic-border);
+  border-radius: var(--radius-xs);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* --- Status Steppers (Real Visual Progress Indicators) --- */
+.status-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--civic-surface-muted);
+  border: 1px solid var(--civic-border);
+  border-radius: var(--radius-xs);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.stepper-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #64748b;
+}
+
+.stepper-step.active {
+  color: var(--civic-cobalt-accent);
+  font-weight: 800;
+}
+
+.stepper-step.completed {
+  color: var(--civic-spruce-green);
+  font-weight: 800;
+}
+
+.stepper-arrow {
+  color: #94a3b8;
+  font-size: 0.7rem;
+}
+
+/* Container 5-State Lifecycle Stepper */
+.container-lifecycle-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.cycle-step {
+  padding: 0.15rem 0.4rem;
+  border-radius: 2px;
+  background: var(--civic-surface-muted);
+  color: #64748b;
+  border: 1px solid var(--civic-border);
+}
+
+.cycle-step.current {
+  background: var(--civic-cobalt-accent);
+  color: #ffffff;
+  border-color: var(--civic-cobalt-accent);
+}
+
+.cycle-step.done {
+  background: var(--civic-spruce-soft);
+  color: var(--civic-spruce-green);
+  border-color: var(--civic-spruce-green);
+}
+
+/* --- Dedicated Credit Store (Citizen Dashboard) --- */
+.credit-store-banner {
+  background: var(--civic-forest-ink);
+  color: #ffffff;
+  padding: 1.5rem 1.75rem;
+  border-radius: var(--radius-sm);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+[data-theme="dark"] .credit-store-banner {
+  background: #11221b;
+  border: 1px solid var(--civic-border);
+}
+
+.credit-balance-lg {
+  font-family: var(--font-display);
+  font-size: 2.25rem;
+  font-weight: 800;
+  line-height: 1;
+  color: #ffffff;
+}
+
+.reward-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+/* Primary Featured Sapling Card (Hero Card Listed First) */
+.reward-card.featured-card {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 100px 1fr auto;
+  align-items: center;
+  gap: 1.5rem;
+  background: var(--civic-surface);
+  border: 2px solid var(--civic-spruce-green);
+  padding: 1.5rem;
+  border-radius: var(--radius-sm);
+}
+
+.featured-icon {
+  font-size: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reward-card {
+  background: var(--civic-surface);
+  border: 1px solid var(--civic-border);
+  border-radius: var(--radius-sm);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.reward-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.reward-cost {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--civic-forest-ink);
+  margin-bottom: 0.5rem;
+}
+
+/* --- Multi-Branch Selector & Institution Styles --- */
+.institution-branch-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--civic-surface);
+  border: 1px solid var(--civic-border);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.branch-select-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* --- Tables & Custom Data Grids --- */
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.custom-table th, .custom-table td {
+  padding: 0.75rem 0.85rem;
+  text-align: left;
+  border-bottom: 1px solid var(--civic-border);
+  vertical-align: middle;
+}
+
+.custom-table th {
+  background: var(--civic-surface-muted);
+  font-weight: 700;
+  color: #475569;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+[data-theme="dark"] .custom-table th {
+  color: #94a3b8;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  border: 1px solid var(--civic-border);
+  border-radius: var(--radius-sm);
+  background: var(--civic-surface);
+}
+
+/* Badges */
+.badge {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-xs);
+  font-weight: 800;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.badge-reported { background: var(--civic-signal-amber-soft); color: var(--civic-signal-amber); }
+.badge-assigned { background: var(--civic-cobalt-soft); color: var(--civic-cobalt-accent); }
+.badge-cleared { background: var(--civic-spruce-soft); color: var(--civic-spruce-green); }
+.badge-emergency { background: var(--civic-signal-crimson-soft); color: var(--civic-signal-crimson); font-weight: 900; }
+.badge-escalated { background: #7f1d1d; color: #fee2e2; }
+
+/* Biomedical Official Category Chips */
+.bmw-badge-yellow { background: var(--bmw-yellow-bg); color: var(--bmw-yellow-text); font-weight: 800; }
+.bmw-badge-red { background: var(--bmw-red-bg); color: var(--bmw-red-text); font-weight: 800; }
+.bmw-badge-white { background: var(--bmw-white-bg); color: var(--bmw-white-text); border: 1px solid var(--bmw-white-border); font-weight: 800; }
+.bmw-badge-black { background: var(--bmw-black-bg); color: var(--bmw-black-text); font-weight: 800; }
+
+/* Report Cards */
+.report-item {
+  background: var(--civic-surface);
+  border: 1px solid var(--civic-border);
+  border-left: 4px solid var(--civic-cobalt-accent);
+  border-radius: var(--radius-sm);
+  padding: 1.15rem;
+  margin-bottom: 0.85rem;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem;
+  align-items: center;
+}
+
+.report-item.emergency {
+  border-left-color: var(--civic-signal-crimson);
+  background: rgba(185, 28, 28, 0.03);
+}
+
+.report-item.escalated {
+  border: 2px solid var(--civic-signal-crimson);
+  border-left: 6px solid var(--civic-signal-crimson);
+}
+
+.report-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.4rem;
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+/* Worker Dispatch Stops (Daylight High-Contrast UI) */
+.route-stop-card {
+  background: var(--civic-surface);
+  border: 2px solid var(--civic-border-strong);
+  border-radius: var(--radius-sm);
+  padding: 1.15rem;
+  margin-bottom: 0.85rem;
+  display: grid;
+  grid-template-columns: 54px 1fr auto;
+  gap: 1rem;
+  align-items: center;
+}
+
+.route-stop-card.emergency {
+  border-color: var(--civic-signal-crimson);
+  background: rgba(185, 28, 28, 0.04);
+}
+
+.stop-number {
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--radius-xs);
+  background: var(--civic-forest-ink);
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-theme="dark"] .stop-number {
+  background: var(--civic-cobalt-accent);
+}
+
+.stop-number.emergency-stop {
+  background: var(--civic-signal-crimson);
+  color: #ffffff;
+}
+
+/* Map Containers */
+.map-box {
+  height: 380px;
+  width: 100%;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--civic-border);
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+/* Modal Dialogs */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(18, 38, 32, 0.65);
+  backdrop-filter: blur(2px);
+  z-index: 2000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+.modal-card {
+  background: var(--civic-surface);
+  border: 1px solid var(--civic-border);
+  border-radius: var(--radius-sm);
+  padding: 1.75rem;
+  width: 100%;
+  max-width: 620px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #64748b;
+  cursor: pointer;
+}
+
+/* Segregation Guide & Tags */
+.guide-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.guide-item-card {
+  background: var(--civic-surface-muted);
+  border: 1px solid var(--civic-border);
+  border-radius: var(--radius-xs);
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.bin-tag {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-xs);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin-top: 0.4rem;
+}
+
+.bin-tag-green { background: #dcfce7; color: #15803d; }
+.bin-tag-blue { background: #dbeafe; color: #1d4ed8; }
+.bin-tag-yellow { background: #fef9c3; color: #a16207; }
+.bin-tag-red { background: #fee2e2; color: #b91c1c; }
+
+/* Filter Buttons */
+.filter-group {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.filter-btn {
+  padding: 0.3rem 0.65rem;
+  border: 1px solid var(--civic-border);
+  background: var(--civic-surface);
+  border-radius: var(--radius-xs);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--civic-forest-ink);
+}
+
+.filter-btn.active {
+  background: var(--civic-forest-ink);
+  color: #ffffff;
+  border-color: var(--civic-forest-ink);
+}
+
+[data-theme="dark"] .filter-btn.active {
+  background: var(--civic-cobalt-accent);
+  border-color: var(--civic-cobalt-accent);
+}
+
+/* SBM 2.0 Status Badges */
+.compliance-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-xs);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.status-ontrack { background: #dcfce7; color: #15803d; }
+.status-neartarget { background: #fef9c3; color: #a16207; }
+.status-offtarget { background: #fee2e2; color: #b91c1c; }
+
+/* --- Accessibility: Prefers Reduced Motion --- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* --- Responsive Media Queries --- */
+@media (max-width: 992px) {
+  .reward-card.featured-card {
+    grid-template-columns: 1fr;
+    text-align: left;
+  }
+}
+
+@media (max-width: 868px) {
+  .auth-container {
+    grid-template-columns: 1fr;
+  }
+  .auth-hero-card {
+    display: none;
+  }
+  .route-stop-card {
+    grid-template-columns: 1fr;
+  }
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* --- Admin Feature Additions: Municipal Fleet, SLA & Broadcast System --- */
+.municipal-broadcast-banner {
+  background: var(--civic-forest-ink);
+  color: #ffffff;
+  border-left: 5px solid var(--civic-signal-amber);
+  border-radius: var(--radius-xs);
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+[data-theme="dark"] .municipal-broadcast-banner {
+  background: #11221b;
+  border: 1px solid var(--civic-border);
+  border-left: 5px solid var(--civic-signal-amber);
+}
+
+.fleet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.15rem;
+}
+
+.fleet-card {
+  background: var(--civic-surface);
+  border: 1px solid var(--civic-border);
+  border-radius: var(--radius-sm);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.capacity-meter-wrap {
+  margin: 0.75rem 0;
+}
+
+.capacity-meter-bar {
+  height: 8px;
+  background: var(--civic-surface-muted);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-top: 0.25rem;
+}
+
+.capacity-meter-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+}
+
+.sla-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-xs);
+  font-family: monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.sla-ok { background: var(--civic-spruce-soft); color: var(--civic-spruce-green); }
+.sla-warning { background: var(--civic-signal-amber-soft); color: var(--civic-signal-amber); }
+.sla-breached { background: var(--civic-signal-crimson-soft); color: var(--civic-signal-crimson); font-weight: 900; }
+
+/* --- Statutory Audit Print View (@media print) --- */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 11pt !important;
+  }
+  .navbar, .btn, .theme-toggle-btn, .modal-overlay,
+  #authView, #citizenDashboard, #workerDashboard, #institutionDashboard, #adminDashboard,
+  #hospitalHazardAlert, .card:not(.print-include) {
+    display: none !important;
+  }
+  #hospitalDashboard {
+    display: block !important;
+    padding: 0 !important;
+  }
+  #hospitalDashboard .dashboard-header {
+    border-bottom: 2px solid #000 !important;
+    margin-bottom: 1rem !important;
+  }
+  .custom-table {
+    border: 1px solid #000 !important;
+  }
+  .custom-table th, .custom-table td {
+    border: 1px solid #000 !important;
+    color: #000 !important;
+    padding: 6px !important;
+  }
+}

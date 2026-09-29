@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Waste Management System — Municipal Public Services Framework</title>
+  <meta name="description" content="Municipal multi-role smart waste management platform with crowdsourced reporting, Leaflet GPS location picking, source segregation, and biomedical compliance tracking.">
+
+  <!-- Google Fonts: Utilitarian Signage & Legible UI -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Leaflet CSS for Maps -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+  <!-- App Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Sticky Municipal Navigation Bar -->
+  <header class="navbar">
+    <div class="container nav-container">
+      <div class="brand-logo" id="navBrandLogo">
+        <div class="brand-icon">♻</div>
+        <div>
+          <span>EcoClear</span>
+          <span style="font-size: 0.72rem; font-weight: 700; color: #64748b; display: block; line-height: 1;">Municipal Waste Network</span>
+        </div>
+      </div>
+
+      <div class="nav-user-bar" id="navUserBar" style="display: none;">
+        <div class="user-badge">
+          <span id="navUserName">Loading...</span>
+          <span id="navUserRolePill" class="role-pill">Role</span>
+        </div>
+        <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="Toggle Theme" title="Toggle Light/Dark Theme">
+          🌙
+        </button>
+        <button id="logoutBtn" class="btn btn-outline btn-sm">Sign Out</button>
+      </div>
+
+      <div class="nav-user-bar" id="navGuestBar">
+        <button id="guestThemeToggleBtn" class="theme-toggle-btn" aria-label="Toggle Theme" title="Toggle Light/Dark Theme">
+          🌙
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- Global Municipal Broadcast Advisory Banner (Real-Time Push) -->
+    <div id="globalBroadcastContainer" style="display: none;" class="municipal-broadcast-banner">
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <span style="font-size: 1.35rem;">📢</span>
+        <div>
+          <strong style="text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.05em; color: var(--civic-signal-amber);">Official Municipal Sanitation Advisory</strong>
+          <div id="globalBroadcastText" style="font-size: 0.88rem; margin-top: 0.15rem;"></div>
+        </div>
+      </div>
+      <button class="btn btn-outline btn-xs" style="color: white; border-color: rgba(255,255,255,0.4);" onclick="dismissBroadcast()">Dismiss</button>
+    </div>
+
+    <!-- ==========================================
+         VIEW 1: AUTHENTICATION / LOGIN & SIGNUP GATEWAY
+         ========================================== -->
+    <section id="authView" class="auth-container">
+      <div class="auth-hero-card">
+        <div>
+          <span class="role-pill role-citizen" style="background: rgba(255,255,255,0.15); color: white;">Municipal Civic Utility</span>
+          <h1 style="font-size: 2.1rem; margin: 1.25rem 0 0.85rem 0; line-height: 1.2;">Smart Waste Management Platform</h1>
+          <p style="opacity: 0.9; font-size: 0.95rem; line-height: 1.5;">An urban digital framework replacing high-cost hardware with crowdsourced reporting, precise GPS verification, route optimization, and statutory biomedical waste tracking.</p>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.08); padding: 1.25rem; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.18);">
+          <div style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; margin-bottom: 0.4rem; letter-spacing: 0.04em;">Multi-Stakeholder Access</div>
+          <p style="font-size: 0.82rem; opacity: 0.85;">Residents, schools, corporate offices, healthcare facilities, field workers, and municipal commissioners share a unified operational registry.</p>
+        </div>
+      </div>
+
+      <div class="auth-card">
+        <div class="auth-tabs">
+          <div id="tabLogin" class="auth-tab active">Sign In</div>
+          <div id="tabSignup" class="auth-tab">Register Account</div>
+        </div>
+
+        <!-- Login Form -->
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="loginEmail" class="form-label">Email Address</label>
+            <input type="email" id="loginEmail" class="form-control" placeholder="e.g. citizen@ecoclear.org" required>
+          </div>
+          <div class="form-group">
+            <label for="loginPassword" class="form-label">Password</label>
+            <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Sign In</button>
+        </form>
+
+        <!-- Signup Form with Dynamic School & Company Fields -->
+        <form id="signupForm" style="display: none;">
+          <div class="form-group">
+            <label for="signupName" class="form-label">Contact Person Name</label>
+            <input type="text" id="signupName" class="form-control" placeholder="e.g. Ananya Sharma or Facility Officer" required>
+          </div>
+          <div class="form-group">
+            <label for="signupEmail" class="form-label">Email Address</label>
+            <input type="email" id="signupEmail" class="form-control" placeholder="user@organization.org" required>
+          </div>
+          <div class="form-group">
+            <label for="signupPassword" class="form-label">Password</label>
+            <input type="password" id="signupPassword" class="form-control" placeholder="••••••••" required>
+          </div>
+
+          <div class="form-group">
+            <label for="signupRole" class="form-label">Account Role</label>
+            <select id="signupRole" class="form-control" required>
+              <option value="citizen">Citizen (Resident / User)</option>
+              <option value="institution">Institution (School / Company / Housing Society)</option>
+              <option value="hospital">Hospital (Biomedical Waste Generator)</option>
+              <option value="worker">Worker / Field Collection Staff</option>
+              <option value="admin">Admin (Municipal Sanitation Officer)</option>
+            </select>
+          </div>
+
+          <!-- Dynamic Institution Type Selector -->
+          <div id="institutionTypeGroup" class="form-group" style="display: none; background: var(--civic-surface-muted); padding: 0.85rem; border-radius: var(--radius-xs); border: 1px solid var(--civic-border);">
+            <label for="signupInstType" class="form-label">Institution Type</label>
+            <select id="signupInstType" class="form-control">
+              <option value="school">School / Educational Institution</option>
+              <option value="company">Office / Corporate Company</option>
+              <option value="other">Housing Society / Market Complex</option>
+            </select>
+          </div>
+
+          <!-- School Specific Field -->
+          <div id="schoolFieldGroup" class="form-group" style="display: none;">
+            <label for="signupSchoolName" class="form-label">School Name <span style="color: var(--civic-signal-crimson);">*</span></label>
+            <input type="text" id="signupSchoolName" class="form-control" placeholder="e.g. Delhi Public School, Sector 12 or St. Xavier's High School">
+            <div style="font-size: 0.78rem; color: #64748b; margin-top: 0.25rem;">Displayed on your dashboard header and bulk collection dispatches.</div>
+          </div>
+
+          <!-- Company / Office Specific Fields -->
+          <div id="companyFieldGroup" class="form-group" style="display: none;">
+            <label for="signupCompanyName" class="form-label">Company / Organization Name <span style="color: var(--civic-signal-crimson);">*</span></label>
+            <input type="text" id="signupCompanyName" class="form-control" placeholder="e.g. Infosys Ltd, Whitefield Campus or Tata Consultancy Services, Andheri Branch">
+            <div style="font-size: 0.78rem; color: #64748b; margin-top: 0.25rem;">Free-text organizational identity shown to Admin & Sanitation Crews.</div>
+          </div>
+
+          <div id="businessTypeFieldGroup" class="form-group" style="display: none;">
+            <label for="signupBusinessType" class="form-label">Business Type (Optional)</label>
+            <select id="signupBusinessType" class="form-control">
+              <option value="">Select Business Sector...</option>
+              <option value="IT / Tech Office">IT / Tech Office</option>
+              <option value="Manufacturing Unit">Manufacturing Unit</option>
+              <option value="Retail / Market Complex">Retail / Market Complex</option>
+              <option value="Co-working Space">Co-working Space</option>
+              <option value="Corporate Headquarters">Corporate Headquarters</option>
+              <option value="Other Commercial">Other Commercial</option>
+            </select>
+          </div>
+
+          <!-- Official Role Verification Field -->
+          <div id="verificationFieldGroup" class="form-group" style="display: none;">
+            <label id="verificationLabel" for="signupVerificationCode" class="form-label">Registration / Badge ID</label>
+            <input type="text" id="signupVerificationCode" class="form-control" placeholder="Enter Registration ID">
+            <div id="verificationHint" style="font-size: 0.78rem; color: #64748b; margin-top: 0.25rem;">Required for official non-citizen roles.</div>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Create Account</button>
+        </form>
+
+        <!-- Quick Demo Switcher -->
+        <div style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px dashed var(--civic-border);">
+          <div style="font-size: 0.8rem; font-weight: 700; color: #64748b; margin-bottom: 0.6rem; text-align: center;">
+            ⚡ Quick Test Logins (One-Click Demo Roles)
+          </div>
+          <div class="demo-account-grid">
+            <button class="demo-btn" onclick="quickLogin('citizen@ecoclear.org')">Resident</button>
+            <button class="demo-btn" onclick="quickLogin('school@cityedu.org')">School</button>
+            <button class="demo-btn" onclick="quickLogin('infosys@campus.org')">Company</button>
+            <button class="demo-btn" onclick="quickLogin('citycare@hospital.org')">Hospital</button>
+            <button class="demo-btn" onclick="quickLogin('crew101@cleanward.org')">Worker</button>
+            <button class="demo-btn" onclick="quickLogin('admin@citygov.org')">Admin</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VIEW 2: CITIZEN DASHBOARD
+         ========================================== -->
+    <section id="citizenDashboard" class="dashboard-view">
+      <div class="dashboard-header">
+        <div>
+          <h2 class="dashboard-title">Welcome, <span id="citizenWelcomeName">Resident</span></h2>
+          <p class="dashboard-subtitle">Report bin overflows, verify segregation, and redeem EcoCredits at the municipal store.</p>
+        </div>
+        <div class="card" style="padding: 0.65rem 1.15rem; display: flex; align-items: center; gap: 1rem;">
+          <div>
+            <div style="font-size: 0.72rem; font-weight: 800; color: var(--civic-forest-ink); text-transform: uppercase;">Wallet Balance</div>
+            <div id="citizenCreditBalance" style="font-size: 1.5rem; font-weight: 800; color: var(--civic-cobalt-accent); line-height: 1;">85 credits</div>
+          </div>
+          <button class="btn btn-outline btn-xs" onclick="openCreditLedgerModal()">📜 History</button>
+          <a href="#redemptionStoreSection" class="btn btn-primary btn-xs">🎁 Credit Store</a>
+        </div>
+      </div>
+
+      <!-- Emergency Alert Banner -->
+      <div style="background: var(--civic-signal-crimson-soft); border-left: 4px solid var(--civic-signal-crimson); padding: 1rem 1.25rem; border-radius: var(--radius-xs); margin-bottom: 1.75rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+        <div>
+          <div style="font-weight: 800; color: var(--civic-signal-crimson); font-size: 1rem;">
+            🚨 Urgent Hazardous Waste Spill or Blockage?
+          </div>
+          <div style="font-size: 0.85rem; color: #556960;">Emergency dispatches bypass standard queues for instant crew response (+25 Credits).</div>
+        </div>
+        <button class="btn btn-emergency btn-sm" onclick="triggerEmergencyModal()">Submit Emergency Hazard</button>
+      </div>
+
+      <!-- Personal Environmental Impact Tracker -->
+      <div class="card" style="margin-bottom: 1.75rem;">
+        <h3 style="font-size: 1.15rem; margin-bottom: 1rem;">
+          🌱 Personal Environmental Impact (Current Month)
+        </h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
+          <div class="stat-card">
+            <div class="stat-icon">📋</div>
+            <div>
+              <div id="impactTotalReports" class="stat-number">4</div>
+              <div class="stat-label">Reports Logged</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">♻️</div>
+            <div>
+              <div id="impactLandfillDiverted" class="stat-number">60 kg</div>
+              <div class="stat-label">Diverted from Landfill</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🍃</div>
+            <div>
+              <div id="impactCO2Saved" class="stat-number">30 kg</div>
+              <div class="stat-label">Est. CO₂ Offset</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="max-height: 200px; position: relative;">
+          <canvas id="citizenImpactChart" height="180"></canvas>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 440px 1fr; gap: 1.75rem; align-items: start;">
+        <!-- Left Column: Report Form & Segregation Guide -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+
+          <!-- Searchable Waste Segregation Guide -->
+          <div class="card">
+            <h3 style="font-size: 1.1rem; margin-bottom: 0.35rem;">🔍 Waste Segregation Guide</h3>
+            <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 0.85rem;">Look up common household items for the correct municipal bin stream.</p>
+            <div class="form-group">
+              <input type="text" id="guideSearchInput" class="form-control" placeholder="Search item (e.g. milk pouch, battery, peels, box)...">
+            </div>
+            <div id="guideResultsGrid" class="guide-card-grid"></div>
+          </div>
+
+          <!-- Photo-Verified Segregation Form -->
+          <div class="card" style="border: 2px dashed var(--civic-border-strong);">
+            <div style="font-size: 0.75rem; font-weight: 800; color: var(--civic-spruce-green); text-transform: uppercase;">Bonus +15 Credits</div>
+            <h3 style="font-size: 1.1rem; margin: 0.2rem 0 0.4rem 0;">📷 Photo Segregation Verification</h3>
+            <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 0.85rem;">Upload a photo of your sorted wet and dry bins before morning collection.</p>
+            <form id="segregationCheckForm">
+              <div class="form-group">
+                <input type="file" id="segregationPhoto" class="form-control" accept="image/*" required>
+              </div>
+              <button type="submit" class="btn btn-outline btn-sm" style="width: 100%;">Submit Verification (+15 Credits)</button>
+            </form>
+          </div>
+
+          <!-- Standard Citizen Bin Report Form with Real Leaflet Location Picker -->
+          <div class="card">
+            <h3 style="margin-bottom: 1rem; font-size: 1.15rem;">Submit Bin Report (+5 Credits)</h3>
+            <form id="citizenReportForm">
+
+              <!-- REAL LOCATION PICKER WITH LEAFLET -->
+              <div class="form-group">
+                <label class="form-label">Location on Map <span style="color: var(--civic-signal-crimson);">*</span></label>
+                <div class="location-picker-bar">
+                  <button type="button" id="citizenLocateBtn" class="btn btn-outline btn-xs" onclick="locateUser('citizen')">📍 Use My Current Location</button>
+                  <span id="citizenCoordBadge" class="coord-display-badge">Lat: 28.6139, Lng: 77.2090</span>
+                </div>
+                <div id="citizenMapPicker" class="leaflet-map-picker"></div>
+                <div id="citizenLocStatus" class="location-status-text">Drag the pin or tap on the map to pinpoint exact location.</div>
+                <input type="hidden" id="citizenLat" value="28.6139">
+                <input type="hidden" id="citizenLng" value="77.2090">
+              </div>
+
+              <div class="form-group">
+                <label for="citizenLandmark" class="form-label">Resolved Address / Landmark <span style="color: var(--civic-signal-crimson);">*</span></label>
+                <input type="text" id="citizenLandmark" class="form-control" placeholder="Auto-fills from pin or enter landmark (e.g. Near Bus Stand #3)" required>
+              </div>
+
+              <div class="form-group">
+                <label for="citizenArea" class="form-label">Municipal Ward Location</label>
+                <select id="citizenArea" class="form-control" required>
+                  <option value="Ward 04 - MG Road & Commercial Center">Ward 04 - MG Road & Commercial Center</option>
+                  <option value="Ward 12 - Indiranagar Residential">Ward 12 - Indiranagar Residential</option>
+                  <option value="Ward 07 - Civil Lines Market">Ward 07 - Civil Lines Market</option>
+                  <option value="Ward 18 - Sector 62 Tech Hub">Ward 18 - Sector 62 Tech Hub</option>
+                  <option value="Ward 02 - Central Railway Station">Ward 02 - Central Railway Station</option>
+                </select>
+              </div>
+
+              <!-- Interactive Severity Level Selector -->
+              <div class="form-group">
+                <label class="form-label">Severity Level <span style="color: var(--civic-signal-crimson);">*</span></label>
+                <div class="severity-selector">
+                  <div class="severity-btn active" data-severity="getting_full" onclick="selectSeverity('getting_full')">Getting Full</div>
+                  <div class="severity-btn" data-severity="full" onclick="selectSeverity('full')">100% Full</div>
+                  <div class="severity-btn" data-severity="overflowing" onclick="selectSeverity('overflowing')">Overflowing</div>
+                </div>
+                <input type="hidden" id="citizenSeverity" value="getting_full" required>
+              </div>
+
+              <!-- Functional Voice Message Report Component -->
+              <div class="voice-recorder-box">
+                <div style="font-size: 0.82rem; font-weight: 700; margin-bottom: 0.4rem;">
+                  🎙️ Voice Message Note (Optional)
+                </div>
+                <button type="button" id="micRecordBtn" class="mic-btn" title="Click to record voice note">🎙️</button>
+                <div id="micStatusText" style="font-size: 0.78rem; color: #64748b;">Click to record verbal observations</div>
+                <div id="audioPlayerContainer" class="custom-player-wrapper" style="display: none;">
+                  <button type="button" id="audioPlayToggleBtn" class="btn btn-outline btn-xs" onclick="toggleAudioPlayback()">▶ Play</button>
+                  <input type="range" id="audioSeekBar" min="0" max="100" value="0" style="flex: 1;" oninput="seekAudioPlayback(this.value)">
+                  <span id="audioTimeDisplay" style="font-size: 0.72rem; font-family: monospace;">0:00 / 0:00</span>
+                  <input type="range" id="audioVolumeBar" min="0" max="1" step="0.1" value="1" style="width: 60px;" title="Volume" oninput="setAudioVolume(this.value)">
+                </div>
+                <audio id="audioPlayback" style="display: none;"></audio>
+                <input type="hidden" id="citizenAudioData" value="">
+              </div>
+
+              <div class="form-group">
+                <label for="citizenNotes" class="form-label">Details / Observations</label>
+                <textarea id="citizenNotes" class="form-control" rows="2" placeholder="e.g. Cardboard boxes and plastic bottles obstructing pedestrian path..."></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Bin Report (+5 Credits)</button>
+            </form>
+          </div>
+
+        </div>
+
+        <!-- Right Column: My Reports & Credit Store -->
+        <div style="display: flex; flex-direction: column; gap: 1.75rem;">
+          
+          <!-- My Submitted Reports Feed -->
+          <div>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.85rem;">
+              <h3 style="font-size: 1.15rem;">My Submitted Reports</h3>
+              <div class="filter-group">
+                <button class="filter-btn active" onclick="filterCitizenReports('all')">All</button>
+                <button class="filter-btn" onclick="filterCitizenReports('reported')">Pending</button>
+                <button class="filter-btn" onclick="filterCitizenReports('assigned')">Assigned</button>
+                <button class="filter-btn" onclick="filterCitizenReports('cleared')">Cleared</button>
+              </div>
+            </div>
+
+            <div id="citizenReportsList"></div>
+          </div>
+
+          <!-- DEDICATED CREDIT STORE SECTION -->
+          <div id="redemptionStoreSection" class="card">
+            <div class="credit-store-banner">
+              <div>
+                <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 800; opacity: 0.8;">Municipal EcoCredit Wallet</div>
+                <div class="credit-balance-lg"><span id="storeHeaderBalance">85</span> Credits</div>
+                <div style="font-size: 0.82rem; opacity: 0.9; margin-top: 0.25rem;">Earned from verified citizen reporting and source segregation.</div>
+              </div>
+              <button class="btn btn-outline btn-sm" style="background: white; color: var(--civic-forest-ink);" onclick="openCreditLedgerModal()">Ledger</button>
+            </div>
+
+            <h3 style="font-size: 1.15rem; margin-bottom: 0.35rem;">Municipal Eco-Reward Catalog</h3>
+            <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 1.25rem;">Redeem earned EcoCredits for civic perks and physical sustainability products.</p>
+
+            <div class="reward-grid" id="rewardStoreGrid"></div>
+
+            <!-- Citizen's Redemption History -->
+            <div style="margin-top: 2rem;">
+              <h4 style="font-size: 1rem; margin-bottom: 0.75rem;">📜 My Redemptions History</h4>
+              <div class="table-responsive">
+                <table class="custom-table" id="myRedemptionsTable">
+                  <thead>
+                    <tr>
+                      <th>Reward Item</th>
+                      <th>Date</th>
+                      <th>Credits</th>
+                      <th>Fulfillment Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="myRedemptionsTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div style="margin-top: 1.25rem; padding-top: 0.85rem; border-top: 1px dashed var(--civic-border); font-size: 0.75rem; color: #64748b; text-align: center;">
+              ℹ️ Physical reward items are fulfilled through municipal environmental programs and partnered NGO networks in real deployments. Digital badges are credited instantly.
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VIEW 3: INSTITUTION DASHBOARD
+         ========================================== -->
+    <section id="institutionDashboard" class="dashboard-view">
+      <div class="dashboard-header">
+        <div>
+          <!-- Dynamic School or Company Name in Header -->
+          <h2 class="dashboard-title" id="instHeaderTitle">Institution Management Portal</h2>
+          <p class="dashboard-subtitle" id="instHeaderSubtitle">Commercial Bulk Waste Management Portal</p>
+        </div>
+        <button class="btn btn-emergency btn-sm" onclick="triggerInstitutionOverloadAlert()">🚨 Request Overload Dispatch</button>
+      </div>
+
+      <!-- Multi-Branch Support Bar -->
+      <div class="institution-branch-bar">
+        <div class="branch-select-group">
+          <label for="instBranchSelect" style="font-weight: 700; font-size: 0.85rem;">Active Branch Location:</label>
+          <select id="instBranchSelect" class="form-control" style="width: auto; min-width: 220px;" onchange="changeInstBranch(this.value)"></select>
+        </div>
+        <button class="btn btn-outline btn-xs" onclick="openAddBranchModal()">+ Add New Branch</button>
+      </div>
+
+      <!-- Institution Tonnage & Compliance Summary -->
+      <div class="card" style="margin-bottom: 1.75rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <div style="font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Commercial Waste Index</div>
+            <div style="font-size: 1.35rem; font-weight: 800; margin-top: 0.2rem;">Segregation Compliance Rating: <span id="instAuditScoreDisplay" style="color: var(--civic-spruce-green);">92%</span></div>
+            <div style="font-size: 0.82rem; color: #64748b;">Higher compliance rates unlock expedited collection dispatch priority from municipal zones.</div>
+          </div>
+          <div style="display: flex; gap: 1.5rem;">
+            <div>
+              <div style="font-size: 0.75rem; font-weight: 700; color: #64748b;">Bulk Tonnage (This Branch)</div>
+              <div id="instStatTonnage" style="font-size: 1.5rem; font-weight: 800;">0 kg</div>
+            </div>
+            <div>
+              <div style="font-size: 0.75rem; font-weight: 700; color: #64748b;">Cleared Pickups</div>
+              <div id="instStatCleared" style="font-size: 1.5rem; font-weight: 800; color: var(--civic-spruce-green);">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 440px 1fr; gap: 1.75rem; align-items: start;">
+        
+        <!-- Left Side: Bulk Request Form + Recurring Schedule + Self-Audit -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+
+          <!-- Feature: Recurring Pickup Schedule Setting -->
+          <div class="card">
+            <h3 style="font-size: 1.1rem; margin-bottom: 0.35rem;">📅 Recurring Pickup Schedule</h3>
+            <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 0.85rem;">Define a fixed collection frequency for this branch instead of one-off tickets.</p>
+            <form id="recurringScheduleForm">
+              <div class="form-group">
+                <label for="schedFrequency" class="form-label">Pickup Frequency</label>
+                <select id="schedFrequency" class="form-control" required>
+                  <option value="daily">Daily Collection (Every Morning)</option>
+                  <option value="weekly_3x">3 Times Weekly (Mon / Wed / Fri)</option>
+                  <option value="weekly_1x">Once Weekly (Saturdays)</option>
+                  <option value="custom">Custom Schedule</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="schedTimeSlot" class="form-label">Preferred Time Window</label>
+                <select id="schedTimeSlot" class="form-control">
+                  <option value="06:00 - 08:00 AM">Early Morning (06:00 - 08:00 AM)</option>
+                  <option value="14:00 - 16:00 PM">Afternoon (14:00 - 16:00 PM)</option>
+                  <option value="20:00 - 22:00 PM">Night Post-Close (20:00 - 22:00 PM)</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-outline btn-sm" style="width: 100%;">Save Recurring Schedule</button>
+            </form>
+            <div id="activeScheduleBadge" style="margin-top: 0.75rem; padding: 0.5rem; background: var(--civic-surface-muted); border-radius: var(--radius-xs); font-size: 0.78rem;">
+              Current: <strong>Daily Collection (06:00 - 08:00 AM)</strong>
+            </div>
+          </div>
+
+          <!-- Feature: Monthly Segregation Self-Audit Form -->
+          <div class="card">
+            <h3 style="font-size: 1.1rem; margin-bottom: 0.35rem;">📊 Monthly Segregation Self-Audit</h3>
+            <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 0.85rem;">Report your facility's internal segregation accuracy to feed into municipal compliance.</p>
+            <form id="instSelfAuditForm">
+              <div class="form-group">
+                <label for="auditComplianceRate" class="form-label">Estimated Source Segregation Rate (%)</label>
+                <input type="number" id="auditComplianceRate" class="form-control" min="10" max="100" value="85" required>
+              </div>
+              <div class="form-group">
+                <label for="auditWasteBreakdown" class="form-label">Dominant Waste Stream</label>
+                <select id="auditWasteBreakdown" class="form-control">
+                  <option value="Wet Canteen & Food Waste">Wet Canteen & Food Waste</option>
+                  <option value="Paper & Packaging Cardboard">Paper & Packaging Cardboard</option>
+                  <option value="Dry Recyclables & Plastic">Dry Recyclables & Plastic</option>
+                  <option value="Construction & Maintenance Debris">Construction & Maintenance Debris</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary btn-sm" style="width: 100%;">Submit Official Self-Audit</button>
+            </form>
+          </div>
+
+          <!-- Bulk Pickup Request Form with Real Leaflet Map Location Picker -->
+          <div class="card">
+            <h3 style="margin-bottom: 1rem; font-size: 1.15rem;">Submit Bulk Pickup Request</h3>
+            <form id="institutionBulkForm">
+
+              <!-- Waste Type Selector with Required Categories -->
+              <div class="form-group">
+                <label for="instWasteType" class="form-label">Waste Type Category <span style="color: var(--civic-signal-crimson);">*</span></label>
+                <select id="instWasteType" class="form-control" required>
+                  <option value="commercial_food">Food-court / Canteen Organic Waste</option>
+                  <option value="market_waste">Market & Produce Waste</option>
+                  <option value="office_paper">Office Paper & Packaging Waste</option>
+                  <option value="c_and_d">Construction & Demolition (C&D) Debris</option>
+                </select>
+              </div>
+
+              <!-- REAL LOCATION PICKER WITH LEAFLET -->
+              <div class="form-group">
+                <label class="form-label">Bay / Gate Location on Map <span style="color: var(--civic-signal-crimson);">*</span></label>
+                <div class="location-picker-bar">
+                  <button type="button" id="instLocateBtn" class="btn btn-outline btn-xs" onclick="locateUser('inst')">📍 Use My Current Location</button>
+                  <span id="instCoordBadge" class="coord-display-badge">Lat: 28.5900, Lng: 77.2250</span>
+                </div>
+                <div id="instMapPicker" class="leaflet-map-picker"></div>
+                <div id="instLocStatus" class="location-status-text">Pinpoint loading dock or gate coordinates.</div>
+                <input type="hidden" id="instLat" value="28.5900">
+                <input type="hidden" id="instLng" value="77.2250">
+              </div>
+
+              <div class="form-group">
+                <label for="instLandmark" class="form-label">Loading Gate / Bay Address <span style="color: var(--civic-signal-crimson);">*</span></label>
+                <input type="text" id="instLandmark" class="form-control" placeholder="e.g. Loading Bay #2, Rear Gate 4" required>
+              </div>
+
+              <div class="form-group">
+                <label for="instArea" class="form-label">Municipal Ward Zone</label>
+                <select id="instArea" class="form-control" required>
+                  <option value="Ward 18 - Sector 62 Tech Hub">Ward 18 - Sector 62 Tech Hub</option>
+                  <option value="Ward 04 - MG Road & Commercial Center">Ward 04 - MG Road & Commercial Center</option>
+                  <option value="Ward 12 - Indiranagar Residential">Ward 12 - Indiranagar Residential</option>
+                  <option value="Ward 07 - Civil Lines Market">Ward 07 - Civil Lines Market</option>
+                </select>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem;">
+                <div class="form-group">
+                  <label for="instVolume" class="form-label">Est. Weight (kg)</label>
+                  <input type="number" id="instVolume" class="form-control" placeholder="e.g. 350" min="20" max="5000" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="instContainerCount" class="form-label">Bins / Containers</label>
+                  <input type="number" id="instContainerCount" class="form-control" value="4" min="1" required>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary" style="width: 100%;">Schedule Bulk Collection</button>
+            </form>
+          </div>
+
+        </div>
+
+        <!-- Right Side: Branch Pickup History -->
+        <div>
+          <h3 style="font-size: 1.15rem; margin-bottom: 0.85rem;">Branch Collection History</h3>
+          <div id="institutionReportsList"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VIEW 4: HOSPITAL DASHBOARD (STATUTORY COMPLIANCE)
+         ========================================== -->
+    <section id="hospitalDashboard" class="dashboard-view">
+      <div class="dashboard-header">
+        <div>
+          <h2 class="dashboard-title">Biomedical Waste Compliance Registry</h2>
+          <p class="dashboard-subtitle">Bio-Medical Waste Management Rules 2016 Statutory Audit Log</p>
+        </div>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button id="exportHospitalCsvBtn" class="btn btn-outline btn-sm" onclick="exportHospitalAuditCSV()">📥 Export Compliance Audit CSV</button>
+          <button id="printHospitalAuditBtn" class="btn btn-primary btn-sm" onclick="printHospitalCertificate()">🖨️ Print Statutory Audit Log</button>
+        </div>
+      </div>
+
+      <!-- Configurable High-Priority Hazard Threshold Header Bar -->
+      <div class="card" style="margin-bottom: 1.5rem; padding: 1rem 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <div style="font-weight: 700; font-size: 0.9rem;">High-Priority Hazard Accumulation Threshold</div>
+          <div style="font-size: 0.8rem; color: #64748b;">Triggers auto-priority dispatch to state treatment plant when pending hazardous waste exceeds threshold.</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <input type="number" id="hospitalThresholdInput" class="form-control" style="width: 90px; text-align: right;" value="25" min="5" max="500">
+          <span style="font-weight: 700; font-size: 0.9rem;">kg</span>
+          <button class="btn btn-outline btn-xs" onclick="updateHospitalHazardThreshold()">Update</button>
+        </div>
+      </div>
+
+      <!-- High Hazard Alert Banner -->
+      <div id="hospitalHazardAlert" style="display: none; background: var(--bmw-yellow-bg); border-left: 4px solid var(--bmw-yellow); padding: 1rem 1.25rem; border-radius: var(--radius-xs); margin-bottom: 1.5rem;">
+        <div style="font-weight: 800; color: var(--bmw-yellow-text); font-size: 0.95rem;">⚠️ HIGH-PRIORITY HAZARD THRESHOLD EXCEEDED</div>
+        <div style="font-size: 0.82rem; color: var(--bmw-yellow-text); margin-top: 0.2rem;">
+          Accumulated hazardous biomedical waste exceeds the configured <span id="hazardThresholdDisplay">25</span> kg threshold! High-priority dispatch auto-flagged to authorized treatment facility.
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 440px 1fr; gap: 1.75rem; align-items: start;">
+        
+        <!-- Left Side: Stream Registration Form & Staff Training -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+
+          <!-- Hazardous Disposal Stream Registration Form -->
+          <div class="card">
+            <h3 style="margin-bottom: 1rem; font-size: 1.15rem;">Register Hazardous Disposal Stream</h3>
+            <form id="hospitalBMWForm">
+              
+              <div class="form-group">
+                <label for="bmwCategory" class="form-label">Biomedical Category (BMW Rules 2016) <span style="color: var(--civic-signal-crimson);">*</span></label>
+                <select id="bmwCategory" class="form-control" required onchange="validateBMWForm()">
+                  <option value="">Select Official Stream Category...</option>
+                  <option value="biomed_yellow">🟡 Yellow: Human Anatomical & Soiled Waste</option>
+                  <option value="biomed_red">🔴 Red: Contaminated Infectious Tubing & Gloves</option>
+                  <option value="biomed_white">⚪ White: Waste Sharps (Needles/Syringes)</option>
+                  <option value="biomed_black">⚫ Black/Blue: Chemical & Expired Pharma Waste</option>
+                  <option value="biomed_general">🟢 General: Non-Hazardous Hospital Waste</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="hospitalWard" class="form-label">Hospital Ward / Department <span style="color: var(--civic-signal-crimson);">*</span></label>
+                <input type="text" id="hospitalWard" class="form-control" placeholder="e.g. ICU Wing 3, Operation Theatre #2" required oninput="validateBMWForm()">
+              </div>
+
+              <!-- Authorized Treatment Facility Field -->
+              <div class="form-group">
+                <label for="bmwTreatmentFacility" class="form-label">Authorized Treatment Facility <span style="color: var(--civic-signal-crimson);">*</span></label>
+                <select id="bmwTreatmentFacility" class="form-control" required onchange="validateBMWForm()">
+                  <option value="CBWTF Sector 9 Central Treatment Plant">CBWTF Sector 9 Central Treatment Plant</option>
+                  <option value="Eco-Care Incinerator & Autoclave Unit 4">Eco-Care Incinerator & Autoclave Unit 4</option>
+                  <option value="State Pollution Control Plant #1">State Pollution Control Plant #1</option>
+                  <option value="National Bio-Disposal Complex">National Bio-Disposal Complex</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="bmwWeight" class="form-label">Weight Volume (kg) <span style="color: var(--civic-signal-crimson);">*</span></label>
+                <input type="number" id="bmwWeight" class="form-control" placeholder="e.g. 18.5" step="0.1" min="0.5" required oninput="validateBMWForm()">
+              </div>
+
+              <div class="form-group">
+                <label for="bmwContainerCode" class="form-label">Barcode / Container ID <span style="color: var(--civic-signal-crimson);">*</span></label>
+                <input type="text" id="bmwContainerCode" class="form-control" placeholder="e.g. BMW-BAG-7719" required oninput="validateBMWForm()">
+              </div>
+
+              <button type="submit" id="registerBMWBtn" class="btn btn-primary" style="width: 100%;" disabled>Register Hazardous Disposal Stream</button>
+            </form>
+          </div>
+
+          <!-- Staff Training Log Section -->
+          <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
+              <h3 style="font-size: 1.05rem;">👨‍⚕️ Staff Training Compliance Log</h3>
+              <button class="btn btn-outline btn-xs" onclick="openStaffTrainingModal()">+ Log Staff</button>
+            </div>
+            <div class="table-responsive">
+              <table class="custom-table" id="hospitalStaffTable">
+                <thead>
+                  <tr>
+                    <th>Staff Name</th>
+                    <th>Training Date</th>
+                    <th>Certificate Status</th>
+                  </tr>
+                </thead>
+                <tbody id="hospitalStaffTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Side: Compliance Log View with Container Lifecycle Stepper -->
+        <div>
+          <h3 style="font-size: 1.15rem; margin-bottom: 0.85rem;">Facility Disposal Compliance Log</h3>
+          <div class="table-responsive">
+            <table class="custom-table print-include" id="hospitalComplianceTable">
+              <thead>
+                <tr>
+                  <th>Stream Category</th>
+                  <th>Dept / Ward</th>
+                  <th>Container ID</th>
+                  <th>Weight</th>
+                  <th>Container Lifecycle Stage</th>
+                  <th>Treatment Facility</th>
+                  <th>Log Time</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="hospitalComplianceTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VIEW 5: WORKER / DISPATCH DASHBOARD (OUTDOOR DAYLIGHT VIEW)
+         ========================================== -->
+    <section id="workerDashboard" class="dashboard-view">
+      <div class="dashboard-header">
+        <div>
+          <h2 class="dashboard-title">Worker Field Dispatch View</h2>
+          <p class="dashboard-subtitle">High-Contrast Route Navigation & Digital Collection Verification</p>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="runSoftwareRouteOptimizer()">🗺️ Recalculate Route</button>
+      </div>
+
+      <!-- Route Optimization Stats Banner -->
+      <div class="card" style="margin-bottom: 1.75rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <div style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--civic-cobalt-accent);">Software Route Engine</div>
+            <div style="font-size: 1.1rem; font-weight: 800; margin-top: 0.15rem;">Nearest-Neighbor Heuristic Active</div>
+            <div style="font-size: 0.82rem; color: #64748b;">Emergency spill reports automatically placed at Stop #1 regardless of driving distance.</div>
+          </div>
+          <div style="display: flex; gap: 1.5rem;">
+            <div>
+              <div style="font-size: 0.75rem; font-weight: 700; color: #64748b;">Route Stops</div>
+              <div id="workerAssignedCount" style="font-size: 1.5rem; font-weight: 800;">0</div>
+            </div>
+            <div>
+              <div style="font-size: 0.75rem; font-weight: 700; color: #64748b;">Est. Distance</div>
+              <div id="workerEstDistance" style="font-size: 1.5rem; font-weight: 800; color: var(--civic-cobalt-accent);">0.0 km</div>
+            </div>
+            <div>
+              <div style="font-size: 0.75rem; font-weight: 700; color: #64748b;">Shift Completion</div>
+              <div id="workerCompletionRate" style="font-size: 1.5rem; font-weight: 800; color: var(--civic-spruce-green);">0%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Route Stops Feed -->
+      <div>
+        <h3 style="font-size: 1.15rem; margin-bottom: 0.85rem;">Prioritized Field Route Stops</h3>
+        <div id="workerRouteStopsList"></div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VIEW 6: ADMIN DASHBOARD (MUNICIPAL COMMAND CENTER)
+         ========================================== -->
+    <section id="adminDashboard" class="dashboard-view">
+      <div class="dashboard-header">
+        <div>
+          <h2 class="dashboard-title">Municipal Sanitation Operations Center</h2>
+          <p class="dashboard-subtitle">Unified oversight of citizens, institutions, hospitals, and field collection staff.</p>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="exportAdminAnalyticsCSV()">📥 Export Operations CSV</button>
+      </div>
+
+      <!-- Live Counters -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">📊</div>
+          <div>
+            <div id="adminStatTotal" class="stat-number">0</div>
+            <div class="stat-label">Total Reports</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⏱️</div>
+          <div>
+            <div id="adminStatPending" class="stat-number">0</div>
+            <div class="stat-label">Pending Dispatch</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="color: var(--civic-signal-crimson);">🚨</div>
+          <div>
+            <div id="adminStatEmergency" class="stat-number">0</div>
+            <div class="stat-label">Emergency Alerts</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="color: #7f1d1d;">⚠️</div>
+          <div>
+            <div id="adminStatEscalated" class="stat-number">0</div>
+            <div class="stat-label">Escalated (>24h)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Municipal Real-Time Broadcast Advisory Console -->
+      <div class="card" style="margin-bottom: 1.5rem; background: var(--civic-surface-muted); border-left: 4px solid var(--civic-signal-amber);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;">
+          <div>
+            <h3 style="font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem;">📢 Municipal Broadcast Advisory Console</h3>
+            <p style="font-size: 0.8rem; color: #64748b;">Transmit real-time operational directives to all citizens, institutions, hospitals, and field collection staff.</p>
+          </div>
+          <button class="btn btn-outline btn-xs" onclick="clearBroadcastAdvisory()">Clear Active Broadcast</button>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 220px auto; gap: 0.75rem; align-items: center;">
+          <input type="text" id="adminBroadcastInput" class="form-control" placeholder="Enter official municipal sanitation advisory message...">
+          <select id="adminBroadcastPreset" class="form-control" onchange="applyBroadcastPreset(this.value)">
+            <option value="">Preset Templates...</option>
+            <option value="Monsoon Protocol Active: Segregate wet organic waste into covered green bins to prevent drain blockages.">🌧️ Monsoon Protocol</option>
+            <option value="Holiday Collection Alert: Door-to-door morning sweep operating on a 2-hour delay today.">📅 Holiday Schedule</option>
+            <option value="CBWTF Facility Alert: Scheduled maintenance at Sector 9 Autoclave unit on Sunday morning.">🏥 CBWTF Maintenance</option>
+            <option value="High-Density Cleanliness Drive: Extended compactor vehicle shifts operating in Ward 04 & 18.">🚛 Special Drive</option>
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="publishBroadcastAdvisory()">Broadcast</button>
+        </div>
+      </div>
+
+      <!-- Admin Tabs Navigation -->
+      <div class="auth-tabs" style="margin-bottom: 1.25rem;">
+        <div id="adminTabFeed" class="auth-tab active" onclick="switchAdminTab('feed')">Unified Live Feed</div>
+        <div id="adminTabFleet" class="auth-tab" onclick="switchAdminTab('fleet')">🚛 Vehicle Fleet & Dispatch</div>
+        <div id="adminTabGrievance" class="auth-tab" onclick="switchAdminTab('grievance')">⏱️ SLA Escalation Monitor</div>
+        <div id="adminTabLeaderboard" class="auth-tab" onclick="switchAdminTab('leaderboard')">🏆 Ward Cleanliness Ranking</div>
+        <div id="adminTabCompliance" class="auth-tab" onclick="switchAdminTab('compliance')">SBM 2.0 Statutory Compliance</div>
+        <div id="adminTabHotspot" class="auth-tab" onclick="switchAdminTab('hotspot')">GPS Density Hotspot Map</div>
+        <div id="adminTabHospital" class="auth-tab" onclick="switchAdminTab('hospital')">Biomedical Compliance</div>
+        <div id="adminTabWorkers" class="auth-tab" onclick="switchAdminTab('workers')">Crew Metrics</div>
+        <div id="adminTabRedemptions" class="auth-tab" onclick="switchAdminTab('redemptions')">🎁 Redemption Requests</div>
+      </div>
+
+      <!-- Admin Section 1: Unified Feed -->
+      <div id="adminPanelFeed">
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Source Origin</th>
+                <th>Resolved Address & Ward</th>
+                <th>Category / Severity</th>
+                <th>Status Stepper</th>
+                <th>Coordinates</th>
+                <th>Assigned Crew</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="adminFeedTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Admin Section: Municipal Fleet & Dispatch Tracking -->
+      <div id="adminPanelFleet" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+          <div>
+            <h3 style="font-size: 1.15rem;">Municipal Sanitation Vehicle Fleet & Telematics</h3>
+            <p style="color: #64748b; font-size: 0.85rem;">Active municipal collection vehicles, live payload capacity utilization, and emergency route diversions.</p>
+          </div>
+          <button class="btn btn-outline btn-xs" onclick="openDispatchStandbyVehicleModal()">+ Dispatch Standby Vehicle</button>
+        </div>
+        <div class="fleet-grid" id="adminFleetGrid"></div>
+      </div>
+
+      <!-- Admin Section: Citizen Grievance & SLA Escalation Monitor -->
+      <div id="adminPanelGrievance" style="display: none;">
+        <div class="card" style="margin-bottom: 1.25rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <h3 style="font-size: 1.15rem;">Citizen Report SLA Resolution Monitor</h3>
+              <p style="color: #64748b; font-size: 0.82rem;">Real-time statutory clock enforcing municipal citizen charter resolution timelines.</p>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+              <span class="sla-pill sla-ok">🟢 Within SLA (&lt;6h)</span>
+              <span class="sla-pill sla-warning">🟡 Approaching (&gt;12h)</span>
+              <span class="sla-pill sla-breached">🔴 Breached (&gt;24h)</span>
+            </div>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="custom-table" id="adminGrievanceTable">
+            <thead>
+              <tr>
+                <th>Ticket ID</th>
+                <th>Citizen / Origin</th>
+                <th>Ward Location</th>
+                <th>Elapsed Age</th>
+                <th>SLA Compliance Status</th>
+                <th>Urgency Boost</th>
+                <th>Statutory Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminGrievanceTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Admin Section: Automated Ward Cleanliness Index Leaderboard -->
+      <div id="adminPanelLeaderboard" style="display: none;">
+        <div class="card" style="margin-bottom: 1.25rem;">
+          <h3 style="font-size: 1.15rem; margin-bottom: 0.35rem;">🏆 Municipal Ward Cleanliness Index (WCI) Ranking</h3>
+          <p style="color: #64748b; font-size: 0.82rem; margin-bottom: 1rem;">Dynamic composite rating derived from verified citizen reporting speed, institutional self-audit compliance, and tonnage diverted from landfill.</p>
+          <div class="table-responsive">
+            <table class="custom-table" id="adminLeaderboardTable">
+              <thead>
+                <tr>
+                  <th>Municipal Rank</th>
+                  <th>Ward Name & Zone</th>
+                  <th>Cleanliness Rating</th>
+                  <th>Composite WCI Score</th>
+                  <th>Avg Response Time</th>
+                  <th>Landfill Diversion</th>
+                  <th>Municipal Policy Recommendation</th>
+                </tr>
+              </thead>
+              <tbody id="adminLeaderboardTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin Section 2: SBM 2.0 Compliance (With Institution Self-Audit Integration) -->
+      <div id="adminPanelCompliance" style="display: none;">
+        <div class="card">
+          <h3 style="margin-bottom: 0.35rem;">🏛️ Municipal Statutory Compliance (Swachh Bharat Mission 2.0 & SWM Rules)</h3>
+          <p style="color: #64748b; margin-bottom: 1.25rem;">Ward-level statutory performance automatically updated by citizen reports and institutional self-audits.</p>
+          
+          <div class="table-responsive">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Ward Name</th>
+                  <th>Source Segregation % (Target: 60%+)</th>
+                  <th>Door-to-Door Coverage % (Target: 80%+)</th>
+                  <th>Scientific Processing % (Target: 80%+)</th>
+                  <th>Statutory Mandate Status</th>
+                </tr>
+              </thead>
+              <tbody id="adminComplianceTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin Section 3: GPS Hotspot Map -->
+      <div id="adminPanelHotspot" style="display: none;">
+        <div class="card">
+          <h3 style="margin-bottom: 0.35rem;">GPS Overflow Density Cluster Map</h3>
+          <p style="color: #64748b; margin-bottom: 1.25rem;">Plots real latitude and longitude coordinates submitted from citizen and institution reports.</p>
+          <div id="adminHotspotMap" class="map-box"></div>
+        </div>
+      </div>
+
+      <!-- Admin Section 4: Hospital Biomedical Compliance -->
+      <div id="adminPanelHospital" style="display: none;">
+        <div class="card">
+          <h3 style="margin-bottom: 1rem;">Registered Healthcare Facility Audit Ledger</h3>
+          <div class="table-responsive">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Facility Name</th>
+                  <th>NABH / Reg No</th>
+                  <th>Logged Streams</th>
+                  <th>Hazard Volume (kg)</th>
+                  <th>Statutory Audit Status</th>
+                </tr>
+              </thead>
+              <tbody id="adminHospitalTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin Section 5: Worker Performance -->
+      <div id="adminPanelWorkers" style="display: none;">
+        <div class="card">
+          <h3 style="margin-bottom: 1rem;">Sanitation Worker Performance Metrics</h3>
+          <div class="table-responsive">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Worker Name</th>
+                  <th>Staff Badge ID</th>
+                  <th>Assigned Stops</th>
+                  <th>Cleared Stops</th>
+                  <th>Completion Rate</th>
+                </tr>
+              </thead>
+              <tbody id="adminWorkerTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin Section 6: Redemption Requests Queue -->
+      <div id="adminPanelRedemptions" style="display: none;">
+        <div class="card">
+          <h3 style="margin-bottom: 0.35rem;">Pending Physical Item Redemption Queue</h3>
+          <p style="color: #64748b; margin-bottom: 1.25rem;">Physical reward requests submitted by citizens (saplings, compost kits, cutlery sets) awaiting municipal dispatch verification.</p>
+          <div class="table-responsive">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Request ID</th>
+                  <th>Citizen Name</th>
+                  <th>Reward Item</th>
+                  <th>Credits Deducted</th>
+                  <th>Requested Date</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="adminRedemptionsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ==========================================
+       MODAL DIALOGS
+       ========================================== -->
+
+  <!-- Worker Collection Proof Modal -->
+  <div id="workerProofModal" class="modal-overlay">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeModal('workerProofModal')">×</button>
+      <h3 style="margin-bottom: 0.5rem;">Confirm Bin Clearance</h3>
+      <p style="color: #64748b; margin-bottom: 1.25rem; font-size: 0.85rem;">Upload photo proof confirming that the bin or commercial container was cleared and sanitized.</p>
+      <form id="workerProofForm">
+        <input type="hidden" id="proofReportId" value="">
+        <div class="form-group">
+          <label for="proofPhotoInput" class="form-label">Completion Proof Photo <span style="color: var(--civic-signal-crimson);">*</span></label>
+          <input type="file" id="proofPhotoInput" class="form-control" accept="image/*" required>
+        </div>
+        <div class="form-group">
+          <label for="proofNotes" class="form-label">Field Notes</label>
+          <input type="text" id="proofNotes" class="form-control" placeholder="e.g. Cleared, sprayed disinfectant, lid secured.">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Verification & Complete Stop</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- EcoCredit Ledger Modal -->
+  <div id="creditLedgerModal" class="modal-overlay">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeModal('creditLedgerModal')">×</button>
+      <h3 style="margin-bottom: 0.35rem;">📜 EcoCredit Transaction Ledger</h3>
+      <p style="color: #64748b; font-size: 0.82rem; margin-bottom: 1.25rem;">Audit log of earned reporting credits and redeemed sustainability rewards.</p>
+      <div class="table-responsive">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Date / Time</th>
+              <th>Description</th>
+              <th>Credits</th>
+            </tr>
+          </thead>
+          <tbody id="creditLedgerTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Institution Add Branch Modal -->
+  <div id="addBranchModal" class="modal-overlay">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeModal('addBranchModal')">×</button>
+      <h3 style="margin-bottom: 0.5rem;">🏢 Register New Facility Branch</h3>
+      <p style="color: #64748b; font-size: 0.82rem; margin-bottom: 1.25rem;">Add an additional campus, regional office, or subsidiary site under this organization login.</p>
+      <form id="addBranchForm">
+        <div class="form-group">
+          <label for="newBranchName" class="form-label">Branch / Campus Name <span style="color: var(--civic-signal-crimson);">*</span></label>
+          <input type="text" id="newBranchName" class="form-control" placeholder="e.g. North Tech Campus - Gate 2" required>
+        </div>
+        <div class="form-group">
+          <label for="newBranchWard" class="form-label">Municipal Ward</label>
+          <select id="newBranchWard" class="form-control" required>
+            <option value="Ward 04 - MG Road & Commercial Center">Ward 04 - MG Road & Commercial Center</option>
+            <option value="Ward 12 - Indiranagar Residential">Ward 12 - Indiranagar Residential</option>
+            <option value="Ward 07 - Civil Lines Market">Ward 07 - Civil Lines Market</option>
+            <option value="Ward 18 - Sector 62 Tech Hub">Ward 18 - Sector 62 Tech Hub</option>
+            <option value="Ward 02 - Central Railway Station">Ward 02 - Central Railway Station</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="newBranchAddress" class="form-label">Street Address</label>
+          <input type="text" id="newBranchAddress" class="form-control" placeholder="e.g. Plot 44, Electronic City Expressway" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Save New Branch Location</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Hospital Staff Training Modal -->
+  <div id="staffTrainingModal" class="modal-overlay">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeModal('staffTrainingModal')">×</button>
+      <h3 style="margin-bottom: 0.5rem;">👨‍⚕️ Log Staff Handling Training</h3>
+      <p style="color: #64748b; font-size: 0.82rem; margin-bottom: 1.25rem;">Record biomedical waste handling certification for clinical and sanitation personnel.</p>
+      <form id="staffTrainingForm">
+        <div class="form-group">
+          <label for="staffMemberName" class="form-label">Staff Member Full Name <span style="color: var(--civic-signal-crimson);">*</span></label>
+          <input type="text" id="staffMemberName" class="form-control" placeholder="e.g. Nurse Sunita Rao" required>
+        </div>
+        <div class="form-group">
+          <label for="staffDepartment" class="form-label">Department / Ward</label>
+          <input type="text" id="staffDepartment" class="form-control" placeholder="e.g. Intensive Care Unit" required>
+        </div>
+        <div class="form-group">
+          <label for="staffTrainingDate" class="form-label">Training Date</label>
+          <input type="date" id="staffTrainingDate" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label for="staffCertStatus" class="form-label">Certification Status</label>
+          <select id="staffCertStatus" class="form-control">
+            <option value="Certified (Valid until 2027)">Certified (Valid until 2027)</option>
+            <option value="Certified (Annual Refresher Complete)">Certified (Annual Refresher Complete)</option>
+            <option value="Provisional (Refresher Due 30d)">Provisional (Refresher Due 30d)</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Record Certified Staff Training</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Municipal Citation Warning Notice Modal -->
+  <div id="sanitationNoticeModal" class="modal-overlay">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeModal('sanitationNoticeModal')">×</button>
+      <h3 style="margin-bottom: 0.5rem;">📜 Issue Statutory Sanitation Notice</h3>
+      <p style="color: #64748b; font-size: 0.82rem; margin-bottom: 1.25rem;">Issue an official municipal citation warning to persistent waste violators or unauthorized dumping points.</p>
+      <form id="sanitationNoticeForm">
+        <input type="hidden" id="noticeReportId" value="">
+        <div class="form-group">
+          <label class="form-label">Violator / Generator Location</label>
+          <input type="text" id="noticeLocation" class="form-control" readonly>
+        </div>
+        <div class="form-group">
+          <label for="noticeViolationType" class="form-label">Violation Category</label>
+          <select id="noticeViolationType" class="form-control" required>
+            <option value="Commercial Solid Waste Overflow (Section 15 SWM Rules 2016)">Commercial Solid Waste Overflow (Section 15 SWM Rules 2016)</option>
+            <option value="Non-Segregation of Biodegradable Organic Stream">Non-Segregation of Biodegradable Organic Stream</option>
+            <option value="Unauthorized Construction & Demolition Debris Dumping">Unauthorized Construction & Demolition Debris Dumping</option>
+            <option value="Biomedical Hazard Inappropriate Container Storage">Biomedical Hazard Inappropriate Container Storage</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="noticeFineAmount" class="form-label">Statutory Notice Penalty Tier</label>
+          <select id="noticeFineAmount" class="form-control">
+            <option value="First Warning Citation (₹0 - 48h Remediation Period)">First Warning Citation (₹0 - 48h Remediation Period)</option>
+            <option value="Standard Municipal Fine Tier 1 (₹2,500)">Standard Municipal Fine Tier 1 (₹2,500)</option>
+            <option value="Commercial Delinquency Penalty Tier 2 (₹10,000)">Commercial Delinquency Penalty Tier 2 (₹10,000)</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Dispatch Official Statutory Notice</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Dispatch Standby Municipal Vehicle Modal -->
+  <div id="dispatchStandbyModal" class="modal-overlay">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeModal('dispatchStandbyModal')">×</button>
+      <h3 style="margin-bottom: 0.5rem;">🚛 Dispatch Reserve Municipal Vehicle</h3>
+      <p style="color: #64748b; font-size: 0.82rem; margin-bottom: 1.25rem;">Deploy a standby compactor or electric tipper from the central depot to reinforce overloaded wards.</p>
+      <form id="dispatchStandbyForm">
+        <div class="form-group">
+          <label for="standbyVehicleType" class="form-label">Vehicle Type</label>
+          <select id="standbyVehicleType" class="form-control" required>
+            <option value="Heavy Compactor Truck (10 Ton)">Heavy Compactor Truck (10 Ton)</option>
+            <option value="Electric Multi-Bin Tipper Auto (1.5 Ton)">Electric Multi-Bin Tipper Auto (1.5 Ton)</option>
+            <option value="Biomedical Closed-Chamber Van (2 Ton)">Biomedical Closed-Chamber Van (2 Ton)</option>
+            <option value="C&D Debris Hydraulic Dumper (14 Ton)">C&D Debris Hydraulic Dumper (14 Ton)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="standbyTargetWard" class="form-label">Target Municipal Ward</label>
+          <select id="standbyTargetWard" class="form-control" required>
+            <option value="Ward 04 - MG Road & Commercial Center">Ward 04 - MG Road & Commercial Center</option>
+            <option value="Ward 12 - Indiranagar Residential">Ward 12 - Indiranagar Residential</option>
+            <option value="Ward 18 - Sector 62 Tech Hub">Ward 18 - Sector 62 Tech Hub</option>
+            <option value="Ward 07 - Civil Lines Market">Ward 07 - Civil Lines Market</option>
+            <option value="Ward 02 - Central Railway Station">Ward 02 - Central Railway Station</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Authorize Standby Dispatch</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Leaflet Map JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <!-- Chart.js for Impact Visualizer -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- App JS Engine -->
+  <script src="app.js"></script>
+</body>
+</html>
