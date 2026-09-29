@@ -1,0 +1,476 @@
+{
+  "users": [
+    {
+      "id": "usr-1",
+      "email": "citizen@ecoclear.org",
+      "pass": "demo123",
+      "name": "Ananya Sharma",
+      "role": "citizen",
+      "credits": 85,
+      "transactions": [
+        {
+          "date": "2026-09-21 10:15",
+          "reason": "Initial Registration Bonus",
+          "amount": 30
+        },
+        {
+          "date": "2026-09-22 14:30",
+          "reason": "Bin Report REP-1001 Filed",
+          "amount": 5
+        },
+        {
+          "date": "2026-09-23 09:00",
+          "reason": "Photo Segregation Verified Bonus",
+          "amount": 15
+        },
+        {
+          "date": "2026-09-23 11:20",
+          "reason": "Emergency Hazard Alert EMG-402",
+          "amount": 25
+        },
+        {
+          "date": "2026-09-23 11:45",
+          "reason": "Redeemed Digital Eco-Champion Badge",
+          "amount": 0
+        }
+      ]
+    },
+    {
+      "id": "usr-2",
+      "email": "school@cityedu.org",
+      "pass": "demo123",
+      "name": "Delhi Public School, Sector 12",
+      "role": "institution",
+      "institutionType": "school",
+      "schoolName": "Delhi Public School, Sector 12",
+      "verificationCode": "INST-SCH-8821",
+      "branches": [
+        {
+          "id": "br-dps-main",
+          "name": "Sector 12 Senior Campus",
+          "ward": "Ward 18 - Sector 62 Tech Hub",
+          "address": "Plot 4, Institutional Area, Sector 12",
+          "lat": 28.592,
+          "lng": 77.228
+        },
+        {
+          "id": "br-dps-junior",
+          "name": "Sector 4 Junior Wing",
+          "ward": "Ward 04 - MG Road & Commercial Center",
+          "address": "Near City Square, Sector 4",
+          "lat": 28.627,
+          "lng": 77.218
+        }
+      ],
+      "activeBranchId": "br-dps-main",
+      "recurringSchedule": {
+        "frequency": "daily",
+        "timeSlot": "06:00 - 08:00 AM"
+      },
+      "selfAudits": [
+        {
+          "date": "2026-09-15",
+          "rate": 92,
+          "stream": "Wet Canteen & Food Waste"
+        }
+      ]
+    },
+    {
+      "id": "usr-6",
+      "email": "infosys@campus.org",
+      "pass": "demo123",
+      "name": "Infosys Ltd, Whitefield Campus",
+      "role": "institution",
+      "institutionType": "company",
+      "companyName": "Infosys Ltd, Whitefield Campus",
+      "businessType": "IT / Tech Office",
+      "verificationCode": "CORP-INFY-4401",
+      "branches": [
+        {
+          "id": "br-infy-main",
+          "name": "Whitefield Main Tech Park",
+          "ward": "Ward 18 - Sector 62 Tech Hub",
+          "address": "Plot 22, Software Innovation Corridor",
+          "lat": 28.588,
+          "lng": 77.221
+        },
+        {
+          "id": "br-infy-dev",
+          "name": "Development Center Wing B",
+          "ward": "Ward 04 - MG Road & Commercial Center",
+          "address": "Tower 3, Central IT Plaza",
+          "lat": 28.621,
+          "lng": 77.213
+        }
+      ],
+      "activeBranchId": "br-infy-main",
+      "recurringSchedule": {
+        "frequency": "daily",
+        "timeSlot": "20:00 - 22:00 PM"
+      },
+      "selfAudits": [
+        {
+          "date": "2026-09-18",
+          "rate": 95,
+          "stream": "Paper & Packaging Cardboard"
+        }
+      ]
+    },
+    {
+      "id": "usr-3",
+      "email": "citycare@hospital.org",
+      "pass": "demo123",
+      "name": "CityCare Super Specialty Hospital",
+      "role": "hospital",
+      "verificationCode": "HOSP-NABH-4019",
+      "hazardThreshold": 25,
+      "credits": 60,
+      "transactions": [
+        {
+          "date": "2026-09-20 08:00",
+          "reason": "Biomedical Waste Registration",
+          "amount": 10
+        },
+        {
+          "date": "2026-09-22 16:30",
+          "reason": "Hazardous Stream Clearance Compliant",
+          "amount": 50
+        }
+      ]
+    },
+    {
+      "id": "usr-4",
+      "email": "crew101@cleanward.org",
+      "pass": "demo123",
+      "name": "Rajesh Singh (Crew #101)",
+      "role": "worker",
+      "verificationCode": "WRK-101"
+    },
+    {
+      "id": "usr-5",
+      "email": "admin@citygov.org",
+      "pass": "demo123",
+      "name": "Municipal Sanitation Officer",
+      "role": "admin",
+      "verificationCode": "ADMIN2026"
+    }
+  ],
+  "reports": [
+    {
+      "id": "REP-1001",
+      "userId": "usr-1",
+      "userName": "Ananya Sharma",
+      "userRole": "citizen",
+      "area": "Ward 04 - MG Road & Commercial Center",
+      "coords": {
+        "lat": 28.625,
+        "lng": 77.215
+      },
+      "latitude": 28.625,
+      "longitude": 77.215,
+      "landmark": "City Plaza Market Gate 2 Bin Point",
+      "resolvedAddress": "City Plaza Market Gate 2, MG Road, Ward 04",
+      "category": "plastic",
+      "severity": "overflowing",
+      "notes": "Plastic packaging spillage blocking pedestrian footpath.",
+      "isEmergency": false,
+      "status": "reported",
+      "createdAt": 1790702895302,
+      "duplicateCount": 1,
+      "isEscalated": false
+    },
+    {
+      "id": "REP-1002",
+      "userId": "usr-1",
+      "userName": "Ananya Sharma",
+      "userRole": "citizen",
+      "area": "Ward 12 - Indiranagar Residential",
+      "coords": {
+        "lat": 28.605,
+        "lng": 77.195
+      },
+      "latitude": 28.605,
+      "longitude": 77.195,
+      "landmark": "Community Park Main Gate",
+      "resolvedAddress": "Indiranagar 5th Cross, Community Park Gate, Ward 12",
+      "category": "organic",
+      "severity": "full",
+      "notes": "Dry leaves and organic bins filled after morning sweep.",
+      "isEmergency": false,
+      "status": "assigned",
+      "assignedWorkerId": "usr-4",
+      "assignedWorkerName": "Rajesh Singh (Crew #101)",
+      "createdAt": 1790611995302,
+      "assignedAt": 1790615595302,
+      "duplicateCount": 2,
+      "isEscalated": true
+    },
+    {
+      "id": "BULK-2001",
+      "userId": "usr-2",
+      "userName": "Delhi Public School, Sector 12",
+      "institutionType": "school",
+      "schoolName": "Delhi Public School, Sector 12",
+      "branchId": "br-dps-main",
+      "branchName": "Sector 12 Senior Campus",
+      "userRole": "institution",
+      "area": "Ward 18 - Sector 62 Tech Hub",
+      "coords": {
+        "lat": 28.592,
+        "lng": 77.228
+      },
+      "latitude": 28.592,
+      "longitude": 77.228,
+      "landmark": "School Cafeteria Loading Dock",
+      "resolvedAddress": "Plot 4 Institutional Area, Sector 12, Ward 18",
+      "category": "commercial_food",
+      "severity": "overflowing",
+      "notes": "Bulk organic food waste from annual school environmental assembly.",
+      "isBulk": true,
+      "volumeKg": 350,
+      "containerCount": 5,
+      "isEmergency": false,
+      "status": "reported",
+      "createdAt": 1790703795302,
+      "duplicateCount": 1,
+      "isEscalated": false
+    },
+    {
+      "id": "BULK-2002",
+      "userId": "usr-6",
+      "userName": "Infosys Ltd, Whitefield Campus",
+      "institutionType": "company",
+      "companyName": "Infosys Ltd, Whitefield Campus",
+      "businessType": "IT / Tech Office",
+      "branchId": "br-infy-main",
+      "branchName": "Whitefield Main Tech Park",
+      "userRole": "institution",
+      "area": "Ward 18 - Sector 62 Tech Hub",
+      "coords": {
+        "lat": 28.588,
+        "lng": 77.221
+      },
+      "latitude": 28.588,
+      "longitude": 77.221,
+      "landmark": "Server Room Recycling Bay #3",
+      "resolvedAddress": "Plot 22 Software Innovation Corridor, Ward 18",
+      "category": "office_paper",
+      "severity": "full",
+      "notes": "Disposal of 420 kg confidential shredded documentation and corrugated paperboard.",
+      "isBulk": true,
+      "volumeKg": 420,
+      "containerCount": 6,
+      "isEmergency": false,
+      "status": "assigned",
+      "assignedWorkerId": "usr-4",
+      "assignedWorkerName": "Rajesh Singh (Crew #101)",
+      "createdAt": 1790701995302,
+      "assignedAt": 1790703195303,
+      "duplicateCount": 1,
+      "isEscalated": false
+    }
+  ],
+  "hospital_reports": [
+    {
+      "id": "BMW-3001",
+      "userId": "usr-3",
+      "userName": "CityCare Super Specialty Hospital",
+      "registrationNo": "HOSP-NABH-4019",
+      "category": "biomed_yellow",
+      "categoryName": "🟡 Yellow: Human Anatomical & Soiled Waste",
+      "hospitalWard": "ICU Wing 3",
+      "containerCode": "BMW-BAG-8841",
+      "volumeKg": 14.5,
+      "lifecycleStage": "In Transit",
+      "treatmentFacility": "CBWTF Sector 9 Central Treatment Plant",
+      "status": "assigned",
+      "createdAt": 1790700195303
+    },
+    {
+      "id": "BMW-3002",
+      "userId": "usr-3",
+      "userName": "CityCare Super Specialty Hospital",
+      "registrationNo": "HOSP-NABH-4019",
+      "category": "biomed_red",
+      "categoryName": "🔴 Red: Contaminated Infectious Tubing & Gloves",
+      "hospitalWard": "Operation Theatre #2",
+      "containerCode": "BMW-BAG-9912",
+      "volumeKg": 12,
+      "lifecycleStage": "Registered",
+      "treatmentFacility": "Eco-Care Incinerator & Autoclave Unit 4",
+      "status": "reported",
+      "createdAt": 1790694795303
+    }
+  ],
+  "hospital_staff": [
+    {
+      "id": "st-1",
+      "name": "Dr. Ramesh Kulkarni",
+      "department": "Surgery & OT",
+      "date": "2026-08-14",
+      "certStatus": "Certified (Valid until 2027)"
+    },
+    {
+      "id": "st-2",
+      "name": "Nurse Sunita Rao",
+      "department": "ICU Critical Care",
+      "date": "2026-09-02",
+      "certStatus": "Certified (Annual Refresher Complete)"
+    },
+    {
+      "id": "st-3",
+      "name": "Vikas Mehra (Sanitation Lead)",
+      "department": "Hospital Bio-Waste Logistics",
+      "date": "2026-07-20",
+      "certStatus": "Certified (Valid until 2027)"
+    }
+  ],
+  "redemptions": [
+    {
+      "id": "RED-501",
+      "userId": "usr-1",
+      "userName": "Ananya Sharma",
+      "itemId": "digital_badge",
+      "itemName": "Digital Eco-Champion Badge",
+      "creditCost": 0,
+      "status": "Fulfilled",
+      "requestedAt": 1790619195303,
+      "fulfilledAt": 1790619195303
+    },
+    {
+      "id": "RED-502",
+      "userId": "usr-1",
+      "userName": "Ananya Sharma",
+      "itemId": "sapling",
+      "itemName": "Sapling / Native Fruit Plant",
+      "creditCost": 50,
+      "status": "Requested",
+      "requestedAt": 1790694795303,
+      "fulfilledAt": null
+    }
+  ],
+  "compliance_metrics": [
+    {
+      "ward": "Ward 04 - MG Road & Commercial Center",
+      "segregationRate": 74,
+      "coverageRate": 92,
+      "processingRate": 85,
+      "status": "ontrack"
+    },
+    {
+      "ward": "Ward 12 - Indiranagar Residential",
+      "segregationRate": 68,
+      "coverageRate": 88,
+      "processingRate": 82,
+      "status": "ontrack"
+    },
+    {
+      "ward": "Ward 18 - Sector 62 Tech Hub",
+      "segregationRate": 78,
+      "coverageRate": 86,
+      "processingRate": 80,
+      "status": "ontrack"
+    },
+    {
+      "ward": "Ward 07 - Civil Lines Market",
+      "segregationRate": 44,
+      "coverageRate": 68,
+      "processingRate": 59,
+      "status": "offtarget"
+    },
+    {
+      "ward": "Ward 02 - Central Railway Station",
+      "segregationRate": 62,
+      "coverageRate": 84,
+      "processingRate": 81,
+      "status": "ontrack"
+    }
+  ],
+  "fleet": [
+    {
+      "id": "FLT-CT-401",
+      "type": "Heavy Hydraulic Compactor (10T)",
+      "regNo": "DL-01-GA-4401",
+      "ward": "Ward 04 - MG Road & Commercial Center",
+      "driver": "Rajesh Singh",
+      "contact": "+91 98112-40192",
+      "capacityTon": 10,
+      "currentPayloadTon": 7.8,
+      "fuelPercent": 84,
+      "status": "Active Collection",
+      "icon": "🚛"
+    },
+    {
+      "id": "FLT-ET-108",
+      "type": "Electric Multi-Bin Tipper Auto (1.5T)",
+      "regNo": "DL-04-EV-1088",
+      "ward": "Ward 12 - Indiranagar Residential",
+      "driver": "Sunita Devi",
+      "contact": "+91 98711-20984",
+      "capacityTon": 1.5,
+      "currentPayloadTon": 1.35,
+      "fuelPercent": 68,
+      "status": "Transfer Station Transit",
+      "icon": "🛺"
+    },
+    {
+      "id": "FLT-BM-09",
+      "type": "Biomedical Closed-Chamber Van (2T)",
+      "regNo": "DL-02-HA-0912",
+      "ward": "Ward 18 - Sector 62 Tech Hub",
+      "driver": "Amit Verma",
+      "contact": "+91 98104-55120",
+      "capacityTon": 2,
+      "currentPayloadTon": 0.7,
+      "fuelPercent": 92,
+      "status": "En Route to CBWTF",
+      "icon": "🚐"
+    },
+    {
+      "id": "FLT-CD-550",
+      "type": "C&D Debris Hydraulic Dumper (14T)",
+      "regNo": "DL-07-CD-5501",
+      "ward": "Ward 07 - Civil Lines Market",
+      "driver": "Harish Kumar",
+      "contact": "+91 98119-33829",
+      "capacityTon": 14,
+      "currentPayloadTon": 8.4,
+      "fuelPercent": 76,
+      "status": "Active Route",
+      "icon": "🚜"
+    }
+  ],
+  "broadcasts": [
+    {
+      "id": "BC-101",
+      "message": "Monsoon Protocol Active: Segregate wet organic waste into covered green bins to prevent drain blockages.",
+      "level": "warning",
+      "author": "Municipal Sanitation Officer",
+      "timestamp": 1790698395303,
+      "active": true
+    }
+  ],
+  "audit_logs": [
+    {
+      "id": "log-1",
+      "timestamp": 1790694795303,
+      "actor": "System",
+      "action": "INIT",
+      "details": "Municipal Waste Management Engine initialized."
+    },
+    {
+      "id": "log-2",
+      "timestamp": 1790698395303,
+      "actor": "Admin",
+      "action": "BROADCAST",
+      "details": "Published Monsoon Protocol directive to all municipal sectors."
+    },
+    {
+      "id": "log-3",
+      "timestamp": 1790703195303,
+      "actor": "Admin",
+      "action": "AUTO_DISPATCH",
+      "details": "Assigned bulk paper collection BULK-2002 to Crew #101."
+    }
+  ]
+}

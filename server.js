@@ -1,0 +1,873 @@
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
+const url = require('url');
+
+const PORT = process.env.PORT || 8080;
+const DB_PATH = path.join(__dirname, 'data', 'db.json');
+
+// MIME types for static assets
+const MIME_TYPES = {
+  '.html': 'text/html; charset=UTF-8',
+  '.css': 'text/css; charset=UTF-8',
+  '.js': 'application/javascript; charset=UTF-8',
+  '.json': 'application/json; charset=UTF-8',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon',
+  '.txt': 'text/plain; charset=UTF-8'
+};
+
+// Seed Entities
+const DEFAULT_DB = {
+  users: [
+    { 
+      id: 'usr-1', 
+      email: 'citizen@ecoclear.org', 
+      pass: 'demo123', 
+      name: 'Ananya Sharma', 
+      role: 'citizen', 
+      credits: 85,
+      transactions: [
+        { date: '2026-09-21 10:15', reason: 'Initial Registration Bonus', amount: 30 },
+        { date: '2026-09-22 14:30', reason: 'Bin Report REP-1001 Filed', amount: 5 },
+        { date: '2026-09-23 09:00', reason: 'Photo Segregation Verified Bonus', amount: 15 },
+        { date: '2026-09-23 11:20', reason: 'Emergency Hazard Alert EMG-402', amount: 25 },
+        { date: '2026-09-23 11:45', reason: 'Redeemed Digital Eco-Champion Badge', amount: 0 }
+      ]
+    },
+    { 
+      id: 'usr-2', 
+      email: 'school@cityedu.org', 
+      pass: 'demo123', 
+      name: 'Delhi Public School, Sector 12', 
+      role: 'institution', 
+      institutionType: 'school',
+      schoolName: 'Delhi Public School, Sector 12',
+      verificationCode: 'INST-SCH-8821',
+      branches: [
+        { id: 'br-dps-main', name: 'Sector 12 Senior Campus', ward: 'Ward 18 - Sector 62 Tech Hub', address: 'Plot 4, Institutional Area, Sector 12', lat: 28.5920, lng: 77.2280 },
+        { id: 'br-dps-junior', name: 'Sector 4 Junior Wing', ward: 'Ward 04 - MG Road & Commercial Center', address: 'Near City Square, Sector 4', lat: 28.6270, lng: 77.2180 }
+      ],
+      activeBranchId: 'br-dps-main',
+      recurringSchedule: { frequency: 'daily', timeSlot: '06:00 - 08:00 AM' },
+      selfAudits: [
+        { date: '2026-09-15', rate: 92, stream: 'Wet Canteen & Food Waste' }
+      ]
+    },
+    { 
+      id: 'usr-6', 
+      email: 'infosys@campus.org', 
+      pass: 'demo123', 
+      name: 'Infosys Ltd, Whitefield Campus', 
+      role: 'institution', 
+      institutionType: 'company',
+      companyName: 'Infosys Ltd, Whitefield Campus',
+      businessType: 'IT / Tech Office',
+      verificationCode: 'CORP-INFY-4401',
+      branches: [
+        { id: 'br-infy-main', name: 'Whitefield Main Tech Park', ward: 'Ward 18 - Sector 62 Tech Hub', address: 'Plot 22, Software Innovation Corridor', lat: 28.5880, lng: 77.2210 },
+        { id: 'br-infy-dev', name: 'Development Center Wing B', ward: 'Ward 04 - MG Road & Commercial Center', address: 'Tower 3, Central IT Plaza', lat: 28.6210, lng: 77.2130 }
+      ],
+      activeBranchId: 'br-infy-main',
+      recurringSchedule: { frequency: 'daily', timeSlot: '20:00 - 22:00 PM' },
+      selfAudits: [
+        { date: '2026-09-18', rate: 95, stream: 'Paper & Packaging Cardboard' }
+      ]
+    },
+    { 
+      id: 'usr-3', 
+      email: 'citycare@hospital.org', 
+      pass: 'demo123', 
+      name: 'CityCare Super Specialty Hospital', 
+      role: 'hospital', 
+      verificationCode: 'HOSP-NABH-4019',
+      hazardThreshold: 25,
+      credits: 60,
+      transactions: [
+        { date: '2026-09-20 08:00', reason: 'Biomedical Waste Registration', amount: 10 },
+        { date: '2026-09-22 16:30', reason: 'Hazardous Stream Clearance Compliant', amount: 50 }
+      ]
+    },
+    { 
+      id: 'usr-4', 
+      email: 'crew101@cleanward.org', 
+      pass: 'demo123', 
+      name: 'Rajesh Singh (Crew #101)', 
+      role: 'worker', 
+      verificationCode: 'WRK-101' 
+    },
+    { 
+      id: 'usr-5', 
+      email: 'admin@citygov.org', 
+      pass: 'demo123', 
+      name: 'Municipal Sanitation Officer', 
+      role: 'admin', 
+      verificationCode: 'ADMIN2026' 
+    }
+  ],
+  reports: [
+    {
+      id: 'REP-1001',
+      userId: 'usr-1',
+      userName: 'Ananya Sharma',
+      userRole: 'citizen',
+      area: 'Ward 04 - MG Road & Commercial Center',
+      coords: { lat: 28.6250, lng: 77.2150 },
+      latitude: 28.6250,
+      longitude: 77.2150,
+      landmark: 'City Plaza Market Gate 2 Bin Point',
+      resolvedAddress: 'City Plaza Market Gate 2, MG Road, Ward 04',
+      category: 'plastic',
+      severity: 'overflowing',
+      notes: 'Plastic packaging spillage blocking pedestrian footpath.',
+      isEmergency: false,
+      status: 'reported',
+      createdAt: Date.now() - 45 * 60 * 1000,
+      duplicateCount: 1,
+      isEscalated: false
+    },
+    {
+      id: 'REP-1002',
+      userId: 'usr-1',
+      userName: 'Ananya Sharma',
+      userRole: 'citizen',
+      area: 'Ward 12 - Indiranagar Residential',
+      coords: { lat: 28.6050, lng: 77.1950 },
+      latitude: 28.6050,
+      longitude: 77.1950,
+      landmark: 'Community Park Main Gate',
+      resolvedAddress: 'Indiranagar 5th Cross, Community Park Gate, Ward 12',
+      category: 'organic',
+      severity: 'full',
+      notes: 'Dry leaves and organic bins filled after morning sweep.',
+      isEmergency: false,
+      status: 'assigned',
+      assignedWorkerId: 'usr-4',
+      assignedWorkerName: 'Rajesh Singh (Crew #101)',
+      createdAt: Date.now() - (26 * 60 * 60 * 1000),
+      assignedAt: Date.now() - (25 * 60 * 60 * 1000),
+      duplicateCount: 2,
+      isEscalated: true
+    },
+    {
+      id: 'BULK-2001',
+      userId: 'usr-2',
+      userName: 'Delhi Public School, Sector 12',
+      institutionType: 'school',
+      schoolName: 'Delhi Public School, Sector 12',
+      branchId: 'br-dps-main',
+      branchName: 'Sector 12 Senior Campus',
+      userRole: 'institution',
+      area: 'Ward 18 - Sector 62 Tech Hub',
+      coords: { lat: 28.5920, lng: 77.2280 },
+      latitude: 28.5920,
+      longitude: 77.2280,
+      landmark: 'School Cafeteria Loading Dock',
+      resolvedAddress: 'Plot 4 Institutional Area, Sector 12, Ward 18',
+      category: 'commercial_food',
+      severity: 'overflowing',
+      notes: 'Bulk organic food waste from annual school environmental assembly.',
+      isBulk: true,
+      volumeKg: 350,
+      containerCount: 5,
+      isEmergency: false,
+      status: 'reported',
+      createdAt: Date.now() - 30 * 60 * 1000,
+      duplicateCount: 1,
+      isEscalated: false
+    },
+    {
+      id: 'BULK-2002',
+      userId: 'usr-6',
+      userName: 'Infosys Ltd, Whitefield Campus',
+      institutionType: 'company',
+      companyName: 'Infosys Ltd, Whitefield Campus',
+      businessType: 'IT / Tech Office',
+      branchId: 'br-infy-main',
+      branchName: 'Whitefield Main Tech Park',
+      userRole: 'institution',
+      area: 'Ward 18 - Sector 62 Tech Hub',
+      coords: { lat: 28.5880, lng: 77.2210 },
+      latitude: 28.5880,
+      longitude: 77.2210,
+      landmark: 'Server Room Recycling Bay #3',
+      resolvedAddress: 'Plot 22 Software Innovation Corridor, Ward 18',
+      category: 'office_paper',
+      severity: 'full',
+      notes: 'Disposal of 420 kg confidential shredded documentation and corrugated paperboard.',
+      isBulk: true,
+      volumeKg: 420,
+      containerCount: 6,
+      isEmergency: false,
+      status: 'assigned',
+      assignedWorkerId: 'usr-4',
+      assignedWorkerName: 'Rajesh Singh (Crew #101)',
+      createdAt: Date.now() - 60 * 60 * 1000,
+      assignedAt: Date.now() - 40 * 60 * 1000,
+      duplicateCount: 1,
+      isEscalated: false
+    }
+  ],
+  hospital_reports: [
+    {
+      id: 'BMW-3001',
+      userId: 'usr-3',
+      userName: 'CityCare Super Specialty Hospital',
+      registrationNo: 'HOSP-NABH-4019',
+      category: 'biomed_yellow',
+      categoryName: '🟡 Yellow: Human Anatomical & Soiled Waste',
+      hospitalWard: 'ICU Wing 3',
+      containerCode: 'BMW-BAG-8841',
+      volumeKg: 14.5,
+      lifecycleStage: 'In Transit',
+      treatmentFacility: 'CBWTF Sector 9 Central Treatment Plant',
+      status: 'assigned',
+      createdAt: Date.now() - 90 * 60 * 1000
+    },
+    {
+      id: 'BMW-3002',
+      userId: 'usr-3',
+      userName: 'CityCare Super Specialty Hospital',
+      registrationNo: 'HOSP-NABH-4019',
+      category: 'biomed_red',
+      categoryName: '🔴 Red: Contaminated Infectious Tubing & Gloves',
+      hospitalWard: 'Operation Theatre #2',
+      containerCode: 'BMW-BAG-9912',
+      volumeKg: 12.0,
+      lifecycleStage: 'Registered',
+      treatmentFacility: 'Eco-Care Incinerator & Autoclave Unit 4',
+      status: 'reported',
+      createdAt: Date.now() - 180 * 60 * 1000
+    }
+  ],
+  hospital_staff: [
+    { id: 'st-1', name: 'Dr. Ramesh Kulkarni', department: 'Surgery & OT', date: '2026-08-14', certStatus: 'Certified (Valid until 2027)' },
+    { id: 'st-2', name: 'Nurse Sunita Rao', department: 'ICU Critical Care', date: '2026-09-02', certStatus: 'Certified (Annual Refresher Complete)' },
+    { id: 'st-3', name: 'Vikas Mehra (Sanitation Lead)', department: 'Hospital Bio-Waste Logistics', date: '2026-07-20', certStatus: 'Certified (Valid until 2027)' }
+  ],
+  redemptions: [
+    { 
+      id: 'RED-501', 
+      userId: 'usr-1', 
+      userName: 'Ananya Sharma', 
+      itemId: 'digital_badge', 
+      itemName: 'Digital Eco-Champion Badge', 
+      creditCost: 0, 
+      status: 'Fulfilled', 
+      requestedAt: Date.now() - (24 * 60 * 60 * 1000), 
+      fulfilledAt: Date.now() - (24 * 60 * 60 * 1000) 
+    },
+    { 
+      id: 'RED-502', 
+      userId: 'usr-1', 
+      userName: 'Ananya Sharma', 
+      itemId: 'sapling', 
+      itemName: 'Sapling / Native Fruit Plant', 
+      creditCost: 50, 
+      status: 'Requested', 
+      requestedAt: Date.now() - (3 * 60 * 60 * 1000), 
+      fulfilledAt: null 
+    }
+  ],
+  compliance_metrics: [
+    { ward: 'Ward 04 - MG Road & Commercial Center', segregationRate: 74, coverageRate: 92, processingRate: 85, status: 'ontrack' },
+    { ward: 'Ward 12 - Indiranagar Residential', segregationRate: 68, coverageRate: 88, processingRate: 82, status: 'ontrack' },
+    { ward: 'Ward 18 - Sector 62 Tech Hub', segregationRate: 78, coverageRate: 86, processingRate: 80, status: 'ontrack' },
+    { ward: 'Ward 07 - Civil Lines Market', segregationRate: 44, coverageRate: 68, processingRate: 59, status: 'offtarget' },
+    { ward: 'Ward 02 - Central Railway Station', segregationRate: 62, coverageRate: 84, processingRate: 81, status: 'ontrack' }
+  ],
+  fleet: [
+    { id: 'FLT-CT-401', type: 'Heavy Hydraulic Compactor (10T)', regNo: 'DL-01-GA-4401', ward: 'Ward 04 - MG Road & Commercial Center', driver: 'Rajesh Singh', contact: '+91 98112-40192', capacityTon: 10.0, currentPayloadTon: 7.8, fuelPercent: 84, status: 'Active Collection', icon: '🚛' },
+    { id: 'FLT-ET-108', type: 'Electric Multi-Bin Tipper Auto (1.5T)', regNo: 'DL-04-EV-1088', ward: 'Ward 12 - Indiranagar Residential', driver: 'Sunita Devi', contact: '+91 98711-20984', capacityTon: 1.5, currentPayloadTon: 1.35, fuelPercent: 68, status: 'Transfer Station Transit', icon: '🛺' },
+    { id: 'FLT-BM-09', type: 'Biomedical Closed-Chamber Van (2T)', regNo: 'DL-02-HA-0912', ward: 'Ward 18 - Sector 62 Tech Hub', driver: 'Amit Verma', contact: '+91 98104-55120', capacityTon: 2.0, currentPayloadTon: 0.7, fuelPercent: 92, status: 'En Route to CBWTF', icon: '🚐' },
+    { id: 'FLT-CD-550', type: 'C&D Debris Hydraulic Dumper (14T)', regNo: 'DL-07-CD-5501', ward: 'Ward 07 - Civil Lines Market', driver: 'Harish Kumar', contact: '+91 98119-33829', capacityTon: 14.0, currentPayloadTon: 8.4, fuelPercent: 76, status: 'Active Route', icon: '🚜' }
+  ],
+  broadcasts: [
+    {
+      id: 'BC-101',
+      message: 'Monsoon Protocol Active: Segregate wet organic waste into covered green bins to prevent drain blockages.',
+      level: 'warning',
+      author: 'Municipal Sanitation Officer',
+      timestamp: Date.now() - 2 * 60 * 60 * 1000,
+      active: true
+    }
+  ],
+  audit_logs: [
+    { id: 'log-1', timestamp: Date.now() - 3 * 60 * 60 * 1000, actor: 'System', action: 'INIT', details: 'Municipal Waste Management Engine initialized.' },
+    { id: 'log-2', timestamp: Date.now() - 2 * 60 * 60 * 1000, actor: 'Admin', action: 'BROADCAST', details: 'Published Monsoon Protocol directive to all municipal sectors.' },
+    { id: 'log-3', timestamp: Date.now() - 40 * 60 * 1000, actor: 'Admin', action: 'AUTO_DISPATCH', details: 'Assigned bulk paper collection BULK-2002 to Crew #101.' }
+  ]
+};
+
+// Database Access Layer with Auto-Persistence
+let db = { ...DEFAULT_DB };
+
+function initDatabase() {
+  const dataDir = path.join(__dirname, 'data');
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+
+  if (fs.existsSync(DB_PATH)) {
+    try {
+      const content = fs.readFileSync(DB_PATH, 'utf-8');
+      const parsed = JSON.parse(content);
+      db = { ...DEFAULT_DB, ...parsed };
+      console.log('📦 Database loaded successfully from data/db.json');
+    } catch (e) {
+      console.warn('⚠️ Error parsing data/db.json. Initializing with default seeds:', e.message);
+      saveDatabase();
+    }
+  } else {
+    console.log('🌱 Seeding fresh database at data/db.json...');
+    saveDatabase();
+  }
+}
+
+function saveDatabase() {
+  try {
+    fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2), 'utf-8');
+  } catch (err) {
+    console.error('❌ Failed to save database:', err.message);
+  }
+}
+
+function logAudit(actor, action, details) {
+  const entry = {
+    id: `log-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    timestamp: Date.now(),
+    actor: actor || 'Admin',
+    action,
+    details
+  };
+  if (!db.audit_logs) db.audit_logs = [];
+  db.audit_logs.unshift(entry);
+  if (db.audit_logs.length > 200) db.audit_logs.pop();
+  saveDatabase();
+  return entry;
+}
+
+// Helper: Parse Request Body JSON
+function parseRequestBody(req) {
+  return new Promise((resolve, reject) => {
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk.toString();
+      if (body.length > 10 * 1024 * 1024) { // 10MB limit
+        reject(new Error('Payload too large'));
+      }
+    });
+    req.on('end', () => {
+      if (!body.trim()) return resolve({});
+      try {
+        resolve(JSON.parse(body));
+      } catch (err) {
+        reject(new Error('Invalid JSON payload'));
+      }
+    });
+    req.on('error', reject);
+  });
+}
+
+// Helper: JSON Response Sender with CORS
+function sendJson(res, statusCode, data) {
+  const payload = JSON.stringify(data);
+  res.writeHead(statusCode, {
+    'Content-Type': 'application/json; charset=UTF-8',
+    'Content-Length': Buffer.byteLength(payload),
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With'
+  });
+  res.end(payload);
+}
+
+// REST API Route Handlers
+async function handleApiRequest(req, res, parsedUrl) {
+  const method = req.method.toUpperCase();
+  const pathname = parsedUrl.pathname;
+  const query = parsedUrl.query;
+
+  // Handle CORS Preflight
+  if (method === 'OPTIONS') {
+    res.writeHead(204, {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With'
+    });
+    res.end();
+    return true;
+  }
+
+  // 1. Health & Server Info
+  if (pathname === '/api/health') {
+    sendJson(res, 200, {
+      status: 'online',
+      version: '2.0.0',
+      system: 'Smart Waste Management Municipal Server',
+      nodeVersion: process.version,
+      timestamp: Date.now()
+    });
+    return true;
+  }
+
+  // 2. Operational Stats Overview
+  if (pathname === '/api/stats') {
+    const totalReports = db.reports.length;
+    const pending = db.reports.filter(r => r.status === 'reported').length;
+    const inProgress = db.reports.filter(r => r.status === 'assigned').length;
+    const cleared = db.reports.filter(r => r.status === 'cleared').length;
+    const emergency = db.reports.filter(r => r.isEmergency).length;
+    const escalated = db.reports.filter(r => r.isEscalated).length;
+    const totalHospitalReports = db.hospital_reports.length;
+    const pendingRedemptions = db.redemptions.filter(r => r.status === 'Requested').length;
+    const activeVehicles = db.fleet.length;
+
+    sendJson(res, 200, {
+      success: true,
+      stats: {
+        totalReports,
+        pending,
+        inProgress,
+        cleared,
+        emergency,
+        escalated,
+        totalHospitalReports,
+        pendingRedemptions,
+        activeVehicles,
+        resolutionRate: totalReports > 0 ? Math.round((cleared / totalReports) * 100) : 0
+      }
+    });
+    return true;
+  }
+
+  // 3. User Management
+  if (pathname === '/api/users') {
+    if (method === 'GET') {
+      sendJson(res, 200, db.users);
+      return true;
+    }
+    if (method === 'POST') {
+      const body = await parseRequestBody(req);
+      if (!body.email || !body.role) {
+        return sendJson(res, 400, { error: 'Email and role are required' });
+      }
+      const newUser = {
+        id: `usr-${Date.now()}`,
+        credits: body.credits || 0,
+        transactions: [],
+        ...body
+      };
+      db.users.push(newUser);
+      logAudit(body.name || 'System', 'USER_REGISTERED', `Created account for ${body.email} (${body.role})`);
+      saveDatabase();
+      sendJson(res, 201, newUser);
+      return true;
+    }
+  }
+
+  // 4. Reports API
+  if (pathname === '/api/reports') {
+    if (method === 'GET') {
+      let filtered = [...db.reports];
+      if (query.status) filtered = filtered.filter(r => r.status === query.status);
+      if (query.role) filtered = filtered.filter(r => r.userRole === query.role);
+      if (query.ward) filtered = filtered.filter(r => (r.area || '').includes(query.ward));
+      if (query.emergency === 'true') filtered = filtered.filter(r => r.isEmergency);
+      sendJson(res, 200, filtered);
+      return true;
+    }
+    if (method === 'POST') {
+      const body = await parseRequestBody(req);
+      const isBulk = !!body.isBulk;
+      const prefix = isBulk ? 'BULK' : 'REP';
+      const newId = `${prefix}-${Date.now().toString().slice(-4)}`;
+      const newReport = {
+        id: newId,
+        createdAt: Date.now(),
+        status: 'reported',
+        duplicateCount: 1,
+        isEscalated: false,
+        ...body
+      };
+      db.reports.unshift(newReport);
+      logAudit(body.userName || 'Citizen', 'REPORT_FILED', `Report ${newId} logged in ${body.area || 'Unknown Ward'}`);
+      saveDatabase();
+      sendJson(res, 201, newReport);
+      return true;
+    }
+  }
+
+  // Single Report Operations (/api/reports/:id/...)
+  const reportMatch = pathname.match(/^\/api\/reports\/([a-zA-Z0-9_-]+)(?:\/(assign|clear|boost|escalate))?$/);
+  if (reportMatch) {
+    const reportId = reportMatch[1];
+    const subAction = reportMatch[2];
+    const index = db.reports.findIndex(r => r.id === reportId);
+
+    if (index === -1) {
+      return sendJson(res, 404, { error: `Report ${reportId} not found` });
+    }
+
+    if (!subAction) {
+      if (method === 'GET') {
+        sendJson(res, 200, db.reports[index]);
+        return true;
+      }
+      if (method === 'PUT' || method === 'PATCH') {
+        const body = await parseRequestBody(req);
+        db.reports[index] = { ...db.reports[index], ...body };
+        saveDatabase();
+        sendJson(res, 200, db.reports[index]);
+        return true;
+      }
+      if (method === 'DELETE') {
+        const removed = db.reports.splice(index, 1)[0];
+        logAudit('Admin', 'REPORT_DELETED', `Deleted report ${reportId}`);
+        saveDatabase();
+        sendJson(res, 200, { success: true, removed });
+        return true;
+      }
+    }
+
+    // Sub-actions
+    if (subAction === 'assign' && method === 'POST') {
+      const body = await parseRequestBody(req);
+      const workerId = body.workerId;
+      const worker = db.users.find(u => u.id === workerId);
+      db.reports[index].assignedWorkerId = workerId || null;
+      db.reports[index].assignedWorkerName = worker ? worker.name : '';
+      db.reports[index].status = workerId ? 'assigned' : 'reported';
+      db.reports[index].assignedAt = Date.now();
+      logAudit('Admin', 'CREW_ASSIGNED', `Assigned ${reportId} to ${worker ? worker.name : 'Unassigned'}`);
+      saveDatabase();
+      sendJson(res, 200, db.reports[index]);
+      return true;
+    }
+
+    if (subAction === 'clear' && method === 'POST') {
+      const body = await parseRequestBody(req);
+      db.reports[index].status = 'cleared';
+      db.reports[index].clearedAt = Date.now();
+      if (body.proofPhoto) db.reports[index].proofPhoto = body.proofPhoto;
+      if (body.resolutionNotes) db.reports[index].resolutionNotes = body.resolutionNotes;
+      logAudit(body.actor || 'Admin', 'REPORT_CLEARED', `Report ${reportId} marked cleared and sanitized`);
+      saveDatabase();
+      sendJson(res, 200, db.reports[index]);
+      return true;
+    }
+
+    if (subAction === 'boost' && method === 'POST') {
+      db.reports[index].isEmergency = true;
+      db.reports[index].urgencyBoosted = true;
+      db.reports[index].boostedAt = Date.now();
+      logAudit('Admin', 'SLA_URGENCY_BOOST', `Urgency boost triggered on ticket ${reportId}`);
+      saveDatabase();
+      sendJson(res, 200, db.reports[index]);
+      return true;
+    }
+
+    if (subAction === 'escalate' && method === 'POST') {
+      db.reports[index].isEscalated = true;
+      db.reports[index].escalatedTo = 'Zonal Municipal Commissioner';
+      db.reports[index].escalatedAt = Date.now();
+      logAudit('Admin', 'STATUTORY_ESCALATION', `Escalated ${reportId} to Zonal Municipal Commissioner`);
+      saveDatabase();
+      sendJson(res, 200, db.reports[index]);
+      return true;
+    }
+  }
+
+  // 5. Municipal Fleet & Dispatch
+  if (pathname === '/api/fleet') {
+    if (method === 'GET') {
+      sendJson(res, 200, db.fleet);
+      return true;
+    }
+    if (method === 'POST') {
+      const body = await parseRequestBody(req);
+      const newVehicle = {
+        id: `FLT-ST-${Math.floor(100 + Math.random() * 900)}`,
+        capacityTon: body.capacityTon || 3.5,
+        currentPayloadTon: 0.0,
+        fuelPercent: 100,
+        status: 'Active Collection',
+        icon: '🚛',
+        ...body
+      };
+      db.fleet.push(newVehicle);
+      logAudit('Admin', 'FLEET_DISPATCH', `Dispatched standby vehicle ${newVehicle.regNo || newVehicle.id} to ${newVehicle.ward}`);
+      saveDatabase();
+      sendJson(res, 201, newVehicle);
+      return true;
+    }
+  }
+
+  const fleetMatch = pathname.match(/^\/api\/fleet\/([a-zA-Z0-9_-]+)$/);
+  if (fleetMatch) {
+    const fleetId = fleetMatch[1];
+    const fIdx = db.fleet.findIndex(f => f.id === fleetId);
+    if (fIdx === -1) return sendJson(res, 404, { error: 'Vehicle not found' });
+
+    if (method === 'PUT' || method === 'PATCH') {
+      const body = await parseRequestBody(req);
+      db.fleet[fIdx] = { ...db.fleet[fIdx], ...body };
+      logAudit('Admin', 'FLEET_UPDATE', `Updated status of vehicle ${fleetId} to ${body.status || 'Updated'}`);
+      saveDatabase();
+      sendJson(res, 200, db.fleet[fIdx]);
+      return true;
+    }
+  }
+
+  // 6. Smart Auto-Assignment Engine
+  if (pathname === '/api/admin/auto-assign' && method === 'POST') {
+    const unassigned = db.reports.filter(r => r.status === 'reported');
+    const workers = db.users.filter(u => u.role === 'worker');
+
+    if (workers.length === 0) {
+      return sendJson(res, 400, { error: 'No active sanitation workers available for automated dispatch' });
+    }
+
+    let assignedCount = 0;
+    unassigned.forEach((rep, idx) => {
+      const assignedWorker = workers[idx % workers.length];
+      rep.status = 'assigned';
+      rep.assignedWorkerId = assignedWorker.id;
+      rep.assignedWorkerName = assignedWorker.name;
+      rep.assignedAt = Date.now();
+      assignedCount++;
+    });
+
+    logAudit('Admin', 'SMART_AUTO_ASSIGN', `Auto-dispatched ${assignedCount} reports across ${workers.length} municipal crew(s)`);
+    saveDatabase();
+    sendJson(res, 200, { success: true, count: assignedCount, reports: db.reports });
+    return true;
+  }
+
+  // 7. Hospital Biomedical Waste Reports
+  if (pathname === '/api/hospital-reports') {
+    if (method === 'GET') {
+      sendJson(res, 200, db.hospital_reports);
+      return true;
+    }
+    if (method === 'POST') {
+      const body = await parseRequestBody(req);
+      const newReport = {
+        id: `BMW-${Date.now().toString().slice(-4)}`,
+        createdAt: Date.now(),
+        lifecycleStage: 'Registered',
+        status: 'reported',
+        ...body
+      };
+      db.hospital_reports.unshift(newReport);
+      logAudit(body.userName || 'Hospital', 'BMW_LOGGED', `Biomedical container ${newReport.containerCode || newReport.id} registered`);
+      saveDatabase();
+      sendJson(res, 201, newReport);
+      return true;
+    }
+  }
+
+  // 8. Hospital Staff
+  if (pathname === '/api/hospital-staff') {
+    if (method === 'GET') {
+      sendJson(res, 200, db.hospital_staff);
+      return true;
+    }
+    if (method === 'POST') {
+      const body = await parseRequestBody(req);
+      const newStaff = {
+        id: `st-${Date.now().toString().slice(-3)}`,
+        date: new Date().toISOString().split('T')[0],
+        certStatus: 'Certified (Valid until 2027)',
+        ...body
+      };
+      db.hospital_staff.push(newStaff);
+      saveDatabase();
+      sendJson(res, 201, newStaff);
+      return true;
+    }
+  }
+
+  // 9. Citizen Redemptions
+  if (pathname === '/api/redemptions') {
+    if (method === 'GET') {
+      sendJson(res, 200, db.redemptions);
+      return true;
+    }
+    if (method === 'POST') {
+      const body = await parseRequestBody(req);
+      const newRedemption = {
+        id: `RED-${Date.now().toString().slice(-3)}`,
+        requestedAt: Date.now(),
+        status: body.creditCost === 0 ? 'Fulfilled' : 'Requested',
+        fulfilledAt: body.creditCost === 0 ? Date.now() : null,
+        ...body
+      };
+      db.redemptions.unshift(newRedemption);
+      logAudit(body.userName || 'Citizen', 'REDEMPTION_REQUESTED', `Redeemed ${body.itemName} for ${body.creditCost} credits`);
+      saveDatabase();
+      sendJson(res, 201, newRedemption);
+      return true;
+    }
+  }
+
+  const redMatch = pathname.match(/^\/api\/redemptions\/([a-zA-Z0-9_-]+)\/fulfill$/);
+  if (redMatch && method === 'POST') {
+    const redId = redMatch[1];
+    const rIdx = db.redemptions.findIndex(r => r.id === redId);
+    if (rIdx === -1) return sendJson(res, 404, { error: 'Redemption request not found' });
+
+    db.redemptions[rIdx].status = 'Fulfilled';
+    db.redemptions[rIdx].fulfilledAt = Date.now();
+    logAudit('Admin', 'REDEMPTION_FULFILLED', `Dispatched reward package for redemption ${redId}`);
+    saveDatabase();
+    sendJson(res, 200, db.redemptions[rIdx]);
+    return true;
+  }
+
+  // 10. SBM 2.0 Compliance Metrics
+  if (pathname === '/api/compliance') {
+    if (method === 'GET') {
+      sendJson(res, 200, db.compliance_metrics);
+      return true;
+    }
+    if (method === 'PUT' || method === 'POST') {
+      const body = await parseRequestBody(req);
+      const wardName = body.ward;
+      const idx = db.compliance_metrics.findIndex(m => m.ward === wardName);
+      if (idx !== -1) {
+        db.compliance_metrics[idx] = { ...db.compliance_metrics[idx], ...body };
+      } else {
+        db.compliance_metrics.push(body);
+      }
+      saveDatabase();
+      sendJson(res, 200, db.compliance_metrics);
+      return true;
+    }
+  }
+
+  // 11. Broadcasts API
+  if (pathname === '/api/broadcasts') {
+    if (method === 'GET') {
+      sendJson(res, 200, db.broadcasts);
+      return true;
+    }
+    if (method === 'POST') {
+      const body = await parseRequestBody(req);
+      if (!body.message) return sendJson(res, 400, { error: 'Message is required' });
+
+      // Deactivate older broadcasts if single active broadcast model
+      db.broadcasts.forEach(b => b.active = false);
+
+      const newBroadcast = {
+        id: `BC-${Date.now().toString().slice(-4)}`,
+        message: body.message,
+        level: body.level || 'warning',
+        author: body.author || 'Municipal Sanitation Officer',
+        timestamp: Date.now(),
+        active: true
+      };
+      db.broadcasts.unshift(newBroadcast);
+      logAudit('Admin', 'BROADCAST_PUBLISHED', `Broadcast alert sent: "${body.message.slice(0, 60)}..."`);
+      saveDatabase();
+      sendJson(res, 201, newBroadcast);
+      return true;
+    }
+    if (method === 'DELETE') {
+      db.broadcasts.forEach(b => b.active = false);
+      logAudit('Admin', 'BROADCAST_CLEARED', 'Cleared all active municipal broadcast advisories');
+      saveDatabase();
+      sendJson(res, 200, { success: true, message: 'All active broadcasts cleared' });
+      return true;
+    }
+  }
+
+  // 12. Audit Logs API
+  if (pathname === '/api/logs') {
+    if (method === 'GET') {
+      sendJson(res, 200, db.audit_logs || []);
+      return true;
+    }
+    if (method === 'POST') {
+      const body = await parseRequestBody(req);
+      const entry = logAudit(body.actor, body.action || 'CUSTOM_ACTION', body.details || '');
+      sendJson(res, 201, entry);
+      return true;
+    }
+  }
+
+  return false; // Not handled by API
+}
+
+// Static File Server
+function serveStaticFile(req, res, pathname) {
+  let safePath = path.normalize(decodeURIComponent(pathname)).replace(/^(\.\.[\/\\])+/, '');
+  if (safePath === '/' || safePath === '' || safePath === '\\') {
+    safePath = '/index.html';
+  }
+
+  const filePath = path.join(__dirname, safePath);
+
+  // Prevent directory traversal
+  if (!filePath.startsWith(__dirname)) {
+    res.writeHead(403, { 'Content-Type': 'text/plain' });
+    res.end('403 Forbidden');
+    return;
+  }
+
+  fs.stat(filePath, (err, stats) => {
+    if (err || !stats.isFile()) {
+      res.writeHead(404, { 'Content-Type': 'text/html' });
+      res.end('<h1>404 Not Found - Smart Waste Management</h1>');
+      return;
+    }
+
+    const ext = path.extname(filePath).toLowerCase();
+    const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+
+    res.writeHead(200, {
+      'Content-Type': contentType,
+      'Content-Length': stats.size,
+      'Cache-Control': 'no-cache'
+    });
+
+    const stream = fs.createReadStream(filePath);
+    stream.pipe(res);
+  });
+}
+
+// Master HTTP Server
+const server = http.createServer(async (req, res) => {
+  const parsedUrl = url.parse(req.url, true);
+
+  try {
+    // If request starts with /api/, route to REST API
+    if (parsedUrl.pathname.startsWith('/api/')) {
+      const handled = await handleApiRequest(req, res, parsedUrl);
+      if (handled) return;
+      return sendJson(res, 404, { error: `Endpoint ${req.method} ${parsedUrl.pathname} not found` });
+    }
+
+    // Otherwise serve static client files
+    serveStaticFile(req, res, parsedUrl.pathname);
+  } catch (err) {
+    console.error(`💥 Server Error handling ${req.method} ${req.url}:`, err);
+    sendJson(res, 500, { error: 'Internal Server Error', message: err.message });
+  }
+});
+
+// Start Server
+initDatabase();
+server.listen(PORT, () => {
+  console.log(`\n======================================================`);
+  console.log(`🚀 Smart Waste Management Municipal REST Server`);
+  console.log(`🌐 Live at: http://localhost:${PORT}/`);
+  console.log(`📡 REST API Base: http://localhost:${PORT}/api/`);
+  console.log(`📂 Database: ${DB_PATH}`);
+  console.log(`======================================================\n`);
+});
+
+module.exports = server;

@@ -227,32 +227,212 @@ runTest('Credit Store: Sapling reward featured as primary largest card first', (
   assert(stylesContent.includes('.reward-card.featured-card'), 'featured-card CSS class missing');
 });
 
-runTest('Credit Store: All secondary reward items included in catalog', () => {
-  const secondaryItemIds = [
-    'jute_bag',
+runTest('Credit Store: Updated secondary reward items in catalog with 4 replacements', () => {
+  const currentSecondaryItemIds = [
     'compost_kit',
-    'cutlery_set',
     'seed_paper',
-    'transit_fare',
-    'tax_voucher',
     'recycled_notebook',
-    'digital_badge'
+    'digital_badge',
+    'segregation_bin_set',
+    'ewaste_voucher',
+    'priority_pickup_pass',
+    'recycler_marketplace_credit'
   ];
-  secondaryItemIds.forEach(id => {
+  currentSecondaryItemIds.forEach(id => {
     assert(appContent.includes(`id: '${id}'`), `Missing reward item ${id}`);
+  });
+  const removedItemIds = ['jute_bag', 'cutlery_set', 'transit_fare', 'tax_voucher'];
+  removedItemIds.forEach(id => {
+    assert(!appContent.includes(`id: '${id}'`), `Removed reward item ${id} is still in catalog`);
   });
 });
 
-runTest('Credit Store: Redemption flow differentiates physical vs digital badges', () => {
+runTest('Credit Store: Redemption flow differentiates physical vs digital badges & priority pass', () => {
   assert(appContent.includes("status: isDigital ? 'Fulfilled' : 'Requested'"), 'Status logic for physical vs digital badge missing');
   assert(appContent.includes('swm_redemptions'), 'swm_redemptions data store missing');
   assert(appContent.includes('redeemCreditStoreItem'), 'redeemCreditStoreItem function missing');
+  assert(appContent.includes('priorityPickupCredits'), 'priorityPickupCredits logic missing');
 });
 
 runTest('Admin Dashboard: Redemption requests queue view with Mark Fulfilled button', () => {
   assert(htmlContent.includes('id="adminTabRedemptions"'), 'adminTabRedemptions tab missing in HTML');
   assert(htmlContent.includes('id="adminPanelRedemptions"'), 'adminPanelRedemptions panel missing in HTML');
   assert(appContent.includes('adminFulfillRedemption'), 'adminFulfillRedemption function missing in app.js');
+});
+
+// --------------------------------------------------------------------------
+// 6. PART A: VERIFY & FIX EXISTING LOGIC
+// --------------------------------------------------------------------------
+console.log('\n⚙️ 6. Testing Part A: Tiered Credit Split, Segregation, Routing, and Impact Tracker...');
+
+runTest('Tiered Credit-Split: Logic table properly defined in checkAndMergeDuplicates', () => {
+  assert(appContent.includes('function getTierCredit(num)'), 'getTierCredit function missing in app.js');
+  // Check tiered thresholds: 1 -> 5, 2-3 -> 4, 4-6 -> 3, 7-10 -> 2, 11+ -> 1
+  assert(appContent.includes('if (num === 1) return 5;'), 'Tier 1 credit missing (5)');
+  assert(appContent.includes('if (num <= 3) return 4;'), 'Tier 2-3 credit missing (4)');
+  assert(appContent.includes('if (num <= 6) return 3;'), 'Tier 4-6 credit missing (3)');
+  assert(appContent.includes('if (num <= 10) return 2;'), 'Tier 7-10 credit missing (2)');
+  assert(appContent.includes('return 1;'), 'Floor credit missing (1)');
+});
+
+runTest('Tiered Credit-Split: Retroactive credit adjustments & transactions logged to all prior reporters', () => {
+  assert(appContent.includes('Adjusted duplicate report #'), 'Retroactive adjustment transaction description missing');
+  assert(appContent.includes('creditHistory.unshift'), 'creditHistory update missing');
+  assert(appContent.includes('reporterIds'), 'reporterIds tracking array missing');
+});
+
+runTest('Tiered Credit-Split: Emergency reports award 25 credits to first reporter and standard tiered to duplicates', () => {
+  assert(appContent.includes("existing.isEmergency || existing.category === 'emergency'"), 'Emergency duplicate check missing');
+  assert(appContent.includes("creditsAwarded: 25"), 'First emergency reporter 25 credits missing');
+});
+
+runTest('Segregation Guide: Live keyword filter search implemented in initSegregationGuide', () => {
+  assert(appContent.includes('function initSegregationGuide()'), 'initSegregationGuide function missing');
+  assert(htmlContent.includes('id="segregationSearchInput"'), 'segregationSearchInput missing in HTML');
+  assert(appContent.includes('.addEventListener(\'input\''), 'input event listener for live segregation filtering missing');
+});
+
+runTest('Route Optimizer: Haversine distance and Nearest-Neighbor algorithm implemented', () => {
+  assert(appContent.includes('function calcDistance(lat1, lon1, lat2, lon2)'), 'calcDistance function missing');
+  assert(appContent.includes('6371'), 'Earth radius 6371km missing in Haversine formula');
+  assert(appContent.includes('Math.sin(dLat / 2)'), 'Haversine formula trigonometric calculations missing');
+  assert(appContent.includes('runSoftwareRouteOptimizer'), 'runSoftwareRouteOptimizer function missing');
+});
+
+runTest('Route Optimizer: Emergency pinned to top and Priority Pickup Pass pinned right below', () => {
+  assert(appContent.includes('const emergencyReports = unassigned.filter('), 'Emergency filtering in route optimizer missing');
+  assert(appContent.includes('const priorityPassReports = unassigned.filter('), 'Priority pass filtering in route optimizer missing');
+  assert(appContent.includes('[...emergencyReports, ...priorityPassReports, ...optimizedStandard]'), 'Pinned queue order missing');
+});
+
+runTest('Personal Impact Tracker: Renders non-zero demo metrics and trend chart for demo accounts', () => {
+  assert(appContent.includes('function renderPersonalImpactTracker()'), 'renderPersonalImpactTracker function missing');
+  assert(htmlContent.includes('id="impactReportsCount"'), 'impactReportsCount element missing');
+  assert(htmlContent.includes('id="impactKgDiverted"'), 'impactKgDiverted element missing');
+  assert(htmlContent.includes('id="impactCo2Saved"'), 'impactCo2Saved element missing');
+  assert(htmlContent.includes('id="impactTrendChart"'), 'impactTrendChart canvas element missing');
+});
+
+// --------------------------------------------------------------------------
+// 7. PART B: MUNICIPAL COMPLIANCE DASHBOARD
+// --------------------------------------------------------------------------
+console.log('\n🏛️ 7. Testing Part B: Municipal Compliance Dashboard (SBM 2.0 / SWM Rules 2026)...');
+
+runTest('Municipal Compliance: Statutory KPI summary cards and statutory thresholds defined', () => {
+  assert(htmlContent.includes('id="adminPanelCompliance"'), 'adminPanelCompliance panel missing');
+  assert(htmlContent.includes('id="kpiCitySegregation"'), 'kpiCitySegregation card missing');
+  assert(htmlContent.includes('id="kpiCityCoverage"'), 'kpiCityCoverage card missing');
+  assert(htmlContent.includes('id="kpiCityProcessing"'), 'kpiCityProcessing card missing');
+  assert(appContent.includes('const SBM_TARGETS = {'), 'SBM_TARGETS constant missing');
+  assert(appContent.includes('segregation: 60'), 'SBM 2.0 segregation target 60% missing');
+  assert(appContent.includes('coverage: 80'), 'SBM 2.0 coverage target 80% missing');
+  assert(appContent.includes('processing: 80'), 'SBM 2.0 processing target 80% missing');
+});
+
+runTest('Municipal Compliance: Color-coded status badge logic (Green >= target, Amber >= target-10, Red otherwise)', () => {
+  assert(appContent.includes('function getComplianceStatus(value, target)'), 'getComplianceStatus function missing');
+  assert(appContent.includes('value >= target - 10'), '10% amber tolerance logic missing');
+});
+
+runTest('Municipal Compliance: Ward Metrics edit modal & handler implemented', () => {
+  assert(htmlContent.includes('id="updateComplianceModal"'), 'updateComplianceModal missing in HTML');
+  assert(htmlContent.includes('id="updateComplianceForm"'), 'updateComplianceForm missing in HTML');
+  assert(appContent.includes('function openUpdateComplianceModal'), 'openUpdateComplianceModal function missing');
+  assert(appContent.includes('function saveWardComplianceMetrics'), 'saveWardComplianceMetrics function missing');
+});
+
+// --------------------------------------------------------------------------
+// 8. PART B: TRANSPARENCY PAGE, DEMO SWITCHER & ABOUT PROJECT
+// --------------------------------------------------------------------------
+console.log('\n🌐 8. Testing Part B: Transparency Page, Demo Switcher & About Project...');
+
+const transparencyHtml = fs.readFileSync(path.join(__dirname, 'transparency.html'), 'utf-8');
+
+runTest('Transparency Page: Standalone public page exists and requires no login', () => {
+  assert(fs.existsSync(path.join(__dirname, 'transparency.html')), 'transparency.html file does not exist');
+  assert(transparencyHtml.includes('Public Civic Waste Transparency Portal'), 'Portal title missing');
+  assert(!transparencyHtml.includes('id="loginForm"'), 'Login form should not be on transparency portal');
+});
+
+runTest('Transparency Page: Displays aggregated civic metrics and ward rankings', () => {
+  assert(transparencyHtml.includes('id="statReportsToday"'), 'statReportsToday stat card missing');
+  assert(transparencyHtml.includes('id="statClearedToday"'), 'statClearedToday stat card missing');
+  assert(transparencyHtml.includes('id="statSegregationAvg"'), 'statSegregationAvg stat card missing');
+  assert(transparencyHtml.includes('id="statProcessingRate"'), 'statProcessingRate stat card missing');
+  assert(transparencyHtml.includes('id="cleanestWardsList"'), 'cleanestWardsList ranking container missing');
+  assert(transparencyHtml.includes('id="mostReportedWardsList"'), 'mostReportedWardsList ranking container missing');
+});
+
+runTest('Transparency Page: Zero personal data, no hospital or patient identifiers', () => {
+  assert(transparencyHtml.includes('Privacy & Statutory Disclosure Notice'), 'Privacy disclosure notice missing');
+  assert(transparencyHtml.includes('Zero Personal Identifiable Information (PII)'), 'Zero PII commitment notice missing');
+  assert(!transparencyHtml.includes('patient'), 'Transparency page must not contain patient references');
+  assert(!transparencyHtml.includes('hospitalStaffTable'), 'Hospital staff table must not be on public transparency page');
+});
+
+runTest('Demo Role-Switch Control: Quick Demo Switcher on login screen supports all 5 roles', () => {
+  assert(htmlContent.includes('id="demoRoleSelect"'), 'demoRoleSelect dropdown missing on login page');
+  assert(htmlContent.includes('id="demoQuickLoginBtn"'), 'demoQuickLoginBtn missing on login page');
+  assert(appContent.includes("function demoSwitchRole(role)"), 'demoSwitchRole function missing in app.js');
+  const roles = ['citizen', 'institution', 'hospital', 'worker', 'admin'];
+  roles.forEach(role => {
+    assert(htmlContent.includes(`demoSwitchRole('${role}')`), `Quick demo button for ${role} missing in HTML`);
+  });
+});
+
+runTest('About This Project: Briefing modal with root-cause analysis and 2000-2026 policy timeline', () => {
+  assert(htmlContent.includes('id="aboutProjectModal"'), 'aboutProjectModal missing in HTML');
+  assert(htmlContent.includes('Urban Waste Management Crisis & SBM 2.0 Solution'), 'About modal heading missing');
+  assert(htmlContent.includes('Root-Cause Breakdown'), 'Root-cause analysis missing');
+  assert(htmlContent.includes('Indian Waste Governance Timeline (2000 - 2026)'), 'Policy timeline missing');
+  assert(htmlContent.includes('MSW Rules 2000'), 'MSW Rules 2000 milestone missing');
+  assert(htmlContent.includes('SWM Rules 2016'), 'SWM Rules 2016 milestone missing');
+  assert(htmlContent.includes('SBM 2.0 Mandates (2024-2026)'), 'SBM 2.0 milestone missing');
+});
+
+// --------------------------------------------------------------------------
+// 9. PART C: FUNCTIONAL PRIORITY PICKUP PASS
+// --------------------------------------------------------------------------
+console.log('\n🎫 9. Testing Part C: Functional Priority Pickup Pass...');
+
+runTest('Priority Pickup Pass: Decrements on citizen report submission and marks report as isPriorityPickup', () => {
+  assert(appContent.includes('currentUser.priorityPickupCredits > 0'), 'Priority pass check missing in report submission');
+  assert(appContent.includes('currentUser.priorityPickupCredits--'), 'Priority pass decrement missing in report submission');
+  assert(appContent.includes('isPriorityPickup: usedPriorityPass'), 'isPriorityPickup flag missing in report');
+  assert(htmlContent.includes('id="citizenPriorityPassNotice"'), 'citizenPriorityPassNotice banner missing in HTML');
+});
+
+runTest('Priority Pickup Pass: Bypasses admin physical redemption fulfillment queue', () => {
+  assert(appContent.includes("const isDigital = item.digitalBadge || item.id === 'priority_pickup_pass';"), 'Priority pass not classified as auto-fulfilled digital reward');
+});
+
+// --------------------------------------------------------------------------
+// 10. BACKEND REST SERVER & ATOMIC PERSISTENCE
+// --------------------------------------------------------------------------
+console.log('\n🖥️ 10. Testing Backend REST Server & Data Persistence...');
+
+const serverContent = fs.readFileSync(path.join(__dirname, 'server.js'), 'utf-8');
+
+runTest('Backend Server: Native REST API routes implemented', () => {
+  const routes = [
+    '/api/health',
+    '/api/stats',
+    '/api/reports',
+    '/api/fleet',
+    '/api/compliance',
+    '/api/broadcasts',
+    '/api/logs',
+    '/api/admin/auto-assign'
+  ];
+  routes.forEach(route => {
+    assert(serverContent.includes(route), `Missing server route ${route}`);
+  });
+});
+
+runTest('Backend Server: Atomic persistence to data/db.json', () => {
+  assert(serverContent.includes('data/db.json'), 'Missing data/db.json path in server.js');
+  assert(serverContent.includes('saveDatabase()'), 'Missing saveDatabase function in server.js');
+  assert(fs.existsSync(path.join(__dirname, 'data', 'db.json')), 'data/db.json does not exist');
 });
 
 // --------------------------------------------------------------------------
@@ -265,6 +445,7 @@ console.log('======================================================\n');
 if (testsFailed > 0) {
   process.exit(1);
 } else {
-  console.log('🎉 ALL 26 COMPREHENSIVE VERIFICATION TESTS PASSED!');
+  console.log('🎉 ALL COMPREHENSIVE VERIFICATION TESTS PASSED!');
   process.exit(0);
 }
+

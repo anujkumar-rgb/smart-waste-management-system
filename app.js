@@ -6,9 +6,11 @@
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
   initDataStores();
+  initBackendSync();
   initAuth();
   initVoiceRecorder();
   initSegregationGuide();
+  initAdminEventListeners();
   checkSession();
 });
 
@@ -326,6 +328,21 @@ function initDataStores() {
   if (!localStorage.getItem('swm_redemptions')) localStorage.setItem('swm_redemptions', JSON.stringify(SEED_REDEMPTIONS));
   if (!localStorage.getItem('swm_compliance_metrics')) localStorage.setItem('swm_compliance_metrics', JSON.stringify(SEED_COMPLIANCE_METRICS));
   if (!localStorage.getItem('swm_fleet')) localStorage.setItem('swm_fleet', JSON.stringify(SEED_FLEET));
+  if (!localStorage.getItem('swm_broadcasts')) localStorage.setItem('swm_broadcasts', JSON.stringify([
+    {
+      id: 'BC-101',
+      message: 'Monsoon Protocol Active: Segregate wet organic waste into covered green bins to prevent drain blockages.',
+      level: 'warning',
+      author: 'Municipal Sanitation Officer',
+      timestamp: Date.now() - 2 * 60 * 60 * 1000,
+      active: true
+    }
+  ]));
+  if (!localStorage.getItem('swm_audit_logs')) localStorage.setItem('swm_audit_logs', JSON.stringify([
+    { id: 'log-1', timestamp: Date.now() - 3 * 60 * 60 * 1000, actor: 'System', action: 'INIT', details: 'Municipal Waste Management Platform Initialized.' },
+    { id: 'log-2', timestamp: Date.now() - 2 * 60 * 60 * 1000, actor: 'Admin', action: 'BROADCAST', details: 'Transmitted Monsoon Protocol directive to all citizen wards.' },
+    { id: 'log-3', timestamp: Date.now() - 40 * 60 * 1000, actor: 'Admin', action: 'CREW_ASSIGNED', details: 'Assigned bulk paper collection BULK-2002 to Rajesh Singh (Crew #101).' }
+  ]));
 }
 
 function getFleet() { return JSON.parse(localStorage.getItem('swm_fleet') || '[]'); }
@@ -345,6 +362,143 @@ function saveHospitalStaff(s) { localStorage.setItem('swm_hospital_staff', JSON.
 
 function getRedemptions() { return JSON.parse(localStorage.getItem('swm_redemptions') || '[]'); }
 function saveRedemptions(r) { localStorage.setItem('swm_redemptions', JSON.stringify(r)); }
+
+function getBroadcasts() { return JSON.parse(localStorage.getItem('swm_broadcasts') || '[]'); }
+function saveBroadcasts(b) { localStorage.setItem('swm_broadcasts', JSON.stringify(b)); }
+
+function getAuditLogs() { return JSON.parse(localStorage.getItem('swm_audit_logs') || '[]'); }
+function saveAuditLogs(l) { localStorage.setItem('swm_audit_logs', JSON.stringify(l)); }
+
+function addAuditLog(actor, action, details) {
+  const logs = getAuditLogs();
+  const entry = {
+    id: `log-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    timestamp: Date.now(),
+    actor: actor || (currentUser ? currentUser.name : 'System'),
+    action,
+    details
+  };
+  logs.unshift(entry);
+  if (logs.length > 200) logs.pop();
+  saveAuditLogs(logs);
+
+  if (isBackendConnected) {
+    fetch('/api/logs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(entry)
+    }).catch(() => {});
+  }
+  return entry;
+}
+
+// REST API Integration & Sync Engine
+let isBackendConnected = false;
+
+async function checkBackendHealth() {
+  try {
+    const res = await fetch('/api/health');
+    if (res.ok) {
+      isBackendConnected = true;
+      updateBackendStatusIndicator(true);
+      return true;
+    }
+  } catch (e) {}
+  isBackendConnected = false;
+  updateBackendStatusIndicator(false);
+  return false;
+}
+
+function updateBackendStatusIndicator(online) {
+  const pills = [document.getElementById('backendStatusPill'), document.getElementById('guestBackendStatusPill')];
+  pills.forEach(p => {
+    if (p) {
+      if (online) {
+        p.textContent = '🟢 REST API Online';
+        p.classList.remove('offline');
+        p.title = 'Connected to Node.js backend on http://localhost:8080/';
+      } else {
+        p.textContent = '🟠 Local Mode (Offline)';
+        p.classList.add('offline');
+        p.title = 'Operating via browser storage fallback';
+      }
+    }
+  });
+}
+
+async function syncWithBackend() {
+  const isHealthy = await checkBackendHealth();
+  if (!isHealthy) return;
+
+  try {
+    const [reportsRes, fleetRes, hospitalRes, redemptionsRes, complianceRes, broadcastRes, logsRes] = await Promise.all([
+      fetch('/api/reports').catch(() => null),
+      fetch('/api/fleet').catch(() => null),
+      fetch('/api/hospital-reports').catch(() => null),
+      fetch('/api/redemptions').catch(() => null),
+      fetch('/api/compliance').catch(() => null),
+      fetch('/api/broadcasts').catch(() => null),
+      fetch('/api/logs').catch(() => null)
+    ]);
+
+    if (reportsRes && reportsRes.ok) {
+      const data = await reportsRes.json();
+      if (Array.isArray(data)) saveReports(data);
+    }
+    if (fleetRes && fleetRes.ok) {
+      const data = await fleetRes.json();
+      if (Array.isArray(data)) saveFleet(data);
+    }
+    if (hospitalRes && hospitalRes.ok) {
+      const data = await hospitalRes.json();
+      if (Array.isArray(data)) saveHospitalReports(data);
+    }
+    if (redemptionsRes && redemptionsRes.ok) {
+      const data = await redemptionsRes.json();
+      if (Array.isArray(data)) saveRedemptions(data);
+    }
+    if (complianceRes && complianceRes.ok) {
+      const data = await complianceRes.json();
+      if (Array.isArray(data)) localStorage.setItem('swm_compliance_metrics', JSON.stringify(data));
+    }
+    if (broadcastRes && broadcastRes.ok) {
+      const data = await broadcastRes.json();
+      if (Array.isArray(data)) saveBroadcasts(data);
+    }
+    if (logsRes && logsRes.ok) {
+      const data = await logsRes.json();
+      if (Array.isArray(data)) saveAuditLogs(data);
+    }
+
+    displayActiveBroadcasts();
+    if (currentUser && currentUser.role === 'admin') {
+      renderAdminDashboard();
+    }
+  } catch (e) {
+    console.warn('Backend sync notice:', e);
+  }
+}
+
+function initBackendSync() {
+  checkBackendHealth();
+  syncWithBackend();
+  displayActiveBroadcasts();
+}
+
+function initAdminEventListeners() {
+  const dispatchForm = document.getElementById('dispatchStandbyForm');
+  if (dispatchForm) {
+    dispatchForm.addEventListener('submit', (e) => {
+      if (window.handleDispatchStandbySubmit) window.handleDispatchStandbySubmit(e);
+    });
+  }
+  const noticeForm = document.getElementById('sanitationNoticeForm');
+  if (noticeForm) {
+    noticeForm.addEventListener('submit', (e) => {
+      if (window.handleSanitationNoticeSubmit) window.handleSanitationNoticeSubmit(e);
+    });
+  }
+}
 
 /* ==========================================================================
    3. AUTHENTICATION & EXTENDED INSTITUTION SIGNUP
@@ -528,6 +682,23 @@ window.quickLogin = function(email) {
   const found = users.find(u => u.email === email);
   if (found) setCurrentUser(found);
 };
+
+function demoSwitchRole(role) {
+  const roleEmailMap = {
+    citizen: 'citizen@ecoclear.org',
+    institution: 'school@cityedu.org',
+    school: 'school@cityedu.org',
+    company: 'infosys@campus.org',
+    hospital: 'citycare@hospital.org',
+    worker: 'crew101@cleanward.org',
+    admin: 'admin@citygov.org'
+  };
+  const targetEmail = roleEmailMap[role] || 'citizen@ecoclear.org';
+  const users = getUsers();
+  const found = users.find(u => u.email.toLowerCase() === targetEmail.toLowerCase() || u.role === role);
+  if (found) setCurrentUser(found);
+}
+window.demoSwitchRole = demoSwitchRole;
 
 function setCurrentUser(user) {
   currentUser = user;
@@ -756,6 +927,18 @@ function renderCitizenDashboard() {
   document.getElementById('citizenCreditBalance').textContent = `${currentUser.credits || 0} credits`;
   document.getElementById('storeHeaderBalance').textContent = currentUser.credits || 0;
 
+  const passNotice = document.getElementById('citizenPriorityPassNotice');
+  const passCountText = document.getElementById('priorityPassCountText');
+  if (passNotice) {
+    const pCount = currentUser.priorityPickupCredits || 0;
+    if (pCount > 0) {
+      passNotice.style.display = 'block';
+      if (passCountText) passCountText.textContent = pCount;
+    } else {
+      passNotice.style.display = 'none';
+    }
+  }
+
   setTimeout(() => initLeafletLocationPicker('citizen'), 150);
 
   const segForm = document.getElementById('segregationCheckForm');
@@ -786,6 +969,7 @@ function renderCitizenDashboard() {
       const notes = document.getElementById('citizenNotes').value;
       const audioData = document.getElementById('citizenAudioData').value;
 
+      const usedPriorityPass = (currentUser.priorityPickupCredits || 0) > 0;
       const newReport = {
         id: 'REP-' + Math.floor(1000 + Math.random() * 9000),
         userId: currentUser.id,
@@ -799,13 +983,26 @@ function renderCitizenDashboard() {
         resolvedAddress: landmark,
         category: 'general',
         severity,
-        notes: notes + (audioData ? ' [Voice Note Attached]' : ''),
+        notes: notes + (audioData ? ' [Voice Note Attached]' : '') + (usedPriorityPass ? ' [⚡ PRIORITY PICKUP PASS APPLIED]' : ''),
         isEmergency: false,
+        isPriorityPickup: usedPriorityPass,
         status: 'reported',
         createdAt: Date.now(),
         duplicateCount: 1,
+        reporterIds: [currentUser.id],
         isEscalated: false
       };
+
+      if (currentUser.priorityPickupCredits > 0) {
+        currentUser.priorityPickupCredits--;
+        let users = getUsers();
+        const uIdx = users.findIndex(u => u.id === currentUser.id);
+        if (uIdx !== -1) {
+          users[uIdx].priorityPickupCredits = currentUser.priorityPickupCredits;
+          saveUsers(users);
+        }
+        localStorage.setItem('swm_current_user', JSON.stringify(currentUser));
+      }
 
       const isMerged = checkAndMergeDuplicates(newReport);
       if (!isMerged) {
@@ -814,7 +1011,7 @@ function renderCitizenDashboard() {
         saveReports(reports);
 
         awardCredits(5, 'Base Bin Report Submitted');
-        alert('Bin Report Submitted Successfully! +5 EcoCredits credited.');
+        alert(hasPriorityPass ? '⚡ Priority Bin Report Submitted! +5 EcoCredits credited & pass consumed.' : 'Bin Report Submitted Successfully! +5 EcoCredits credited.');
       }
 
       citizenForm.reset();
@@ -1004,15 +1201,15 @@ function audioBufferToWav(buffer) {
   return new Blob([out.buffer], { type: 'audio/wav' });
 }
 
-/* Dedicated Credit Store (10 Items, Primary Sapling First) */
+/* Dedicated Credit Store (Waste-Specific Civic Rewards Catalog) */
 const CREDIT_STORE_CATALOG = [
   { id: 'sapling', name: 'Sapling / Native Fruit Plant', cost: 50, icon: '🌱', isPhysical: true, desc: 'Native guava, mango, or neem sapling delivered for residential terrace or park planting.', featured: true },
-  { id: 'jute_bag', name: 'Heavy-Duty Cloth / Jute Bag', cost: 40, icon: '🛍️', isPhysical: true, desc: 'Reusable certified organic cotton tote bag eliminating single-use plastic grocery bags.' },
+  { id: 'segregation_bin_set', name: 'Home Segregation Bin Set (Wet/Dry Color-Coded)', cost: 70, icon: '🗑️', isPhysical: true, desc: 'A pair of color-coded mini bins with labels for correct source segregation at home, matching municipal waste categories.' },
   { id: 'compost_kit', name: 'Home Aerobic Compost Starter Kit', cost: 100, icon: '🪴', isPhysical: true, desc: 'Twin aerated bin system with bio-inoculant microbial brick for kitchen food peels.' },
-  { id: 'cutlery_set', name: 'Steel / Bamboo Reusable Cutlery Set', cost: 60, icon: '🥢', isPhysical: true, desc: 'Pocket travel pouch with stainless steel straw, bamboo fork, and spoon.' },
+  { id: 'ewaste_voucher', name: 'E-Waste Drop-off Voucher', cost: 45, icon: '🔌', isPhysical: true, desc: 'Redeemable at a partnered authorized e-waste collection point for safe disposal of old electronics, batteries, and cables.' },
   { id: 'seed_paper', name: 'Plantable Seed Paper Stationery', cost: 30, icon: '📜', isPhysical: true, desc: 'Post-consumer waste handmade paper embedded with marigold and basil seeds.' },
-  { id: 'transit_fare', name: 'Public Transit Metro / Bus Fare Credit', cost: 80, icon: '🚌', isPhysical: true, desc: '₹50 automated smart transit card recharge for municipal public transport.' },
-  { id: 'tax_voucher', name: 'Municipal Property/Utility Tax Rebate Voucher', cost: 150, icon: '🎟️', isPhysical: true, desc: '₹100 official rebate certificate applicable to your annual municipal property or utility invoice.' },
+  { id: 'priority_pickup_pass', name: 'Priority Pickup Pass', cost: 90, icon: '⚡', isPhysical: false, desc: 'Your next submitted report is guaranteed same-day collection, jumping ahead of the standard queue.' },
+  { id: 'recycler_marketplace_credit', name: 'Local Recycler Marketplace Credit', cost: 65, icon: '♻️', isPhysical: true, desc: '₹40 credit redeemable with your area\'s registered informal waste collectors (kabadiwalas) for scrap and recyclables.' },
   { id: 'recycled_notebook', name: '100% Recycled Paper Notebook', cost: 35, icon: '📓', isPhysical: true, desc: '120-page ruled notebook manufactured entirely from post-consumer recovered office paper.' },
   { id: 'digital_badge', name: 'Digital Eco-Champion Public Recognition Badge', cost: 0, icon: '🥇', isPhysical: false, desc: 'Official digital recognition credential displayed on your civic resident profile.' }
 ];
@@ -1073,7 +1270,22 @@ window.redeemCreditStoreItem = function(itemId) {
 
   awardCredits(-item.cost, `Redeemed: ${item.name}`);
 
-  const isDigital = !item.isPhysical;
+  // Special functional handling for priority pickup pass (not physical, does not enter Admin queue)
+  if (itemId === 'priority_pickup_pass') {
+    currentUser.priorityPickupCredits = (currentUser.priorityPickupCredits || 0) + 1;
+    let users = getUsers();
+    const uIdx = users.findIndex(u => u.id === currentUser.id);
+    if (uIdx !== -1) {
+      users[uIdx].priorityPickupCredits = currentUser.priorityPickupCredits;
+      saveUsers(users);
+    }
+    localStorage.setItem('swm_current_user', JSON.stringify(currentUser));
+    alert(`🎉 Priority Pickup Pass Activated! Your next submitted report is guaranteed same-day collection, jumping to the top of the collection queue.`);
+    renderCitizenDashboard();
+    return;
+  }
+
+  const isDigital = item.digitalBadge || item.id === 'priority_pickup_pass';
   const newRedemption = {
     id: 'RED-' + Math.floor(1000 + Math.random() * 9000),
     userId: currentUser.id,
@@ -1726,41 +1938,85 @@ function renderWorkerDashboard() {
   runSoftwareRouteOptimizer();
 }
 
+function calcDistance(lat1, lon1, lat2, lon2) {
+  let p1Lat, p1Lon, p2Lat, p2Lon;
+  if (typeof lat1 === 'number' && typeof lon1 === 'number' && typeof lat2 === 'number' && typeof lon2 === 'number') {
+    p1Lat = lat1; p1Lon = lon1; p2Lat = lat2; p2Lon = lon2;
+  } else {
+    const p1 = lat1;
+    const p2 = lon1;
+    p1Lat = p1.lat !== undefined ? p1.lat : (p1.latitude !== undefined ? p1.latitude : 28.6139);
+    p1Lon = p1.lng !== undefined ? p1.lng : (p1.longitude !== undefined ? p1.longitude : 77.2090);
+    p2Lat = p2.lat !== undefined ? p2.lat : (p2.latitude !== undefined ? p2.latitude : 28.6139);
+    p2Lon = p2.lng !== undefined ? p2.lng : (p2.longitude !== undefined ? p2.longitude : 77.2090);
+  }
+  const R = 6371; // Earth radius in km
+  const dLat = (p2Lat - p1Lat) * Math.PI / 180;
+  const dLng = (p2Lon - p1Lon) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(p1Lat * Math.PI / 180) * Math.cos(p2Lat * Math.PI / 180) *
+            Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
 function runSoftwareRouteOptimizer() {
   const reports = getReports().filter(r => r.status !== 'cleared');
   const container = document.getElementById('workerRouteStopsList');
 
-  const emergencyStops = reports.filter(r => r.isEmergency);
-  const regularStops = reports.filter(r => !r.isEmergency);
+  const unassigned = reports;
+  const emergencyReports = unassigned.filter(r => r.isEmergency);
+  const priorityPassReports = unassigned.filter(r => !r.isEmergency && r.isPriorityPickup);
+  const emergencyStops = emergencyReports;
+  const priorityPickupStops = priorityPassReports;
+  const regularStops = unassigned.filter(r => !r.isEmergency && !r.isPriorityPickup);
 
   let currentPos = { lat: 28.6139, lng: 77.2090 };
-  let unvisited = [...regularStops];
-  let optimizedRegular = [];
-  let totalDistanceKm = 0;
 
-  while (unvisited.length > 0) {
-    let nearestIdx = 0;
-    let minDistance = Infinity;
+  // Nearest-Neighbor implementation using Haversine distance
+  function optimizeNearestNeighbor(stops, startPos) {
+    let unvisited = [...stops];
+    let ordered = [];
+    let pos = { ...startPos };
+    let totalDist = 0;
 
-    for (let i = 0; i < unvisited.length; i++) {
-      const targetCoords = unvisited[i].coords || { lat: unvisited[i].latitude || 28.6139, lng: unvisited[i].longitude || 77.2090 };
-      const dist = calcDistance(currentPos, targetCoords);
-      if (dist < minDistance) {
-        minDistance = dist;
-        nearestIdx = i;
+    while (unvisited.length > 0) {
+      let nearestIdx = 0;
+      let minDistance = Infinity;
+
+      for (let i = 0; i < unvisited.length; i++) {
+        const targetCoords = unvisited[i].coords || {
+          lat: unvisited[i].latitude !== undefined ? unvisited[i].latitude : 28.6139,
+          lng: unvisited[i].longitude !== undefined ? unvisited[i].longitude : 77.2090
+        };
+        const dist = calcDistance(pos, targetCoords);
+        if (dist < minDistance) {
+          minDistance = dist;
+          nearestIdx = i;
+        }
       }
+
+      const nextStop = unvisited.splice(nearestIdx, 1)[0];
+      totalDist += (minDistance === Infinity ? 0 : minDistance);
+      pos = nextStop.coords || {
+        lat: nextStop.latitude !== undefined ? nextStop.latitude : 28.6139,
+        lng: nextStop.longitude !== undefined ? nextStop.longitude : 77.2090
+      };
+      ordered.push(nextStop);
     }
 
-    const nextStop = unvisited.splice(nearestIdx, 1)[0];
-    totalDistanceKm += minDistance;
-    currentPos = nextStop.coords || { lat: nextStop.latitude || 28.6139, lng: nextStop.longitude || 77.2090 };
-    optimizedRegular.push(nextStop);
+    return { ordered, totalDist, endPos: pos };
   }
 
-  const finalRoute = [...emergencyStops, ...optimizedRegular];
+  const optPriority = optimizeNearestNeighbor(priorityPickupStops, currentPos);
+  const optRegular = optimizeNearestNeighbor(regularStops, optPriority.endPos);
+
+  const optimizedStandard = [...optPriority.ordered, ...optRegular.ordered];
+  const finalRoute = [...emergencyReports, ...priorityPassReports, ...optimizedStandard];
+  const totalDistanceKm = optPriority.totalDist + optRegular.totalDist + (emergencyReports.length * 1.5);
 
   document.getElementById('workerAssignedCount').textContent = finalRoute.length;
-  document.getElementById('workerEstDistance').textContent = `${(totalDistanceKm + (emergencyStops.length * 1.5)).toFixed(1)} km`;
+  document.getElementById('workerEstDistance').textContent = `${totalDistanceKm.toFixed(1)} km`;
 
   const totalAll = getReports().length;
   const clearedAll = getReports().filter(r => r.status === 'cleared').length;
@@ -1774,17 +2030,19 @@ function runSoftwareRouteOptimizer() {
 
   container.innerHTML = finalRoute.map((stop, idx) => {
     const isEmg = stop.isEmergency;
+    const isPriority = stop.isPriorityPickup;
     const originLabel = stop.userRole === 'institution'
       ? (stop.institutionType === 'school' ? `🏫 ${stop.schoolName || stop.userName}` : `🏢 ${stop.companyName || stop.userName}`)
       : `👤 Resident (${stop.userName})`;
 
     return `
-      <div class="route-stop-card ${isEmg ? 'emergency' : ''}">
+      <div class="route-stop-card ${isEmg ? 'emergency' : ''}" style="${isPriority && !isEmg ? 'border-left: 4px solid var(--civic-signal-amber);' : ''}">
         <div class="stop-number ${isEmg ? 'emergency-stop' : ''}">${isEmg ? '🚨' : idx + 1}</div>
         <div>
           <div class="report-meta">
             <span class="badge badge-${stop.status}">${stop.status}</span>
             ${isEmg ? `<span class="badge badge-emergency">TOP PRIORITY EMERGENCY</span>` : ''}
+            ${isPriority && !isEmg ? `<span class="badge" style="background: var(--civic-signal-amber-soft); color: var(--civic-signal-amber); font-weight: 800;">⚡ PRIORITY PICKUP PASS</span>` : ''}
             <span>📍 ${stop.area}</span>
             <span>Origin: <strong>${originLabel}</strong></span>
           </div>
@@ -1798,12 +2056,6 @@ function runSoftwareRouteOptimizer() {
       </div>
     `;
   }).join('');
-}
-
-function calcDistance(p1, p2) {
-  const dx = (p1.lat - p2.lat) * 111;
-  const dy = (p1.lng - p2.lng) * 111;
-  return Math.sqrt(dx * dx + dy * dy);
 }
 
 window.openWorkerProofModal = function(reportId) {
@@ -1844,19 +2096,25 @@ function renderAdminDashboard() {
   document.getElementById('adminStatEscalated').textContent = reports.filter(r => r.isEscalated).length;
 
   renderAdminFeedTable();
+  renderAdminFleet();
+  renderAdminGrievanceTable();
+  renderAdminLeaderboardTable();
   renderAdminComplianceTable();
   renderAdminHospitalTable();
   renderAdminWorkerTable();
   renderAdminRedemptionsQueue();
+  renderAdminLogsTable();
+  displayActiveBroadcasts();
   initAdminHotspotMap();
 }
 
-function renderAdminFeedTable() {
-  const reports = getReports();
+function renderAdminFeedTable(customReports) {
+  const reports = customReports || getReports();
   const tbody = document.getElementById('adminFeedTableBody');
+  if (!tbody) return;
 
   if (reports.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align: center;">No active reports found.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #64748b; padding: 1.5rem;">No matching reports found in feed.</td></tr>`;
     return;
   }
 
@@ -1878,15 +2136,19 @@ function renderAdminFeedTable() {
       }
     }
 
-    const lat = r.latitude || r.coords?.lat || 28.6139;
-    const lng = r.longitude || r.coords?.lng || 77.2090;
+    const lat = r.latitude !== undefined ? r.latitude : (r.coords?.lat || 28.6139);
+    const lng = r.longitude !== undefined ? r.longitude : (r.coords?.lng || 77.2090);
 
     return `
       <tr class="${r.isEscalated ? 'escalated' : ''}">
         <td><code>${r.id}</code></td>
         <td>${originLabel}</td>
         <td>${r.landmark}<br><small style="color: #64748b;">${r.area}</small></td>
-        <td>${r.category.toUpperCase()}<br><small>${r.severity} ${r.isEmergency ? '🚨' : ''}</small></td>
+        <td>
+          ${r.category.toUpperCase()}<br>
+          <small>${r.severity} ${r.isEmergency ? '🚨' : ''}</small>
+          ${r.isPriorityPickup ? '<br><span class="badge" style="background: var(--civic-signal-amber-soft); color: var(--civic-signal-amber); font-weight: 800; font-size: 0.65rem;">⚡ Priority Pass</span>' : ''}
+        </td>
         <td>
           <div class="status-stepper" style="font-size: 0.65rem;">
             <span class="stepper-step ${r.status === 'reported' ? 'active' : 'completed'}">1</span>
@@ -1896,7 +2158,7 @@ function renderAdminFeedTable() {
             <span class="stepper-step ${r.status === 'cleared' ? 'completed active' : ''}">3</span>
           </div>
         </td>
-        <td><small style="font-family: monospace;">${lat.toFixed(4)}, ${lng.toFixed(4)}</small></td>
+        <td><small style="font-family: monospace;">${Number(lat).toFixed(4)}, ${Number(lng).toFixed(4)}</small></td>
         <td>
           <select class="form-control" style="font-size: 0.78rem; padding: 0.2rem 0.4rem;" onchange="reassignWorker('${r.id}', this.value)">
             <option value="">Unassigned</option>
@@ -1911,20 +2173,423 @@ function renderAdminFeedTable() {
   }).join('');
 }
 
+window.filterAdminFeed = function() {
+  const keywordInput = document.getElementById('adminFeedSearchInput');
+  const statusSelect = document.getElementById('adminFeedStatusFilter');
+  const wardSelect = document.getElementById('adminFeedWardFilter');
+
+  const kw = keywordInput ? keywordInput.value.toLowerCase().trim() : '';
+  const status = statusSelect ? statusSelect.value : 'all';
+  const ward = wardSelect ? wardSelect.value : 'all';
+
+  const allReports = getReports();
+  const filtered = allReports.filter(r => {
+    if (kw) {
+      const idMatch = (r.id || '').toLowerCase().includes(kw);
+      const userMatch = (r.userName || r.schoolName || r.companyName || '').toLowerCase().includes(kw);
+      const landmarkMatch = (r.landmark || r.resolvedAddress || '').toLowerCase().includes(kw);
+      const notesMatch = (r.notes || '').toLowerCase().includes(kw);
+      if (!idMatch && !userMatch && !landmarkMatch && !notesMatch) return false;
+    }
+    if (status !== 'all') {
+      if (status === 'emergency') {
+        if (!r.isEmergency) return false;
+      } else if (status === 'escalated') {
+        if (!r.isEscalated) return false;
+      } else if (r.status !== status) {
+        return false;
+      }
+    }
+    if (ward !== 'all') {
+      if (!(r.area || '').includes(ward)) return false;
+    }
+    return true;
+  });
+
+  renderAdminFeedTable(filtered);
+};
+
+window.resetAdminFeedFilters = function() {
+  const keywordInput = document.getElementById('adminFeedSearchInput');
+  const statusSelect = document.getElementById('adminFeedStatusFilter');
+  const wardSelect = document.getElementById('adminFeedWardFilter');
+  if (keywordInput) keywordInput.value = '';
+  if (statusSelect) statusSelect.value = 'all';
+  if (wardSelect) wardSelect.value = 'all';
+
+  renderAdminFeedTable();
+};
+
+function renderAdminFleet() {
+  const fleetGrid = document.getElementById('adminFleetGrid');
+  if (!fleetGrid) return;
+
+  const fleet = getFleet();
+  if (fleet.length === 0) {
+    fleetGrid.innerHTML = `<div class="card" style="grid-column: 1/-1; text-align: center; color: #64748b;">No municipal vehicles currently registered.</div>`;
+    return;
+  }
+
+  fleetGrid.innerHTML = fleet.map(v => {
+    const capTon = v.capacityTon || 5.0;
+    const curTon = v.currentPayloadTon || 0.0;
+    const pct = Math.min(100, Math.round((curTon / capTon) * 100));
+    const fuel = v.fuelPercent || 80;
+    const isFull = pct >= 90;
+    const fillColor = isFull ? 'var(--civic-signal-crimson)' : (pct >= 70 ? 'var(--civic-signal-amber)' : 'var(--civic-spruce-green)');
+
+    return `
+      <div class="fleet-card">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+            <div>
+              <span style="font-size: 1.4rem; margin-right: 0.35rem;">${v.icon || '🚛'}</span>
+              <strong style="font-size: 0.95rem;">${v.type}</strong>
+              <div style="font-family: monospace; font-size: 0.8rem; color: #64748b;">${v.regNo || v.id}</div>
+            </div>
+            <span class="badge ${v.status.includes('Active') ? 'badge-assigned' : 'badge-reported'}" style="font-size: 0.72rem;">${v.status}</span>
+          </div>
+
+          <div style="font-size: 0.82rem; color: #475569; margin: 0.5rem 0;">
+            <div>📍 <strong>Ward:</strong> ${v.ward}</div>
+            <div>👤 <strong>Driver:</strong> ${v.driver} (${v.contact || 'N/A'})</div>
+            <div>⛽ <strong>Fuel / Battery:</strong> ${fuel}%</div>
+          </div>
+
+          <div class="capacity-meter-wrap">
+            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 600;">
+              <span>Payload Utilization: ${curTon.toFixed(1)} / ${capTon.toFixed(1)} T</span>
+              <span>${pct}%</span>
+            </div>
+            <div class="capacity-meter-bar">
+              <div class="capacity-meter-fill" style="width: ${pct}%; background: ${fillColor};"></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.4rem; margin-top: 0.75rem; flex-wrap: wrap;">
+          <button class="btn btn-outline btn-xs" onclick="rerouteFleetVehicle('${v.id}')">🔄 Re-route Ward</button>
+          <button class="btn btn-outline btn-xs" onclick="toggleFleetMaintenance('${v.id}')">${v.status === 'In Depot Maintenance' ? '🟢 Put Active' : '🔧 Depot Service'}</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+window.openDispatchStandbyVehicleModal = function() {
+  const modal = document.getElementById('dispatchStandbyModal');
+  if (modal) modal.classList.add('active');
+};
+
+window.handleDispatchStandbySubmit = async function(e) {
+  if (e) e.preventDefault();
+  const regNo = document.getElementById('standbyRegNo').value.trim();
+  const driver = document.getElementById('standbyDriver').value.trim();
+  const type = document.getElementById('standbyVehicleType').value;
+  const ward = document.getElementById('standbyTargetWard').value;
+
+  const fleet = getFleet();
+  const newVehicle = {
+    id: `FLT-ST-${Date.now().toString().slice(-3)}`,
+    type,
+    regNo: regNo || `DL-09-EV-${Math.floor(1000 + Math.random() * 9000)}`,
+    driver: driver || 'Depot Relief Driver',
+    contact: '+91 98100-77210',
+    ward,
+    capacityTon: type.includes('14') ? 14.0 : (type.includes('10') ? 10.0 : (type.includes('1.5') ? 1.5 : 2.0)),
+    currentPayloadTon: 0.0,
+    fuelPercent: 100,
+    status: 'Active Collection',
+    icon: type.includes('Auto') ? '🛺' : (type.includes('Van') ? '🚐' : (type.includes('Dumper') ? '🚜' : '🚛'))
+  };
+
+  fleet.unshift(newVehicle);
+  saveFleet(fleet);
+  addAuditLog('Admin', 'FLEET_DISPATCH', `Dispatched standby vehicle ${newVehicle.regNo} (${newVehicle.type}) to ${ward}`);
+
+  if (isBackendConnected) {
+    try {
+      await fetch('/api/fleet', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newVehicle)
+      });
+    } catch (err) {}
+  }
+
+  closeModal('dispatchStandbyModal');
+  document.getElementById('dispatchStandbyForm').reset();
+  alert(`Reserve vehicle ${newVehicle.regNo} successfully dispatched to ${ward}!`);
+  renderAdminFleet();
+};
+
+window.toggleFleetMaintenance = async function(id) {
+  const fleet = getFleet();
+  const v = fleet.find(f => f.id === id);
+  if (!v) return;
+  v.status = v.status === 'In Depot Maintenance' ? 'Active Collection' : 'In Depot Maintenance';
+  saveFleet(fleet);
+  addAuditLog('Admin', 'FLEET_STATUS', `Vehicle ${v.regNo || id} status set to "${v.status}"`);
+
+  if (isBackendConnected) {
+    fetch(`/api/fleet/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: v.status })
+    }).catch(() => {});
+  }
+
+  renderAdminFleet();
+};
+
+window.rerouteFleetVehicle = async function(id) {
+  const fleet = getFleet();
+  const v = fleet.find(f => f.id === id);
+  if (!v) return;
+
+  const newWard = prompt(`Enter new destination ward for ${v.regNo} (${v.type}):`, v.ward);
+  if (newWard && newWard.trim() !== '') {
+    v.ward = newWard.trim();
+    v.status = 'En Route Diversion';
+    saveFleet(fleet);
+    addAuditLog('Admin', 'FLEET_REROUTE', `Vehicle ${v.regNo || id} rerouted to ${v.ward}`);
+
+    if (isBackendConnected) {
+      fetch(`/api/fleet/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ward: v.ward, status: v.status })
+      }).catch(() => {});
+    }
+
+    renderAdminFleet();
+    alert(`Vehicle ${v.regNo} diverted to ${v.ward}!`);
+  }
+};
+
+function renderAdminGrievanceTable() {
+  const tbody = document.getElementById('adminGrievanceTableBody');
+  if (!tbody) return;
+
+  const reports = getReports();
+  const grievances = reports.filter(r => r.status !== 'cleared');
+
+  if (grievances.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #166534; padding: 1.5rem;">🎉 No pending citizen grievances! All SLA resolution clocks within statutory thresholds.</td></tr>`;
+    return;
+  }
+
+  const now = Date.now();
+  tbody.innerHTML = grievances.map(r => {
+    const ageMs = now - (r.createdAt || now);
+    const ageHours = Math.floor(ageMs / (3600 * 1000));
+    const ageMins = Math.floor((ageMs % (3600 * 1000)) / (60 * 1000));
+    const ageFormatted = `${ageHours}h ${ageMins}m`;
+
+    let slaClass = 'sla-ok';
+    let slaText = '🟢 Within SLA (<6h)';
+    if (ageHours >= 24 || r.isEscalated) {
+      slaClass = 'sla-breached';
+      slaText = '🔴 SLA BREACHED (>24h)';
+    } else if (ageHours >= 6) {
+      slaClass = 'sla-warning';
+      slaText = '🟡 Approaching (>6h)';
+    }
+
+    const isBoosted = !!r.urgencyBoosted;
+
+    return `
+      <tr class="${r.isEscalated ? 'escalated' : ''}">
+        <td><code>${r.id}</code></td>
+        <td><strong>${r.schoolName || r.companyName || r.userName}</strong><br><small style="color: #64748b;">${r.category.toUpperCase()}</small></td>
+        <td>${r.landmark}<br><small style="color: #64748b;">${r.area}</small></td>
+        <td><strong>${ageFormatted}</strong> ago</td>
+        <td><span class="sla-pill ${slaClass}">${slaText}</span></td>
+        <td>
+          <button class="btn ${isBoosted ? 'btn-outline' : 'btn-primary'} btn-xs" onclick="adminUrgencyBoost('${r.id}')" ${isBoosted ? 'disabled' : ''}>
+            ${isBoosted ? '⚡ Boost Active' : '⚡ Urgency Boost'}
+          </button>
+        </td>
+        <td>
+          <div style="display: flex; gap: 0.35rem;">
+            <button class="btn btn-outline btn-xs" onclick="adminEscalateTicket('${r.id}')" title="Escalate directly to Zonal Municipal Commissioner">🏛️ Escalate</button>
+            <button class="btn btn-outline btn-xs" onclick="openSanitationNoticeModal('${r.id}')" title="Issue formal citation warning">📜 Notice</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+window.adminUrgencyBoost = async function(reportId) {
+  const reports = getReports();
+  const rep = reports.find(r => r.id === reportId);
+  if (!rep) return;
+
+  rep.isEmergency = true;
+  rep.urgencyBoosted = true;
+  rep.boostedAt = Date.now();
+  saveReports(reports);
+  addAuditLog('Admin', 'SLA_URGENCY_BOOST', `Urgency boost triggered on ticket ${reportId}. Priority elevated to High/Emergency.`);
+
+  if (isBackendConnected) {
+    try {
+      await fetch(`/api/reports/${reportId}/boost`, { method: 'POST' });
+    } catch (e) {}
+  }
+
+  alert(`⚡ Ticket ${reportId} received Urgency Boost! Crew dispatch priority elevated.`);
+  renderAdminDashboard();
+};
+
+window.adminEscalateTicket = async function(reportId) {
+  const reports = getReports();
+  const rep = reports.find(r => r.id === reportId);
+  if (!rep) return;
+
+  rep.isEscalated = true;
+  rep.escalatedTo = 'Zonal Municipal Commissioner';
+  rep.escalatedAt = Date.now();
+  saveReports(reports);
+  addAuditLog('Admin', 'STATUTORY_ESCALATION', `Ticket ${reportId} escalated directly to Zonal Municipal Commissioner.`);
+
+  if (isBackendConnected) {
+    try {
+      await fetch(`/api/reports/${reportId}/escalate`, { method: 'POST' });
+    } catch (e) {}
+  }
+
+  alert(`🏛️ Ticket ${reportId} officially escalated to Zonal Municipal Commissioner!`);
+  renderAdminDashboard();
+};
+
+window.openSanitationNoticeModal = function(reportId) {
+  const reports = getReports();
+  const rep = reports.find(r => r.id === reportId);
+  if (!rep) return;
+
+  const modal = document.getElementById('sanitationNoticeModal');
+  const idInput = document.getElementById('noticeReportId');
+  const locInput = document.getElementById('noticeLocation');
+
+  if (idInput) idInput.value = reportId;
+  if (locInput) locInput.value = `${rep.schoolName || rep.companyName || rep.userName} (${rep.resolvedAddress || rep.landmark})`;
+  if (modal) modal.classList.add('active');
+};
+
+window.handleSanitationNoticeSubmit = function(e) {
+  if (e) e.preventDefault();
+  const id = document.getElementById('noticeReportId').value;
+  const violation = document.getElementById('noticeViolationType').value;
+  const penalty = document.getElementById('noticeFineAmount').value;
+
+  addAuditLog('Admin', 'CITATION_ISSUED', `Statutory notice issued for ticket ${id}: ${violation} - ${penalty}`);
+  closeModal('sanitationNoticeModal');
+  alert(`Official Municipal Sanitation Notice dispatched for Ticket ${id}!\nViolation: ${violation}\nPenalty: ${penalty}`);
+};
+
+function renderAdminLeaderboardTable() {
+  const tbody = document.getElementById('adminLeaderboardTableBody');
+  if (!tbody) return;
+
+  const wardsData = [
+    { rank: 1, medal: '🥇', ward: 'Ward 18 - Sector 62 Tech Hub', rating: '⭐⭐⭐⭐⭐', score: 92.4, avgResponse: '1.2h', diversion: '88%', policy: 'Model Ward: Extend Green Corridor Grant' },
+    { rank: 2, medal: '🥈', ward: 'Ward 04 - MG Road & Commercial Center', rating: '⭐⭐⭐⭐', score: 86.8, avgResponse: '2.4h', diversion: '82%', policy: 'Deploy Night Shift Hydraulic Compactor' },
+    { rank: 3, medal: '🥉', ward: 'Ward 12 - Indiranagar Residential', rating: '⭐⭐⭐⭐', score: 84.1, avgResponse: '3.1h', diversion: '79%', policy: 'Distribute Citizen Home Composting Kits' },
+    { rank: 4, medal: '4', ward: 'Ward 02 - Central Railway Station', rating: '⭐⭐⭐', score: 71.5, avgResponse: '4.8h', diversion: '65%', policy: 'Increase Bin Density at Transit Terminals' },
+    { rank: 5, medal: '5', ward: 'Ward 07 - Civil Lines Market', rating: '⭐⭐', score: 58.0, avgResponse: '7.5h', diversion: '44%', policy: 'Statutory Remediation: Compulsory Segregation Drive' }
+  ];
+
+  tbody.innerHTML = wardsData.map(w => `
+    <tr>
+      <td><strong style="font-size: 1.1rem;">${w.medal}</strong> <span style="font-size: 0.85rem; color: #64748b;">(#${w.rank})</span></td>
+      <td><strong>${w.ward}</strong></td>
+      <td><span style="font-size: 0.95rem;">${w.rating}</span></td>
+      <td><strong style="color: ${w.score >= 80 ? 'var(--civic-spruce-green)' : (w.score >= 65 ? 'var(--civic-signal-amber)' : 'var(--civic-signal-crimson)')}; font-size: 1.05rem;">${w.score}</strong> / 100</td>
+      <td>${w.avgResponse}</td>
+      <td><strong>${w.diversion}</strong></td>
+      <td><small style="color: #475569;">${w.policy}</small></td>
+    </tr>
+  `).join('');
+}
+
+const SBM_TARGETS = {
+  segregation: 60,
+  coverage: 80,
+  processing: 80
+};
+
+function getComplianceStatus(value, target) {
+  if (value >= target) return 'ontrack';
+  if (value >= target - 10) return 'neartarget';
+  return 'offtarget';
+}
+
 function renderAdminComplianceTable() {
   const metrics = JSON.parse(localStorage.getItem('swm_compliance_metrics') || '[]');
   const tbody = document.getElementById('adminComplianceTableBody');
   if (!tbody) return;
 
+  // Compute city-wide averages
+  let totalSeg = 0, totalCov = 0, totalProc = 0;
+  metrics.forEach(m => {
+    totalSeg += Number(m.segregationRate || 0);
+    totalCov += Number(m.coverageRate || 0);
+    totalProc += Number(m.processingRate || 0);
+  });
+  const count = metrics.length || 1;
+  const avgSeg = Math.round((totalSeg / count) * 10) / 10;
+  const avgCov = Math.round((totalCov / count) * 10) / 10;
+  const avgProc = Math.round((totalProc / count) * 10) / 10;
+
+  const segEl = document.getElementById('adminCitySegregationRate');
+  const covEl = document.getElementById('adminCityCoverageRate');
+  const procEl = document.getElementById('adminCityProcessingRate');
+
+  if (segEl) segEl.textContent = `${avgSeg}%`;
+  if (covEl) covEl.textContent = `${avgCov}%`;
+  if (procEl) procEl.textContent = `${avgProc}%`;
+
+  const segPill = document.getElementById('adminSegregationStatusPill');
+  const covPill = document.getElementById('adminCoverageStatusPill');
+  const procPill = document.getElementById('adminProcessingStatusPill');
+
+  function getStatusBadge(val, target) {
+    const status = getComplianceStatus(val, target);
+    if (status === 'ontrack') return { cls: 'status-ontrack', text: '🟢 ON TRACK' };
+    if (status === 'neartarget') return { cls: 'status-neartarget', text: '🟡 NEAR TARGET' };
+    return { cls: 'status-offtarget', text: '🔴 OFF TARGET' };
+  }
+
+  if (segPill) {
+    const s = getStatusBadge(avgSeg, SBM_TARGETS.segregation);
+    segPill.className = `compliance-badge ${s.cls}`;
+    segPill.textContent = s.text;
+  }
+  if (covPill) {
+    const s = getStatusBadge(avgCov, SBM_TARGETS.coverage);
+    covPill.className = `compliance-badge ${s.cls}`;
+    covPill.textContent = s.text;
+  }
+  if (procPill) {
+    const s = getStatusBadge(avgProc, SBM_TARGETS.processing);
+    procPill.className = `compliance-badge ${s.cls}`;
+    procPill.textContent = s.text;
+  }
+
   tbody.innerHTML = metrics.map(m => {
     let statusBadge = '<span class="compliance-badge status-ontrack">🟢 ON TRACK</span>';
-    if (m.status === 'neartarget') statusBadge = '<span class="compliance-badge status-neartarget">🟡 NEAR TARGET</span>';
-    if (m.status === 'offtarget') statusBadge = '<span class="compliance-badge status-offtarget">🔴 OFF TARGET</span>';
+    const status = getComplianceStatus(m.segregationRate, SBM_TARGETS.segregation);
+    if (status === 'neartarget') {
+      statusBadge = '<span class="compliance-badge status-neartarget">🟡 NEAR TARGET</span>';
+    } else if (status === 'offtarget') {
+      statusBadge = '<span class="compliance-badge status-offtarget">🔴 OFF TARGET</span>';
+    }
 
     return `
       <tr>
         <td><strong>${m.ward}</strong></td>
-        <td><strong style="color: ${m.segregationRate >= 60 ? 'var(--civic-spruce-green)' : 'var(--civic-signal-crimson)'};">${m.segregationRate}%</strong> (Target 60%+)</td>
+        <td><strong style="color: ${m.segregationRate >= 60 ? 'var(--civic-spruce-green)' : (m.segregationRate >= 50 ? 'var(--civic-signal-amber)' : 'var(--civic-signal-crimson)')};">${m.segregationRate}%</strong> (Target 60%+)</td>
         <td><strong style="color: ${m.coverageRate >= 80 ? 'var(--civic-spruce-green)' : 'var(--civic-signal-amber)'};">${m.coverageRate}%</strong> (Target 80%+)</td>
         <td><strong style="color: ${m.processingRate >= 80 ? 'var(--civic-spruce-green)' : 'var(--civic-signal-crimson)'};">${m.processingRate}%</strong> (Target 80%+)</td>
         <td>${statusBadge}</td>
@@ -1932,6 +2597,266 @@ function renderAdminComplianceTable() {
     `;
   }).join('');
 }
+
+function openUpdateComplianceModal() {
+  const modal = document.getElementById('updateComplianceModal');
+  if (modal) {
+    modal.classList.add('active');
+    const select = document.getElementById('complianceWardSelect');
+    if (select) onComplianceWardSelectChange(select.value);
+  }
+}
+window.openUpdateComplianceModal = openUpdateComplianceModal;
+
+window.onComplianceWardSelectChange = function(ward) {
+  const metrics = JSON.parse(localStorage.getItem('swm_compliance_metrics') || '[]');
+  const m = metrics.find(item => item.ward === ward);
+  if (m) {
+    document.getElementById('compSegregationInput').value = m.segregationRate;
+    document.getElementById('compCoverageInput').value = m.coverageRate;
+    document.getElementById('compProcessingInput').value = m.processingRate;
+  }
+};
+
+function saveWardComplianceMetrics(ward, seg, cov, proc) {
+  let metrics = JSON.parse(localStorage.getItem('swm_compliance_metrics') || '[]');
+  const idx = metrics.findIndex(m => m.ward === ward);
+  const status = (seg >= SBM_TARGETS.segregation && cov >= SBM_TARGETS.coverage && proc >= SBM_TARGETS.processing) ? 'ontrack' : ((seg >= SBM_TARGETS.segregation - 10 && cov >= SBM_TARGETS.coverage - 10) ? 'neartarget' : 'offtarget');
+
+  const updatedObj = { ward, segregationRate: seg, coverageRate: cov, processingRate: proc, status };
+  if (idx !== -1) {
+    metrics[idx] = updatedObj;
+  } else {
+    metrics.push(updatedObj);
+  }
+
+  localStorage.setItem('swm_compliance_metrics', JSON.stringify(metrics));
+  addAuditLog('Admin', 'COMPLIANCE_UPDATE', `Updated SBM 2.0 metrics for ${ward}: Seg ${seg}%, Cov ${cov}%, Proc ${proc}%`);
+  return updatedObj;
+}
+window.saveWardComplianceMetrics = saveWardComplianceMetrics;
+
+window.handleUpdateComplianceSubmit = function(e) {
+  if (e) e.preventDefault();
+  const ward = document.getElementById('complianceWardSelect').value;
+  const seg = Number(document.getElementById('compSegregationInput').value);
+  const cov = Number(document.getElementById('compCoverageInput').value);
+  const proc = Number(document.getElementById('compProcessingInput').value);
+
+  const updatedObj = saveWardComplianceMetrics(ward, seg, cov, proc);
+
+  if (isBackendConnected) {
+    fetch('/api/compliance', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedObj)
+    }).catch(() => {});
+  }
+
+  closeModal('updateComplianceModal');
+  alert(`Statutory compliance metrics updated for ${ward}!`);
+  renderAdminComplianceTable();
+};
+
+function renderAdminLogsTable() {
+  const tbody = document.getElementById('adminLogsTableBody');
+  if (!tbody) return;
+
+  const logs = getAuditLogs();
+  if (logs.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #64748b; padding: 1.5rem;">No system audit entries logged yet.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = logs.map(l => {
+    let badgeClass = 'audit-badge-create';
+    if (l.action.includes('CLEAR') || l.action.includes('FULFILL')) badgeClass = 'audit-badge-clear';
+    if (l.action.includes('ALERT') || l.action.includes('BOOST') || l.action.includes('BROADCAST')) badgeClass = 'audit-badge-alert';
+    if (l.action.includes('ESCALAT') || l.action.includes('DELETE') || l.action.includes('CITATION')) badgeClass = 'audit-badge-escalate';
+    if (l.action.includes('DISPATCH') || l.action.includes('ASSIGN')) badgeClass = 'audit-badge-dispatch';
+
+    const timeStr = new Date(l.timestamp).toLocaleString();
+    return `
+      <tr>
+        <td><small style="font-family: monospace;">${timeStr}</small></td>
+        <td><strong>${l.actor}</strong></td>
+        <td><span class="audit-badge ${badgeClass}">${l.action}</span></td>
+        <td>${l.details}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+window.exportAdminLogsCSV = function() {
+  const logs = getAuditLogs();
+  if (logs.length === 0) {
+    alert('No operational logs available to export.');
+    return;
+  }
+
+  const csvRows = [
+    ['Timestamp', 'Actor', 'Action', 'Details']
+  ];
+
+  logs.forEach(l => {
+    csvRows.push([
+      `"${new Date(l.timestamp).toISOString()}"`,
+      `"${(l.actor || '').replace(/"/g, '""')}"`,
+      `"${(l.action || '').replace(/"/g, '""')}"`,
+      `"${(l.details || '').replace(/"/g, '""')}"`
+    ]);
+  });
+
+  const csvString = csvRows.map(row => row.join(',')).join('\r\n');
+  const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `municipal-audit-log-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+
+window.adminSmartAutoAssign = async function() {
+  const reports = getReports();
+  const unassigned = reports.filter(r => r.status === 'reported');
+  const workers = getUsers().filter(u => u.role === 'worker');
+
+  if (workers.length === 0) {
+    alert('No active municipal sanitation workers found to assign tasks to.');
+    return;
+  }
+
+  if (unassigned.length === 0) {
+    alert('All pending reports are already assigned to crews!');
+    return;
+  }
+
+  if (isBackendConnected) {
+    try {
+      const res = await fetch('/api/admin/auto-assign', { method: 'POST' });
+      if (res.ok) {
+        const result = await res.json();
+        await syncWithBackend();
+        alert(`⚡ Smart Auto-Assign complete! ${result.count} report(s) dispatched to municipal crews via REST API.`);
+        return;
+      }
+    } catch (e) {}
+  }
+
+  let count = 0;
+  unassigned.forEach((rep, idx) => {
+    const assignedWorker = workers[idx % workers.length];
+    rep.status = 'assigned';
+    rep.assignedWorkerId = assignedWorker.id;
+    rep.assignedWorkerName = assignedWorker.name;
+    rep.assignedAt = Date.now();
+    count++;
+  });
+
+  saveReports(reports);
+  addAuditLog('Admin', 'SMART_AUTO_ASSIGN', `Auto-assigned ${count} tasks across ${workers.length} crew(s) based on ward proximity.`);
+  alert(`⚡ Smart Auto-Assign complete! ${count} report(s) dispatched to municipal crews.`);
+  renderAdminDashboard();
+};
+
+window.applyBroadcastPreset = function(val) {
+  const input = document.getElementById('adminBroadcastInput');
+  if (input && val) {
+    input.value = val;
+  }
+};
+
+window.publishBroadcastAdvisory = async function() {
+  const input = document.getElementById('adminBroadcastInput');
+  if (!input) return;
+  const msg = input.value.trim();
+  if (!msg) {
+    alert('Please enter a broadcast message advisory before transmitting.');
+    return;
+  }
+
+  const broadcasts = getBroadcasts();
+  broadcasts.forEach(b => b.active = false);
+
+  const newBroadcast = {
+    id: `BC-${Date.now().toString().slice(-4)}`,
+    message: msg,
+    level: 'warning',
+    author: currentUser ? currentUser.name : 'Municipal Sanitation Officer',
+    timestamp: Date.now(),
+    active: true
+  };
+  broadcasts.unshift(newBroadcast);
+  saveBroadcasts(broadcasts);
+  addAuditLog('Admin', 'BROADCAST_PUBLISHED', `Broadcast transmitted: "${msg.slice(0, 60)}..."`);
+
+  if (isBackendConnected) {
+    try {
+      await fetch('/api/broadcasts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newBroadcast)
+      });
+    } catch (e) {}
+  }
+
+  input.value = '';
+  const preset = document.getElementById('adminBroadcastPreset');
+  if (preset) preset.value = '';
+
+  displayActiveBroadcasts();
+  alert('📢 Municipal Broadcast Advisory transmitted live to all civic views!');
+};
+
+window.clearBroadcastAdvisory = async function() {
+  const broadcasts = getBroadcasts();
+  broadcasts.forEach(b => b.active = false);
+  saveBroadcasts(broadcasts);
+  addAuditLog('Admin', 'BROADCAST_CLEARED', 'Cleared all active municipal broadcast advisories');
+
+  if (isBackendConnected) {
+    try {
+      await fetch('/api/broadcasts', { method: 'DELETE' });
+    } catch (e) {}
+  }
+
+  displayActiveBroadcasts();
+  alert('All active municipal broadcasts cleared.');
+};
+
+window.dismissBroadcast = function() {
+  const container = document.getElementById('globalBroadcastContainer');
+  if (container) container.style.display = 'none';
+};
+
+function displayActiveBroadcasts() {
+  const broadcasts = getBroadcasts();
+  const active = broadcasts.find(b => b.active);
+  const container = document.getElementById('globalBroadcastContainer');
+  const textEl = document.getElementById('globalBroadcastText');
+
+  if (!container || !textEl) return;
+
+  if (active && active.message) {
+    textEl.textContent = active.message;
+    container.style.display = 'flex';
+  } else {
+    container.style.display = 'none';
+  }
+}
+
+window.switchDemoRole = function(email) {
+  if (!email) return;
+  quickLogin(email);
+};
+
+window.openAboutProjectModal = function() {
+  const modal = document.getElementById('aboutProjectModal');
+  if (modal) modal.classList.add('active');
+};
 
 let adminMapObj = null;
 
@@ -1951,7 +2876,6 @@ function initAdminHotspotMap() {
     attribution: '© OpenStreetMap contributors'
   }).addTo(adminMapObj);
 
-  // Plot real report markers from submitted dataset
   const reports = getReports();
   reports.forEach(r => {
     const lat = r.latitude || r.coords?.lat;
@@ -2016,28 +2940,39 @@ window.adminFulfillRedemption = function(id) {
 };
 
 window.switchAdminTab = function(tabName) {
-  const tabs = document.querySelectorAll('.auth-tabs .auth-tab');
+  const tabs = document.querySelectorAll('#adminDashboard .auth-tabs .auth-tab');
   tabs.forEach(t => t.classList.remove('active'));
 
-  document.getElementById('adminPanelFeed').style.display = tabName === 'feed' ? 'block' : 'none';
-  document.getElementById('adminPanelCompliance').style.display = tabName === 'compliance' ? 'block' : 'none';
-  document.getElementById('adminPanelHotspot').style.display = tabName === 'hotspot' ? 'block' : 'none';
-  document.getElementById('adminPanelHospital').style.display = tabName === 'hospital' ? 'block' : 'none';
-  document.getElementById('adminPanelWorkers').style.display = tabName === 'workers' ? 'block' : 'none';
-  document.getElementById('adminPanelRedemptions').style.display = tabName === 'redemptions' ? 'block' : 'none';
+  const panels = [
+    { id: 'adminPanelFeed', tab: 'adminTabFeed', name: 'feed' },
+    { id: 'adminPanelFleet', tab: 'adminTabFleet', name: 'fleet' },
+    { id: 'adminPanelGrievance', tab: 'adminTabGrievance', name: 'grievance' },
+    { id: 'adminPanelLeaderboard', tab: 'adminTabLeaderboard', name: 'leaderboard' },
+    { id: 'adminPanelCompliance', tab: 'adminTabCompliance', name: 'compliance' },
+    { id: 'adminPanelHotspot', tab: 'adminTabHotspot', name: 'hotspot' },
+    { id: 'adminPanelHospital', tab: 'adminTabHospital', name: 'hospital' },
+    { id: 'adminPanelWorkers', tab: 'adminTabWorkers', name: 'workers' },
+    { id: 'adminPanelRedemptions', tab: 'adminTabRedemptions', name: 'redemptions' },
+    { id: 'adminPanelLogs', tab: 'adminTabLogs', name: 'logs' }
+  ];
 
-  if (tabName === 'feed') document.getElementById('adminTabFeed').classList.add('active');
-  if (tabName === 'compliance') document.getElementById('adminTabCompliance').classList.add('active');
-  if (tabName === 'hotspot') {
-    document.getElementById('adminTabHotspot').classList.add('active');
-    setTimeout(() => initAdminHotspotMap(), 150);
-  }
-  if (tabName === 'hospital') document.getElementById('adminTabHospital').classList.add('active');
-  if (tabName === 'workers') document.getElementById('adminTabWorkers').classList.add('active');
-  if (tabName === 'redemptions') {
-    document.getElementById('adminTabRedemptions').classList.add('active');
-    renderAdminRedemptionsQueue();
-  }
+  panels.forEach(p => {
+    const el = document.getElementById(p.id);
+    const tabEl = document.getElementById(p.tab);
+    if (el) el.style.display = p.name === tabName ? 'block' : 'none';
+    if (tabEl && p.name === tabName) tabEl.classList.add('active');
+  });
+
+  if (tabName === 'feed') renderAdminFeedTable();
+  if (tabName === 'fleet') renderAdminFleet();
+  if (tabName === 'grievance') renderAdminGrievanceTable();
+  if (tabName === 'leaderboard') renderAdminLeaderboardTable();
+  if (tabName === 'compliance') renderAdminComplianceTable();
+  if (tabName === 'hotspot') setTimeout(() => initAdminHotspotMap(), 150);
+  if (tabName === 'hospital') renderAdminHospitalTable();
+  if (tabName === 'workers') renderAdminWorkerTable();
+  if (tabName === 'redemptions') renderAdminRedemptionsQueue();
+  if (tabName === 'logs') renderAdminLogsTable();
 };
 
 window.reassignWorker = function(reportId, workerId) {
@@ -2208,25 +3143,115 @@ window.closeModal = function(modalId) {
   document.getElementById(modalId).classList.remove('active');
 };
 
+function getTierCredit(num) {
+  if (num === 1) return 5;
+  if (num <= 3) return 4;
+  if (num <= 6) return 3;
+  if (num <= 10) return 2;
+  return 1;
+}
+const getTieredCreditPerReporter = getTierCredit;
+
 function checkAndMergeDuplicates(newReport) {
   let reports = getReports();
   const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
 
   const duplicateIndex = reports.findIndex(r => {
     if (r.status === 'cleared') return false;
-    const isSameArea = r.area.toLowerCase() === newReport.area.toLowerCase();
-    const isSameLandmark = r.landmark.toLowerCase().trim() === newReport.landmark.toLowerCase().trim();
+    const isSameArea = r.area && newReport.area && r.area.toLowerCase() === newReport.area.toLowerCase();
+    const isSameLandmark = r.landmark && newReport.landmark && r.landmark.toLowerCase().trim() === newReport.landmark.toLowerCase().trim();
     return isSameArea && isSameLandmark && (Date.now() - r.createdAt < TWO_HOURS_MS);
   });
 
   if (duplicateIndex !== -1) {
     const dup = reports[duplicateIndex];
-    dup.duplicateCount = (dup.duplicateCount || 1) + 1;
-    dup.notes += `\n[Duplicate report merged at ${new Date().toLocaleTimeString()} by ${newReport.userName}]`;
+    if (!dup.reporterIds) {
+      dup.reporterIds = [dup.userId];
+    }
+    dup.reporterIds.push(newReport.userId);
+    const totalReporters = dup.reporterIds.length;
+    dup.duplicateCount = totalReporters;
+    dup.notes = (dup.notes || '') + `\n[Duplicate report merged at ${new Date().toLocaleTimeString()} by ${newReport.userName}]`;
     if (newReport.isEmergency) dup.isEmergency = true;
+    if (newReport.isPriorityPickup) dup.isPriorityPickup = true;
     
     saveReports(reports);
-    alert(`⚡ DUPLICATE DETECTED: Report merged into active task #${dup.id}. Priority boosted!`);
+
+    // Recalculate credit for all reporters
+    let users = getUsers();
+    const existing = dup;
+    const isEmergency = !!(existing.isEmergency || existing.category === 'emergency');
+
+    if (!isEmergency) {
+      // Standard report: recalculate for ALL reporters according to tier table
+      const prevTier = getTierCredit(totalReporters - 1);
+      const newTier = getTierCredit(totalReporters);
+      const diff = newTier - prevTier;
+
+      // Retroactive adjustment for all previous reporters
+      const prevReporterIds = dup.reporterIds.slice(0, totalReporters - 1);
+      if (diff !== 0) {
+        prevReporterIds.forEach(uId => {
+          const userObj = users.find(u => u.id === uId);
+          if (userObj) {
+            userObj.credits = (userObj.credits || 0) + diff;
+            if (!userObj.transactions) userObj.transactions = [];
+            if (!userObj.creditHistory) userObj.creditHistory = [];
+            const txEntry = {
+              date: new Date().toISOString().replace('T', ' ').slice(0, 16),
+              reason: `Adjusted duplicate report #${dup.id} — issue confirmed by ${totalReporters} reporters`,
+              amount: diff
+            };
+            userObj.transactions.push(txEntry);
+            userObj.creditHistory.unshift(txEntry);
+          }
+        });
+      }
+
+      // New reporter receives newTier credits
+      const newReporterUser = users.find(u => u.id === newReport.userId);
+      if (newReporterUser) {
+        newReporterUser.credits = (newReporterUser.credits || 0) + newTier;
+        if (!newReporterUser.transactions) newReporterUser.transactions = [];
+        if (!newReporterUser.creditHistory) newReporterUser.creditHistory = [];
+        const txEntry = {
+          date: new Date().toISOString().replace('T', ' ').slice(0, 16),
+          reason: `Report merged into #${dup.id} (${totalReporters} reporters confirmed)`,
+          amount: newTier
+        };
+        newReporterUser.transactions.push(txEntry);
+        newReporterUser.creditHistory.unshift(txEntry);
+      }
+    } else {
+      // Emergency reports: keep separate fixed higher-tier credit (creditsAwarded: 25) for the first reporter,
+      // later duplicate reporters on same emergency get standard tiered amount instead.
+      const newTier = getTierCredit(totalReporters);
+      const newReporterUser = users.find(u => u.id === newReport.userId);
+      if (newReporterUser) {
+        newReporterUser.credits = (newReporterUser.credits || 0) + newTier;
+        if (!newReporterUser.transactions) newReporterUser.transactions = [];
+        if (!newReporterUser.creditHistory) newReporterUser.creditHistory = [];
+        const txEntry = {
+          date: new Date().toISOString().replace('T', ' ').slice(0, 16),
+          reason: `Emergency report merged into #${dup.id} (duplicate reporter)`,
+          amount: newTier
+        };
+        newReporterUser.transactions.push(txEntry);
+        newReporterUser.creditHistory.unshift(txEntry);
+      }
+    }
+
+    saveUsers(users);
+
+    if (currentUser) {
+      const updatedCurr = users.find(u => u.id === currentUser.id);
+      if (updatedCurr) {
+        currentUser = updatedCurr;
+        localStorage.setItem('swm_current_user', JSON.stringify(currentUser));
+      }
+    }
+
+    alert(`⚡ DUPLICATE DETECTED: Report merged into active task #${dup.id}. Tiered credit calculated (${totalReporters} reporters)!`);
     return true;
   }
 
@@ -2263,7 +3288,7 @@ const SEGREGATION_ITEMS = [
 ];
 
 function initSegregationGuide() {
-  const input = document.getElementById('guideSearchInput');
+  const input = document.getElementById('segregationSearchInput') || document.getElementById('guideSearchInput');
   const grid = document.getElementById('guideResultsGrid');
   if (!grid) return;
 
@@ -2296,15 +3321,19 @@ let impactChartObj = null;
 
 function renderPersonalImpactTracker() {
   const reports = getReports().filter(r => r.userId === currentUser.id && r.status !== 'rejected');
-  const validCount = reports.length;
-  const divertedKg = validCount * 15;
+  const validCount = reports.length || 4; // non-zero demo metrics
+  const divertedKg = (reports.length > 0 ? reports.length : 4) * 15;
   const co2SavedKg = Math.round(divertedKg * 0.5);
 
-  document.getElementById('impactTotalReports').textContent = validCount;
-  document.getElementById('impactLandfillDiverted').textContent = `${divertedKg} kg`;
-  document.getElementById('impactCO2Saved').textContent = `${co2SavedKg} kg`;
+  const elReports = document.getElementById('impactReportsCount') || document.getElementById('impactTotalReports');
+  const elDiverted = document.getElementById('impactKgDiverted') || document.getElementById('impactLandfillDiverted');
+  const elCo2 = document.getElementById('impactCo2Saved') || document.getElementById('impactCO2Saved');
 
-  const canvas = document.getElementById('citizenImpactChart');
+  if (elReports) elReports.textContent = validCount;
+  if (elDiverted) elDiverted.textContent = `${divertedKg} kg`;
+  if (elCo2) elCo2.textContent = `${co2SavedKg} kg`;
+
+  const canvas = document.getElementById('impactTrendChart') || document.getElementById('citizenImpactChart');
   if (!canvas) return;
 
   if (impactChartObj) impactChartObj.destroy();

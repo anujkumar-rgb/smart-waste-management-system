@@ -1158,7 +1158,60 @@ button, input, select, textarea {
 .sla-warning { background: var(--civic-signal-amber-soft); color: var(--civic-signal-amber); }
 .sla-breached { background: var(--civic-signal-crimson-soft); color: var(--civic-signal-crimson); font-weight: 900; }
 
+/* Admin Filter Toolbar & Audit Trail Styles */
+.admin-filter-bar {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+  background: var(--civic-surface);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--civic-border);
+}
+
+.admin-filter-bar .form-control {
+  min-width: 150px;
+}
+
+.audit-badge {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-xs);
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: monospace;
+}
+
+.audit-badge-create { background: var(--civic-cobalt-soft); color: var(--civic-cobalt-accent); }
+.audit-badge-clear { background: var(--civic-spruce-soft); color: var(--civic-spruce-green); }
+.audit-badge-alert { background: var(--civic-signal-amber-soft); color: var(--civic-signal-amber); }
+.audit-badge-escalate { background: var(--civic-signal-crimson-soft); color: var(--civic-signal-crimson); }
+.audit-badge-dispatch { background: rgba(147, 51, 234, 0.12); color: #7e22ce; }
+
+.backend-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  background: var(--civic-spruce-soft);
+  color: var(--civic-spruce-green);
+  border: 1px solid rgba(22, 101, 52, 0.2);
+  transition: all 0.2s ease;
+}
+
+.backend-status-pill.offline {
+  background: var(--civic-signal-amber-soft);
+  color: var(--civic-signal-amber);
+  border-color: rgba(217, 119, 6, 0.3);
+}
+
 /* --- Statutory Audit Print View (@media print) --- */
+
 @media print {
   body {
     background: #ffffff !important;

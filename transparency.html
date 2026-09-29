@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Public Civic Waste Transparency Portal — Municipal Waste Network</title>
+  <meta name="description" content="Publicly accessible, real-time aggregate municipal sanitation and waste management statistics for citizens.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .transparency-header {
+      background: linear-gradient(135deg, var(--civic-forest-ink) 0%, #1e3a2f 100%);
+      color: #ffffff;
+      padding: 2.5rem 1.5rem;
+      border-radius: var(--radius-sm);
+      margin-bottom: 2rem;
+    }
+    .stat-hero-card {
+      background: var(--civic-surface);
+      border: 1px solid var(--civic-border);
+      border-radius: var(--radius-sm);
+      padding: 1.5rem;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+    }
+    .stat-hero-number {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--civic-forest-ink);
+      line-height: 1.1;
+      margin: 0.5rem 0 0.25rem 0;
+    }
+    .kpi-badge {
+      display: inline-block;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sticky Navbar -->
+  <header class="navbar">
+    <div class="container nav-container">
+      <div class="brand-logo">
+        <div class="brand-icon">♻</div>
+        <div>
+          <span>EcoClear</span>
+          <span style="font-size: 0.72rem; font-weight: 700; color: #64748b; display: block; line-height: 1;">Civic Waste Transparency</span>
+        </div>
+      </div>
+      <div class="nav-user-bar">
+        <span class="backend-status-pill" id="publicApiPill">🟢 Public Real-Time Feed</span>
+        <a href="index.html" class="btn btn-outline btn-sm">← Back to Portal / Login</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="padding-top: 2rem; padding-bottom: 3rem;">
+
+    <div class="transparency-header">
+      <div style="max-width: 800px;">
+        <span class="role-pill" style="background: rgba(255,255,255,0.2); color: white; margin-bottom: 0.5rem; display: inline-block;">Statutory Public Disclosure</span>
+        <h1 style="font-size: 2.2rem; margin: 0.5rem 0; line-height: 1.2;">Public Civic Waste Transparency Portal</h1>
+        <p style="opacity: 0.9; font-size: 0.95rem; margin: 0;">Open aggregate operational data enforcing Swachh Bharat Mission (SBM 2.0) guidelines and SWM Rules 2026. Zero personal, medical, or individual citizen data is exposed.</p>
+      </div>
+    </div>
+
+    <!-- Live City-Wide Overview Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
+      <div class="stat-hero-card">
+        <div style="font-size: 1.75rem;">📋</div>
+        <div class="stat-hero-number" id="statReportsToday">4</div>
+        <div style="font-size: 0.85rem; color: #64748b; font-weight: 600;">Today's Reports Logged</div>
+      </div>
+      <div class="stat-hero-card">
+        <div style="font-size: 1.75rem;">✅</div>
+        <div class="stat-hero-number" id="statClearedToday" style="color: var(--civic-spruce-green);">1</div>
+        <div style="font-size: 0.85rem; color: #64748b; font-weight: 600;">Sanitized & Cleared Reports</div>
+      </div>
+      <div class="stat-hero-card">
+        <div style="font-size: 1.75rem;">♻️</div>
+        <div class="stat-hero-number" id="statSegregationAvg" style="color: var(--civic-cobalt-accent);">72%</div>
+        <div style="font-size: 0.85rem; color: #64748b; font-weight: 600;">City-Wide Segregation Rate</div>
+        <div style="font-size: 0.72rem; color: #166534; margin-top: 0.25rem; font-weight: 700;">Target: 60%+ (🟢 Compliant)</div>
+      </div>
+      <div class="stat-hero-card">
+        <div style="font-size: 1.75rem;">🏭</div>
+        <div class="stat-hero-number" id="statProcessingRate" style="color: var(--civic-forest-ink);">77.4%</div>
+        <div style="font-size: 0.85rem; color: #64748b; font-weight: 600;">Scientific Processing Rate</div>
+        <div style="font-size: 0.72rem; color: #b45309; margin-top: 0.25rem; font-weight: 700;">Target: 80%+ (🟡 Approaching)</div>
+      </div>
+    </div>
+
+    <!-- Cleanest & Most Reported Wards Rankings -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+      <div class="card">
+        <h3 style="font-size: 1.2rem; margin-bottom: 0.35rem;">🏆 Cleanest Ranked Wards</h3>
+        <p style="color: #64748b; font-size: 0.82rem; margin-bottom: 1rem;">Ranked by segregation rate, collection consistency, and rapid resolution.</p>
+        <div id="cleanestWardsList" style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: var(--civic-surface-muted); border-radius: var(--radius-xs);">
+            <div><strong>🥇 Ward 18 - Sector 62 Tech Hub</strong><div style="font-size: 0.78rem; color: #64748b;">Cleanliness Score: 92.4 / 100</div></div>
+            <span class="kpi-badge" style="background: var(--civic-spruce-soft); color: var(--civic-spruce-green);">Model Clean Ward</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: var(--civic-surface-muted); border-radius: var(--radius-xs);">
+            <div><strong>🥈 Ward 04 - MG Road & Commercial</strong><div style="font-size: 0.78rem; color: #64748b;">Cleanliness Score: 86.8 / 100</div></div>
+            <span class="kpi-badge" style="background: var(--civic-spruce-soft); color: var(--civic-spruce-green);">High Performing</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: var(--civic-surface-muted); border-radius: var(--radius-xs);">
+            <div><strong>🥉 Ward 12 - Indiranagar Residential</strong><div style="font-size: 0.78rem; color: #64748b;">Cleanliness Score: 84.1 / 100</div></div>
+            <span class="kpi-badge" style="background: var(--civic-spruce-soft); color: var(--civic-spruce-green);">Standard Compliance</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size: 1.2rem; margin-bottom: 0.35rem;">📍 Most Reported Municipal Wards</h3>
+        <p style="color: #64748b; font-size: 0.82rem; margin-bottom: 1rem;">Wards with highest citizen reporting engagement and sanitation alerts.</p>
+        <div id="mostReportedWardsList" style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: var(--civic-surface-muted); border-radius: var(--radius-xs);">
+            <div><strong>Ward 04 - MG Road & Commercial Center</strong><div style="font-size: 0.78rem; color: #64748b;">2 Active Citizen Reports</div></div>
+            <span class="kpi-badge" style="background: rgba(245,158,11,0.12); color: #b45309;">High Activity</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: var(--civic-surface-muted); border-radius: var(--radius-xs);">
+            <div><strong>Ward 12 - Indiranagar Residential</strong><div style="font-size: 0.78rem; color: #64748b;">1 Active Citizen Report</div></div>
+            <span class="kpi-badge" style="background: var(--civic-spruce-soft); color: var(--civic-spruce-green);">Moderate Activity</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: var(--civic-surface-muted); border-radius: var(--radius-xs);">
+            <div><strong>Ward 18 - Sector 62 Tech Hub</strong><div style="font-size: 0.78rem; color: #64748b;">1 Active Citizen Report</div></div>
+            <span class="kpi-badge" style="background: var(--civic-spruce-soft); color: var(--civic-spruce-green);">Moderate Activity</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statutory Framework Notice -->
+    <div style="background: var(--civic-surface-muted); padding: 1.5rem; border-radius: var(--radius-sm); border: 1px solid var(--civic-border);">
+      <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">⚖️ Privacy & Statutory Disclosure Notice</h4>
+      <p style="font-size: 0.85rem; color: #475569; line-height: 1.6; margin: 0;">
+        This public transparency feed is generated automatically by the municipal operations center. In strict compliance with statutory guidelines, this page enforces <strong>Zero Personal Identifiable Information (PII)</strong>. No resident names, telephone numbers, home GPS coordinates, or clinical healthcare identifiers are published.
+      </p>
+    </div>
+
+  </main>
+
+  <script>
+    // Live update from backend or localStorage if available
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        fetch('/api/stats')
+          .then(r => r.json())
+          .then(data => {
+            if (data && data.stats) {
+              const s = data.stats;
+              const elTot = document.getElementById('statReportsToday');
+              const elClr = document.getElementById('statClearedToday');
+              if (elTot) elTot.textContent = s.totalReports;
+              if (elClr) elClr.textContent = s.cleared || 0;
+            }
+          })
+          .catch(() => {
+            const reports = JSON.parse(localStorage.getItem('swm_reports') || '[]');
+            if (reports.length > 0) {
+              const total = reports.length;
+              const cleared = reports.filter(r => r.status === 'cleared').length;
+              const elTot = document.getElementById('statReportsToday');
+              const elClr = document.getElementById('statClearedToday');
+              if (elTot) elTot.textContent = total;
+              if (elClr) elClr.textContent = cleared;
+            }
+          });
+      } catch (e) {}
+    });
+  </script>
+</body>
+</html>

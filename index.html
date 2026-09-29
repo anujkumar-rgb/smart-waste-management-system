@@ -31,6 +31,9 @@
       </div>
 
       <div class="nav-user-bar" id="navUserBar" style="display: none;">
+        <a href="transparency.html" class="btn btn-outline btn-xs" id="navTransparencyBtn" title="Public City-Wide Transparency Dashboard">🌐 Transparency</a>
+        <button type="button" class="btn btn-outline btn-xs" id="navAboutBtn" onclick="openAboutProjectModal()">ℹ️ About Project</button>
+        <span id="backendStatusPill" class="backend-status-pill" title="Live status of Node.js REST API server">🟢 REST API Online</span>
         <div class="user-badge">
           <span id="navUserName">Loading...</span>
           <span id="navUserRolePill" class="role-pill">Role</span>
@@ -42,6 +45,9 @@
       </div>
 
       <div class="nav-user-bar" id="navGuestBar">
+        <a href="transparency.html" class="btn btn-outline btn-xs" id="guestNavTransparencyBtn" title="Public City-Wide Transparency Dashboard">🌐 Public Transparency</a>
+        <button type="button" class="btn btn-outline btn-xs" id="guestNavAboutBtn" onclick="openAboutProjectModal()">ℹ️ About Project</button>
+        <span id="guestBackendStatusPill" class="backend-status-pill" title="Live status of Node.js REST API server">🟢 REST API Online</span>
         <button id="guestThemeToggleBtn" class="theme-toggle-btn" aria-label="Toggle Theme" title="Toggle Light/Dark Theme">
           🌙
         </button>
@@ -98,6 +104,30 @@
           </div>
           <button type="submit" class="btn btn-primary" style="width: 100%;">Sign In</button>
         </form>
+
+        <!-- Quick Demo Role Switcher Control -->
+        <div class="card" style="margin-top: 1.25rem; background: var(--civic-surface-muted); border: 1px dashed var(--civic-cobalt-accent); padding: 1rem;">
+          <div style="font-weight: 800; font-size: 0.85rem; color: var(--civic-forest-ink); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem;">
+            <span>⚡</span> <span>Quick Demo: Switch Role</span>
+          </div>
+          <div style="display: flex; gap: 0.5rem; margin-bottom: 0.65rem;">
+            <select id="demoRoleSelect" class="form-control" style="font-size: 0.82rem; padding: 0.35rem 0.5rem;">
+              <option value="citizen">👤 Citizen (Ananya Sharma)</option>
+              <option value="institution">🏫 Institution (Delhi Public School)</option>
+              <option value="hospital">🏥 Hospital (CityCare Super Specialty)</option>
+              <option value="worker">👷 Worker (Rajesh Singh - Crew 101)</option>
+              <option value="admin">🏛️ Admin (Municipal Commissioner)</option>
+            </select>
+            <button id="demoQuickLoginBtn" type="button" class="btn btn-outline btn-xs" onclick="demoSwitchRole(document.getElementById('demoRoleSelect').value)">Switch</button>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 0.35rem;">
+            <button type="button" class="btn btn-outline btn-xs" onclick="demoSwitchRole('citizen')">Citizen</button>
+            <button type="button" class="btn btn-outline btn-xs" onclick="demoSwitchRole('institution')">Institution</button>
+            <button type="button" class="btn btn-outline btn-xs" onclick="demoSwitchRole('hospital')">Hospital</button>
+            <button type="button" class="btn btn-outline btn-xs" onclick="demoSwitchRole('worker')">Worker</button>
+            <button type="button" class="btn btn-outline btn-xs" onclick="demoSwitchRole('admin')">Admin</button>
+          </div>
+        </div>
 
         <!-- Signup Form with Dynamic School & Company Fields -->
         <form id="signupForm" style="display: none;">
@@ -172,18 +202,30 @@
           <button type="submit" class="btn btn-primary" style="width: 100%;">Create Account</button>
         </form>
 
-        <!-- Quick Demo Switcher -->
-        <div style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px dashed var(--civic-border);">
-          <div style="font-size: 0.8rem; font-weight: 700; color: #64748b; margin-bottom: 0.6rem; text-align: center;">
-            ⚡ Quick Test Logins (One-Click Demo Roles)
+        <!-- Quick Demo: Switch Role -->
+        <div id="quickDemoSwitchRole" style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px dashed var(--civic-border);">
+          <div style="font-size: 0.82rem; font-weight: 800; color: var(--civic-forest-ink); margin-bottom: 0.6rem; text-align: center; display: flex; align-items: center; justify-content: center; gap: 0.35rem;">
+            <span>⚡ Quick Demo: Switch Role</span>
+          </div>
+          <div style="margin-bottom: 0.75rem;">
+            <select id="demoRoleSelectDropdown" class="form-control" onchange="switchDemoRole(this.value)">
+              <option value="">Switch Role (Select Demo Account)...</option>
+              <option value="citizen@ecoclear.org">Citizen: Ananya Sharma (Resident)</option>
+              <option value="school@cityedu.org">Institution: Delhi Public School</option>
+              <option value="citycare@hospital.org">Hospital: CityCare Super Specialty</option>
+              <option value="crew101@cleanward.org">Worker: Rajesh Singh (Crew #101)</option>
+              <option value="admin@citygov.org">Admin: Municipal Sanitation Officer</option>
+            </select>
           </div>
           <div class="demo-account-grid">
-            <button class="demo-btn" onclick="quickLogin('citizen@ecoclear.org')">Resident</button>
-            <button class="demo-btn" onclick="quickLogin('school@cityedu.org')">School</button>
-            <button class="demo-btn" onclick="quickLogin('infosys@campus.org')">Company</button>
-            <button class="demo-btn" onclick="quickLogin('citycare@hospital.org')">Hospital</button>
-            <button class="demo-btn" onclick="quickLogin('crew101@cleanward.org')">Worker</button>
-            <button class="demo-btn" onclick="quickLogin('admin@citygov.org')">Admin</button>
+            <button type="button" class="demo-btn" onclick="switchDemoRole('citizen@ecoclear.org')">Citizen</button>
+            <button type="button" class="demo-btn" onclick="switchDemoRole('school@cityedu.org')">Institution</button>
+            <button type="button" class="demo-btn" onclick="switchDemoRole('citycare@hospital.org')">Hospital</button>
+            <button type="button" class="demo-btn" onclick="switchDemoRole('crew101@cleanward.org')">Worker</button>
+            <button type="button" class="demo-btn" onclick="switchDemoRole('admin@citygov.org')">Admin</button>
+          </div>
+          <div style="text-align: center; margin-top: 1rem;">
+            <a href="transparency.html" style="font-size: 0.82rem; color: var(--civic-cobalt-accent); text-decoration: underline; font-weight: 600;">🌐 View Public City-Wide Transparency Page (No Login Required) →</a>
           </div>
         </div>
       </div>
@@ -228,28 +270,32 @@
           <div class="stat-card">
             <div class="stat-icon">📋</div>
             <div>
-              <div id="impactTotalReports" class="stat-number">4</div>
+              <div id="impactReportsCount" class="stat-number">4</div>
+              <span id="impactTotalReports" style="display: none;">4</span>
               <div class="stat-label">Reports Logged</div>
             </div>
           </div>
           <div class="stat-card">
             <div class="stat-icon">♻️</div>
             <div>
-              <div id="impactLandfillDiverted" class="stat-number">60 kg</div>
+              <div id="impactKgDiverted" class="stat-number">60 kg</div>
+              <span id="impactLandfillDiverted" style="display: none;">60 kg</span>
               <div class="stat-label">Diverted from Landfill</div>
             </div>
           </div>
           <div class="stat-card">
             <div class="stat-icon">🍃</div>
             <div>
-              <div id="impactCO2Saved" class="stat-number">30 kg</div>
+              <div id="impactCo2Saved" class="stat-number">30 kg</div>
+              <span id="impactCO2Saved" style="display: none;">30 kg</span>
               <div class="stat-label">Est. CO₂ Offset</div>
             </div>
           </div>
         </div>
 
         <div style="max-height: 200px; position: relative;">
-          <canvas id="citizenImpactChart" height="180"></canvas>
+          <canvas id="impactTrendChart" height="180"></canvas>
+          <canvas id="citizenImpactChart" height="180" style="display: none;"></canvas>
         </div>
       </div>
 
@@ -262,7 +308,7 @@
             <h3 style="font-size: 1.1rem; margin-bottom: 0.35rem;">🔍 Waste Segregation Guide</h3>
             <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 0.85rem;">Look up common household items for the correct municipal bin stream.</p>
             <div class="form-group">
-              <input type="text" id="guideSearchInput" class="form-control" placeholder="Search item (e.g. milk pouch, battery, peels, box)...">
+              <input type="text" id="segregationSearchInput" class="form-control" placeholder="Search item (e.g. milk pouch, battery, peels, box)...">
             </div>
             <div id="guideResultsGrid" class="guide-card-grid"></div>
           </div>
@@ -282,7 +328,10 @@
 
           <!-- Standard Citizen Bin Report Form with Real Leaflet Location Picker -->
           <div class="card">
-            <h3 style="margin-bottom: 1rem; font-size: 1.15rem;">Submit Bin Report (+5 Credits)</h3>
+            <h3 style="margin-bottom: 0.75rem; font-size: 1.15rem;">Submit Bin Report (+5 Credits)</h3>
+            <div id="citizenPriorityPassNotice" style="display: none; background: rgba(245, 158, 11, 0.12); border-left: 4px solid var(--civic-signal-amber); padding: 0.65rem 1rem; border-radius: var(--radius-xs); margin-bottom: 1rem; font-size: 0.85rem; font-weight: 700; color: #b45309;">
+              ⚡ You have <span id="priorityPassCountText">1</span> Priority Pickup Pass active! Next report will jump to the top of the collection queue.
+            </div>
             <form id="citizenReportForm">
 
               <!-- REAL LOCATION PICKER WITH LEAFLET -->
@@ -772,7 +821,11 @@
           <h2 class="dashboard-title">Municipal Sanitation Operations Center</h2>
           <p class="dashboard-subtitle">Unified oversight of citizens, institutions, hospitals, and field collection staff.</p>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="exportAdminAnalyticsCSV()">📥 Export Operations CSV</button>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button class="btn btn-primary btn-sm" onclick="adminSmartAutoAssign()" title="Auto-assign pending tickets to nearest crew">⚡ Smart Auto-Assign Crews</button>
+          <button class="btn btn-outline btn-sm" onclick="syncWithBackend()" title="Force Refresh from Node.js REST API">🔄 Refresh Server</button>
+          <button class="btn btn-outline btn-sm" onclick="exportAdminAnalyticsCSV()">📥 Export Operations CSV</button>
+        </div>
       </div>
 
       <!-- Live Counters -->
@@ -840,10 +893,33 @@
         <div id="adminTabHospital" class="auth-tab" onclick="switchAdminTab('hospital')">Biomedical Compliance</div>
         <div id="adminTabWorkers" class="auth-tab" onclick="switchAdminTab('workers')">Crew Metrics</div>
         <div id="adminTabRedemptions" class="auth-tab" onclick="switchAdminTab('redemptions')">🎁 Redemption Requests</div>
+        <div id="adminTabLogs" class="auth-tab" onclick="switchAdminTab('logs')">📜 Operational Audit Trail</div>
       </div>
 
       <!-- Admin Section 1: Unified Feed -->
       <div id="adminPanelFeed">
+        <!-- Live Search and Filter Bar -->
+        <div class="admin-filter-bar">
+          <input type="text" id="adminFeedSearchInput" class="form-control" style="flex: 1;" placeholder="🔍 Search reports by ID, citizen, landmark, or street..." oninput="filterAdminFeed()">
+          <select id="adminFeedStatusFilter" class="form-control" onchange="filterAdminFeed()">
+            <option value="all">All Statuses</option>
+            <option value="reported">Pending Dispatch (Reported)</option>
+            <option value="assigned">Assigned to Crew</option>
+            <option value="cleared">Cleared / Completed</option>
+            <option value="emergency">🚨 Emergency Alerts</option>
+            <option value="escalated">⚠️ Escalated (>24h)</option>
+          </select>
+          <select id="adminFeedWardFilter" class="form-control" onchange="filterAdminFeed()">
+            <option value="all">All Wards</option>
+            <option value="Ward 04">Ward 04 - MG Road</option>
+            <option value="Ward 12">Ward 12 - Indiranagar</option>
+            <option value="Ward 18">Ward 18 - Sector 62</option>
+            <option value="Ward 07">Ward 07 - Civil Lines</option>
+            <option value="Ward 02">Ward 02 - Central Railway</option>
+          </select>
+          <button class="btn btn-outline btn-sm" onclick="resetAdminFeedFilters()">Reset Filters</button>
+        </div>
+
         <div class="table-responsive">
           <table class="custom-table">
             <thead>
@@ -934,11 +1010,44 @@
 
       <!-- Admin Section 2: SBM 2.0 Compliance (With Institution Self-Audit Integration) -->
       <div id="adminPanelCompliance" style="display: none;">
+        <!-- City-Wide Statutory Compliance Summary KPI Cards -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
+          <div class="stat-card" id="kpiCitySegregation">
+            <div class="stat-icon">🌱</div>
+            <div>
+              <div id="adminCitySegregationRate" class="stat-number">65.2%</div>
+              <div class="stat-label">Source Segregation (Target: 60%+)</div>
+              <div id="adminSegregationStatusPill" class="compliance-badge status-ontrack" style="margin-top: 0.25rem;">🟢 ON TRACK</div>
+            </div>
+          </div>
+          <div class="stat-card" id="kpiCityCoverage">
+            <div class="stat-icon">🚪</div>
+            <div>
+              <div id="adminCityCoverageRate" class="stat-number">83.2%</div>
+              <div class="stat-label">Door-to-Door Coverage (Target: 80%+)</div>
+              <div id="adminCoverageStatusPill" class="compliance-badge status-ontrack" style="margin-top: 0.25rem;">🟢 ON TRACK</div>
+            </div>
+          </div>
+          <div class="stat-card" id="kpiCityProcessing">
+            <div class="stat-icon">🏭</div>
+            <div>
+              <div id="adminCityProcessingRate" class="stat-number">77.4%</div>
+              <div class="stat-label">Scientific Processing (Target: 80%+)</div>
+              <div id="adminProcessingStatusPill" class="compliance-badge status-neartarget" style="margin-top: 0.25rem;">🟡 NEAR TARGET</div>
+            </div>
+          </div>
+        </div>
+
         <div class="card">
-          <h3 style="margin-bottom: 0.35rem;">🏛️ Municipal Statutory Compliance (Swachh Bharat Mission 2.0 & SWM Rules)</h3>
-          <p style="color: #64748b; margin-bottom: 1.25rem;">Ward-level statutory performance automatically updated by citizen reports and institutional self-audits.</p>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+            <div>
+              <h3 style="margin-bottom: 0.25rem;">🏛️ Municipal Statutory Compliance (Swachh Bharat Mission 2.0 & SWM Rules)</h3>
+              <p style="color: #64748b; font-size: 0.85rem; margin: 0;">Ward-level statutory performance automatically computed from citizen verification data and institutional self-audits.</p>
+            </div>
+            <button class="btn btn-outline btn-xs" onclick="openUpdateComplianceModal()">✏️ Update Ward Metrics</button>
+          </div>
           
-          <div class="table-responsive">
+          <div class="table-responsive" style="margin-top: 1rem;">
             <table class="custom-table">
               <thead>
                 <tr>
@@ -1025,6 +1134,33 @@
                 </tr>
               </thead>
               <tbody id="adminRedemptionsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      <!-- Admin Section 7: Operational Audit Trail -->
+      <div id="adminPanelLogs" style="display: none;">
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+            <div>
+              <h3 style="font-size: 1.15rem; margin-bottom: 0.25rem;">📜 Municipal System Operational Audit Trail</h3>
+              <p style="color: #64748b; font-size: 0.82rem;">Permanent chronological record of municipal sanitation actions, crew dispatches, SLA escalation alerts, and administrative overrides.</p>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn btn-outline btn-xs" onclick="renderAdminLogsTable()">🔄 Refresh Logs</button>
+              <button class="btn btn-outline btn-xs" onclick="exportAdminLogsCSV()">📥 Export Logs CSV</button>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="custom-table" id="adminLogsTable">
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Actor / Role</th>
+                  <th>Action Event</th>
+                  <th>Operational Details</th>
+                </tr>
+              </thead>
+              <tbody id="adminLogsTableBody"></tbody>
             </table>
           </div>
         </div>
@@ -1184,6 +1320,14 @@
       <p style="color: #64748b; font-size: 0.82rem; margin-bottom: 1.25rem;">Deploy a standby compactor or electric tipper from the central depot to reinforce overloaded wards.</p>
       <form id="dispatchStandbyForm">
         <div class="form-group">
+          <label for="standbyRegNo" class="form-label">Vehicle Registration Number</label>
+          <input type="text" id="standbyRegNo" class="form-control" placeholder="e.g. DL-08-EV-9921" required>
+        </div>
+        <div class="form-group">
+          <label for="standbyDriver" class="form-label">Designated Driver Name</label>
+          <input type="text" id="standbyDriver" class="form-control" placeholder="e.g. Manoj Sharma (Depot Crew)" required>
+        </div>
+        <div class="form-group">
           <label for="standbyVehicleType" class="form-label">Vehicle Type</label>
           <select id="standbyVehicleType" class="form-control" required>
             <option value="Heavy Compactor Truck (10 Ton)">Heavy Compactor Truck (10 Ton)</option>
@@ -1203,6 +1347,106 @@
           </select>
         </div>
         <button type="submit" class="btn btn-primary" style="width: 100%;">Authorize Standby Dispatch</button>
+      </form>
+    </div>
+  <!-- About This Project Modal (In-App Static Briefing) -->
+  <div id="aboutProjectModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 720px; max-height: 88vh; overflow-y: auto;">
+      <button class="modal-close" onclick="closeModal('aboutProjectModal')">×</button>
+      <div style="border-bottom: 2px solid var(--civic-border); padding-bottom: 0.75rem; margin-bottom: 1.25rem;">
+        <span class="role-pill role-citizen" style="font-size: 0.72rem;">Public Systems Architecture</span>
+        <h2 style="font-size: 1.5rem; margin: 0.35rem 0 0.2rem 0;">Urban Waste Management Crisis & SBM 2.0 Solution</h2>
+        <p style="color: #64748b; font-size: 0.85rem; margin: 0;">A Software-Only, Zero-IoT, Multi-Stakeholder Civic Governance Engine</p>
+      </div>
+
+      <!-- Section 1: Project Summary -->
+      <div style="margin-bottom: 1.5rem;">
+        <h3 style="font-size: 1.1rem; color: var(--civic-forest-ink); margin-bottom: 0.4rem;">1. Project Overview & Architecture</h3>
+        <p style="font-size: 0.88rem; line-height: 1.6; color: #334155; margin: 0;">
+          This platform is a <strong>software-only, multi-role municipal civic utility</strong> designed to eliminate the prohibitive capital costs and maintenance failure rates of hardware IoT sensors. By combining geo-referenced crowdsourcing, verified source segregation, institution self-audits, route optimization, and statutory biomedical ledger tracking, it equips Urban Local Bodies (ULBs) with end-to-end accountability from citizen generator to processing facility.
+        </p>
+      </div>
+
+      <!-- Section 2: Root-Cause Summary -->
+      <div style="margin-bottom: 1.5rem; background: var(--civic-surface-muted); padding: 1.15rem; border-radius: var(--radius-xs); border-left: 4px solid var(--civic-signal-crimson);">
+        <h3 style="font-size: 1.05rem; color: var(--civic-signal-crimson); margin-bottom: 0.5rem;">2. Root-Cause Breakdown</h3>
+        <ul style="font-size: 0.85rem; line-height: 1.6; color: #334155; margin: 0; padding-left: 1.2rem;">
+          <li><strong>Low Source Segregation:</strong> Mixed municipal solid waste contaminates recyclables and prevents biological composting and biomethanation.</li>
+          <li><strong>Weak Municipal Capacity:</strong> Sub-optimal field crew allocations and lack of algorithmic routing lead to uncollected overflow points.</li>
+          <li><strong>Funding-to-Ground Gaps:</strong> Capital grants often stall before reaching ward-level sanitation infrastructure and sanitary worker safety gear.</li>
+          <li><strong>Treatment Capacity Lag:</strong> Waste generation exponentially outpaces centralized processing facilities and waste-to-energy plants.</li>
+          <li><strong>Overloaded Landfills:</strong> Legacy dump sites exceed saturation limits, creating toxic leachate and methane emission hazards.</li>
+          <li><strong>Informal Sector Left Unregulated:</strong> Informal waste pickers (kabadiwalas) handle over 60% of urban recycling without institutional formalization or social security.</li>
+        </ul>
+      </div>
+
+      <!-- Section 3: Government Response Timeline -->
+      <div style="margin-bottom: 1rem;">
+        <h3 style="font-size: 1.1rem; color: var(--civic-forest-ink); margin-bottom: 0.75rem;">3. Indian Waste Governance Timeline (2000 - 2026)</h3>
+        <div style="display: flex; flex-direction: column; gap: 0.75rem; border-left: 2px solid var(--civic-border); padding-left: 1rem; margin-left: 0.5rem;">
+          <div style="position: relative;">
+            <div style="font-weight: 800; font-size: 0.88rem; color: var(--civic-cobalt-accent);">MSW Rules 2000</div>
+            <div style="font-size: 0.82rem; color: #475569;">First national statutory framework defining urban local body responsibilities for municipal solid waste management.</div>
+          </div>
+          <div style="position: relative;">
+            <div style="font-weight: 800; font-size: 0.88rem; color: var(--civic-spruce-green);">SBM-Urban 2014</div>
+            <div style="font-size: 0.82rem; color: #475569;">Flagship Swachh Bharat Mission launched by the Government of India to achieve 100% open-defecation-free status and scientifically manage urban solid waste.</div>
+          </div>
+          <div style="position: relative;">
+            <div style="font-weight: 800; font-size: 0.88rem; color: var(--civic-cobalt-accent);">SWM Rules 2016</div>
+            <div style="font-size: 0.82rem; color: #475569;">Replaced MSW 2000; legally mandated source segregation into Wet, Dry, and Domestic Hazardous waste streams for all waste generators and bulk facilities.</div>
+          </div>
+          <div style="position: relative;">
+            <div style="font-weight: 800; font-size: 0.88rem; color: var(--civic-spruce-green);">SBM 2.0 Mandates (2024-2026)</div>
+            <div style="font-size: 0.82rem; color: #475569;">Transitioned mandate toward "Garbage-Free Cities" (GFC), biomining and bio-remediation of 100% legacy dumpsites, and circular economy integration.</div>
+          </div>
+          <div style="position: relative;">
+            <div style="font-weight: 800; font-size: 0.88rem; color: var(--civic-signal-amber);">80.26% Processing Rate Milestone (2024)</div>
+            <div style="font-size: 0.82rem; color: #475569;">National statutory processing capacity reached landmark 80.26% milestone across Indian urban local bodies, up from under 18% in 2014.</div>
+          </div>
+          <div style="position: relative;">
+            <div style="font-weight: 800; font-size: 0.88rem; color: var(--civic-signal-crimson);">SWM Rules 2026 (Mandatory Source Segregation)</div>
+            <div style="font-size: 0.82rem; color: #475569;">Enforces mandatory nationwide source segregation with automated compliance auditing, bulk generator digital self-certifications, and integration of informal recycling markets.</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 1.25rem; text-align: right;">
+        <button type="button" class="btn btn-primary btn-sm" onclick="closeModal('aboutProjectModal')">Close Briefing</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Update Ward Statutory Compliance Modal -->
+  <div id="updateComplianceModal" class="modal-overlay">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeModal('updateComplianceModal')">×</button>
+      <h3 style="margin-bottom: 0.5rem;">✏️ Update Ward Statutory Compliance</h3>
+      <p style="color: #64748b; font-size: 0.85rem; margin-bottom: 1.25rem;">Adjust SBM 2.0 / SWM Rules statutory performance metrics for a municipal ward.</p>
+      <form id="updateComplianceForm" onsubmit="handleUpdateComplianceSubmit(event)">
+        <div class="form-group">
+          <label for="complianceWardSelect" class="form-label">Municipal Ward</label>
+          <select id="complianceWardSelect" class="form-control" required onchange="onComplianceWardSelectChange(this.value)">
+            <option value="Ward 04 - MG Road & Commercial Center">Ward 04 - MG Road & Commercial Center</option>
+            <option value="Ward 12 - Indiranagar Residential">Ward 12 - Indiranagar Residential</option>
+            <option value="Ward 18 - Sector 62 Tech Hub">Ward 18 - Sector 62 Tech Hub</option>
+            <option value="Ward 07 - Civil Lines Market">Ward 07 - Civil Lines Market</option>
+            <option value="Ward 02 - Central Railway Station">Ward 02 - Central Railway Station</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="compSegregationInput" class="form-label">Source Segregation Rate (%) [Target: 60%+]</label>
+          <input type="number" id="compSegregationInput" class="form-control" min="0" max="100" required>
+        </div>
+        <div class="form-group">
+          <label for="compCoverageInput" class="form-label">Door-to-Door Coverage Rate (%) [Target: 80%+]</label>
+          <input type="number" id="compCoverageInput" class="form-control" min="0" max="100" required>
+        </div>
+        <div class="form-group">
+          <label for="compProcessingInput" class="form-label">Scientific Processing Rate (%) [Target: 80%+]</label>
+          <input type="number" id="compProcessingInput" class="form-control" min="0" max="100" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Save Statutory Compliance Metrics</button>
       </form>
     </div>
   </div>
