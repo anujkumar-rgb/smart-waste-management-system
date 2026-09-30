@@ -39,27 +39,27 @@
       "id": "usr-2",
       "email": "school@cityedu.org",
       "pass": "demo123",
-      "name": "Delhi Public School, Sector 12",
+      "name": "Bombay Scottish School, Powai",
       "role": "institution",
       "institutionType": "school",
-      "schoolName": "Delhi Public School, Sector 12",
+      "schoolName": "Bombay Scottish School, Powai",
       "verificationCode": "INST-SCH-8821",
       "branches": [
         {
           "id": "br-dps-main",
-          "name": "Sector 12 Senior Campus",
-          "ward": "Ward 18 - Sector 62 Tech Hub",
-          "address": "Plot 4, Institutional Area, Sector 12",
-          "lat": 28.592,
-          "lng": 77.228
+          "name": "Powai Senior Campus",
+          "ward": "Ward S - Powai Lake & Tech Enclave",
+          "address": "Plot 4, Technology Corridor, Powai",
+          "lat": 19.125,
+          "lng": 72.915
         },
         {
           "id": "br-dps-junior",
-          "name": "Sector 4 Junior Wing",
-          "ward": "Ward 04 - MG Road & Commercial Center",
-          "address": "Near City Square, Sector 4",
-          "lat": 28.627,
-          "lng": 77.218
+          "name": "Dadar Junior Wing",
+          "ward": "Ward G/South - Dadar & Elphinstone",
+          "address": "Near Shivaji Park, Dadar West",
+          "lat": 19.022,
+          "lng": 72.838
         }
       ],
       "activeBranchId": "br-dps-main",
@@ -79,28 +79,28 @@
       "id": "usr-6",
       "email": "infosys@campus.org",
       "pass": "demo123",
-      "name": "Infosys Ltd, Whitefield Campus",
+      "name": "Tata Consultancy Services, Andheri (E)",
       "role": "institution",
       "institutionType": "company",
-      "companyName": "Infosys Ltd, Whitefield Campus",
+      "companyName": "Tata Consultancy Services, Andheri (E)",
       "businessType": "IT / Tech Office",
-      "verificationCode": "CORP-INFY-4401",
+      "verificationCode": "CORP-TCS-4401",
       "branches": [
         {
           "id": "br-infy-main",
-          "name": "Whitefield Main Tech Park",
-          "ward": "Ward 18 - Sector 62 Tech Hub",
-          "address": "Plot 22, Software Innovation Corridor",
-          "lat": 28.588,
-          "lng": 77.221
+          "name": "Andheri Tech Park",
+          "ward": "Ward K/East - Andheri Industrial Estate",
+          "address": "Plot 22, MIDC Innovation Park, Andheri East",
+          "lat": 19.115,
+          "lng": 72.868
         },
         {
           "id": "br-infy-dev",
-          "name": "Development Center Wing B",
-          "ward": "Ward 04 - MG Road & Commercial Center",
-          "address": "Tower 3, Central IT Plaza",
-          "lat": 28.621,
-          "lng": 77.213
+          "name": "Bandra Development Center",
+          "ward": "Ward H/West - Bandra Residential",
+          "address": "Tower 3, Hill Road Tech Center, Bandra",
+          "lat": 19.058,
+          "lng": 72.831
         }
       ],
       "activeBranchId": "br-infy-main",
@@ -144,7 +144,10 @@
       "pass": "demo123",
       "name": "Rajesh Singh (Crew #101)",
       "role": "worker",
-      "verificationCode": "WRK-101"
+      "verificationCode": "WRK-101",
+      "lastKnownLat": 19.02,
+      "lastKnownLng": 72.835,
+      "lastLocationUpdatedAt": 1790755058098
     },
     {
       "id": "usr-5",
@@ -161,21 +164,21 @@
       "userId": "usr-1",
       "userName": "Ananya Sharma",
       "userRole": "citizen",
-      "area": "Ward 04 - MG Road & Commercial Center",
+      "area": "Ward G/South - Dadar & Elphinstone",
       "coords": {
-        "lat": 28.625,
-        "lng": 77.215
+        "lat": 19.021,
+        "lng": 72.835
       },
-      "latitude": 28.625,
-      "longitude": 77.215,
+      "latitude": 19.021,
+      "longitude": 72.835,
       "landmark": "City Plaza Market Gate 2 Bin Point",
-      "resolvedAddress": "City Plaza Market Gate 2, MG Road, Ward 04",
+      "resolvedAddress": "Dadar Commercial Plaza Gate 2, Senapati Bapat Marg, Ward G/South",
       "category": "plastic",
       "severity": "overflowing",
       "notes": "Plastic packaging spillage blocking pedestrian footpath.",
       "isEmergency": false,
       "status": "reported",
-      "createdAt": 1790702895302,
+      "createdAt": 1790752478098,
       "duplicateCount": 1,
       "isEscalated": false
     },
@@ -184,15 +187,15 @@
       "userId": "usr-1",
       "userName": "Ananya Sharma",
       "userRole": "citizen",
-      "area": "Ward 12 - Indiranagar Residential",
+      "area": "Ward H/West - Bandra Residential",
       "coords": {
-        "lat": 28.605,
-        "lng": 77.195
+        "lat": 19.058,
+        "lng": 72.83
       },
-      "latitude": 28.605,
-      "longitude": 77.195,
+      "latitude": 19.058,
+      "longitude": 72.83,
       "landmark": "Community Park Main Gate",
-      "resolvedAddress": "Indiranagar 5th Cross, Community Park Gate, Ward 12",
+      "resolvedAddress": "Bandra 5th Cross, Community Park Gate, Ward H/West",
       "category": "organic",
       "severity": "full",
       "notes": "Dry leaves and organic bins filled after morning sweep.",
@@ -200,29 +203,29 @@
       "status": "assigned",
       "assignedWorkerId": "usr-4",
       "assignedWorkerName": "Rajesh Singh (Crew #101)",
-      "createdAt": 1790611995302,
-      "assignedAt": 1790615595302,
+      "createdAt": 1790661578098,
+      "assignedAt": 1790665178098,
       "duplicateCount": 2,
       "isEscalated": true
     },
     {
       "id": "BULK-2001",
       "userId": "usr-2",
-      "userName": "Delhi Public School, Sector 12",
+      "userName": "Bombay Scottish School, Powai",
       "institutionType": "school",
-      "schoolName": "Delhi Public School, Sector 12",
+      "schoolName": "Bombay Scottish School, Powai",
       "branchId": "br-dps-main",
-      "branchName": "Sector 12 Senior Campus",
+      "branchName": "Powai Senior Campus",
       "userRole": "institution",
-      "area": "Ward 18 - Sector 62 Tech Hub",
+      "area": "Ward S - Powai Lake & Tech Enclave",
       "coords": {
-        "lat": 28.592,
-        "lng": 77.228
+        "lat": 19.125,
+        "lng": 72.915
       },
-      "latitude": 28.592,
-      "longitude": 77.228,
+      "latitude": 19.125,
+      "longitude": 72.915,
       "landmark": "School Cafeteria Loading Dock",
-      "resolvedAddress": "Plot 4 Institutional Area, Sector 12, Ward 18",
+      "resolvedAddress": "Plot 4 Technology Corridor, Powai, Ward S",
       "category": "commercial_food",
       "severity": "overflowing",
       "notes": "Bulk organic food waste from annual school environmental assembly.",
@@ -231,29 +234,29 @@
       "containerCount": 5,
       "isEmergency": false,
       "status": "reported",
-      "createdAt": 1790703795302,
+      "createdAt": 1790753378098,
       "duplicateCount": 1,
       "isEscalated": false
     },
     {
       "id": "BULK-2002",
       "userId": "usr-6",
-      "userName": "Infosys Ltd, Whitefield Campus",
+      "userName": "Tata Consultancy Services, Andheri (E)",
       "institutionType": "company",
-      "companyName": "Infosys Ltd, Whitefield Campus",
+      "companyName": "Tata Consultancy Services, Andheri (E)",
       "businessType": "IT / Tech Office",
       "branchId": "br-infy-main",
-      "branchName": "Whitefield Main Tech Park",
+      "branchName": "Andheri Tech Park",
       "userRole": "institution",
-      "area": "Ward 18 - Sector 62 Tech Hub",
+      "area": "Ward K/East - Andheri Industrial Estate",
       "coords": {
-        "lat": 28.588,
-        "lng": 77.221
+        "lat": 19.115,
+        "lng": 72.868
       },
-      "latitude": 28.588,
-      "longitude": 77.221,
+      "latitude": 19.115,
+      "longitude": 72.868,
       "landmark": "Server Room Recycling Bay #3",
-      "resolvedAddress": "Plot 22 Software Innovation Corridor, Ward 18",
+      "resolvedAddress": "Plot 22 MIDC Innovation Park, Andheri East, Ward K/East",
       "category": "office_paper",
       "severity": "full",
       "notes": "Disposal of 420 kg confidential shredded documentation and corrugated paperboard.",
@@ -264,8 +267,8 @@
       "status": "assigned",
       "assignedWorkerId": "usr-4",
       "assignedWorkerName": "Rajesh Singh (Crew #101)",
-      "createdAt": 1790701995302,
-      "assignedAt": 1790703195303,
+      "createdAt": 1790751578098,
+      "assignedAt": 1790752778098,
       "duplicateCount": 1,
       "isEscalated": false
     }
@@ -284,7 +287,7 @@
       "lifecycleStage": "In Transit",
       "treatmentFacility": "CBWTF Sector 9 Central Treatment Plant",
       "status": "assigned",
-      "createdAt": 1790700195303
+      "createdAt": 1790749778098
     },
     {
       "id": "BMW-3002",
@@ -299,7 +302,7 @@
       "lifecycleStage": "Registered",
       "treatmentFacility": "Eco-Care Incinerator & Autoclave Unit 4",
       "status": "reported",
-      "createdAt": 1790694795303
+      "createdAt": 1790744378098
     }
   ],
   "hospital_staff": [
@@ -334,8 +337,8 @@
       "itemName": "Digital Eco-Champion Badge",
       "creditCost": 0,
       "status": "Fulfilled",
-      "requestedAt": 1790619195303,
-      "fulfilledAt": 1790619195303
+      "requestedAt": 1790668778098,
+      "fulfilledAt": 1790668778098
     },
     {
       "id": "RED-502",
@@ -345,41 +348,41 @@
       "itemName": "Sapling / Native Fruit Plant",
       "creditCost": 50,
       "status": "Requested",
-      "requestedAt": 1790694795303,
+      "requestedAt": 1790744378098,
       "fulfilledAt": null
     }
   ],
   "compliance_metrics": [
     {
-      "ward": "Ward 04 - MG Road & Commercial Center",
+      "ward": "Ward G/South - Dadar & Elphinstone",
       "segregationRate": 74,
       "coverageRate": 92,
       "processingRate": 85,
       "status": "ontrack"
     },
     {
-      "ward": "Ward 12 - Indiranagar Residential",
+      "ward": "Ward H/West - Bandra Residential",
       "segregationRate": 68,
       "coverageRate": 88,
       "processingRate": 82,
       "status": "ontrack"
     },
     {
-      "ward": "Ward 18 - Sector 62 Tech Hub",
+      "ward": "Ward K/East - Andheri Industrial Estate",
       "segregationRate": 78,
       "coverageRate": 86,
       "processingRate": 80,
       "status": "ontrack"
     },
     {
-      "ward": "Ward 07 - Civil Lines Market",
+      "ward": "Ward S - Powai Lake & Tech Enclave",
       "segregationRate": 44,
       "coverageRate": 68,
       "processingRate": 59,
       "status": "offtarget"
     },
     {
-      "ward": "Ward 02 - Central Railway Station",
+      "ward": "Ward A - Colaba & Fort Commercial",
       "segregationRate": 62,
       "coverageRate": 84,
       "processingRate": 81,
@@ -390,21 +393,25 @@
     {
       "id": "FLT-CT-401",
       "type": "Heavy Hydraulic Compactor (10T)",
-      "regNo": "DL-01-GA-4401",
-      "ward": "Ward 04 - MG Road & Commercial Center",
+      "regNo": "MH-01-GA-4401",
+      "ward": "Ward G/South - Dadar & Elphinstone",
       "driver": "Rajesh Singh",
+      "driverId": "usr-4",
       "contact": "+91 98112-40192",
       "capacityTon": 10,
       "currentPayloadTon": 7.8,
       "fuelPercent": 84,
       "status": "Active Collection",
-      "icon": "🚛"
+      "icon": "🚛",
+      "lastKnownLat": 19.02,
+      "lastKnownLng": 72.835,
+      "lastLocationUpdatedAt": 1790755058098
     },
     {
       "id": "FLT-ET-108",
       "type": "Electric Multi-Bin Tipper Auto (1.5T)",
-      "regNo": "DL-04-EV-1088",
-      "ward": "Ward 12 - Indiranagar Residential",
+      "regNo": "MH-02-EV-1088",
+      "ward": "Ward H/West - Bandra Residential",
       "driver": "Sunita Devi",
       "contact": "+91 98711-20984",
       "capacityTon": 1.5,
@@ -416,8 +423,8 @@
     {
       "id": "FLT-BM-09",
       "type": "Biomedical Closed-Chamber Van (2T)",
-      "regNo": "DL-02-HA-0912",
-      "ward": "Ward 18 - Sector 62 Tech Hub",
+      "regNo": "MH-03-HA-0912",
+      "ward": "Ward K/East - Andheri Industrial Estate",
       "driver": "Amit Verma",
       "contact": "+91 98104-55120",
       "capacityTon": 2,
@@ -429,8 +436,8 @@
     {
       "id": "FLT-CD-550",
       "type": "C&D Debris Hydraulic Dumper (14T)",
-      "regNo": "DL-07-CD-5501",
-      "ward": "Ward 07 - Civil Lines Market",
+      "regNo": "MH-04-CD-5501",
+      "ward": "Ward S - Powai Lake & Tech Enclave",
       "driver": "Harish Kumar",
       "contact": "+91 98119-33829",
       "capacityTon": 14,
@@ -446,28 +453,28 @@
       "message": "Monsoon Protocol Active: Segregate wet organic waste into covered green bins to prevent drain blockages.",
       "level": "warning",
       "author": "Municipal Sanitation Officer",
-      "timestamp": 1790698395303,
+      "timestamp": 1790747978098,
       "active": true
     }
   ],
   "audit_logs": [
     {
       "id": "log-1",
-      "timestamp": 1790694795303,
+      "timestamp": 1790744378098,
       "actor": "System",
       "action": "INIT",
       "details": "Municipal Waste Management Engine initialized."
     },
     {
       "id": "log-2",
-      "timestamp": 1790698395303,
+      "timestamp": 1790747978098,
       "actor": "Admin",
       "action": "BROADCAST",
       "details": "Published Monsoon Protocol directive to all municipal sectors."
     },
     {
       "id": "log-3",
-      "timestamp": 1790703195303,
+      "timestamp": 1790752778098,
       "actor": "Admin",
       "action": "AUTO_DISPATCH",
       "details": "Assigned bulk paper collection BULK-2002 to Crew #101."

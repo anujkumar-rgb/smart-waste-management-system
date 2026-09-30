@@ -67,14 +67,14 @@ const SEED_USERS = [
     id: 'usr-2', 
     email: 'school@cityedu.org', 
     pass: 'demo123', 
-    name: 'Delhi Public School, Sector 12', 
+    name: 'Bombay Scottish School, Powai', 
     role: 'institution', 
     institutionType: 'school',
-    schoolName: 'Delhi Public School, Sector 12',
+    schoolName: 'Bombay Scottish School, Powai',
     verificationCode: 'INST-SCH-8821',
     branches: [
-      { id: 'br-dps-main', name: 'Sector 12 Senior Campus', ward: 'Ward 18 - Sector 62 Tech Hub', address: 'Plot 4, Institutional Area, Sector 12', lat: 28.5920, lng: 77.2280 },
-      { id: 'br-dps-junior', name: 'Sector 4 Junior Wing', ward: 'Ward 04 - MG Road & Commercial Center', address: 'Near City Square, Sector 4', lat: 28.6270, lng: 77.2180 }
+      { id: 'br-dps-main', name: 'Powai Senior Campus', ward: 'Ward S - Powai Lake & Tech Enclave', address: 'Plot 4, Technology Corridor, Powai', lat: 19.1250, lng: 72.9150 },
+      { id: 'br-dps-junior', name: 'Dadar Junior Wing', ward: 'Ward G/South - Dadar & Elphinstone', address: 'Near Shivaji Park, Dadar West', lat: 19.0220, lng: 72.8380 }
     ],
     activeBranchId: 'br-dps-main',
     recurringSchedule: { frequency: 'daily', timeSlot: '06:00 - 08:00 AM' },
@@ -86,15 +86,15 @@ const SEED_USERS = [
     id: 'usr-6', 
     email: 'infosys@campus.org', 
     pass: 'demo123', 
-    name: 'Infosys Ltd, Whitefield Campus', 
+    name: 'Tata Consultancy Services, Andheri (E)', 
     role: 'institution', 
     institutionType: 'company',
-    companyName: 'Infosys Ltd, Whitefield Campus',
+    companyName: 'Tata Consultancy Services, Andheri (E)',
     businessType: 'IT / Tech Office',
-    verificationCode: 'CORP-INFY-4401',
+    verificationCode: 'CORP-TCS-4401',
     branches: [
-      { id: 'br-infy-main', name: 'Whitefield Main Tech Park', ward: 'Ward 18 - Sector 62 Tech Hub', address: 'Plot 22, Software Innovation Corridor', lat: 28.5880, lng: 77.2210 },
-      { id: 'br-infy-dev', name: 'Development Center Wing B', ward: 'Ward 04 - MG Road & Commercial Center', address: 'Tower 3, Central IT Plaza', lat: 28.6210, lng: 77.2130 }
+      { id: 'br-infy-main', name: 'Andheri Tech Park', ward: 'Ward K/East - Andheri Industrial Estate', address: 'Plot 22, MIDC Innovation Park, Andheri East', lat: 19.1150, lng: 72.8680 },
+      { id: 'br-infy-dev', name: 'Bandra Development Center', ward: 'Ward H/West - Bandra Residential', address: 'Tower 3, Hill Road Tech Center, Bandra', lat: 19.0580, lng: 72.8310 }
     ],
     activeBranchId: 'br-infy-main',
     recurringSchedule: { frequency: 'daily', timeSlot: '20:00 - 22:00 PM' },
@@ -122,7 +122,10 @@ const SEED_USERS = [
     pass: 'demo123', 
     name: 'Rajesh Singh (Crew #101)', 
     role: 'worker', 
-    verificationCode: 'WRK-101' 
+    verificationCode: 'WRK-101',
+    lastKnownLat: 19.0200,
+    lastKnownLng: 72.8350,
+    lastLocationUpdatedAt: Date.now() - 120000
   },
   { 
     id: 'usr-5', 
@@ -140,12 +143,12 @@ const SEED_REPORTS = [
     userId: 'usr-1',
     userName: 'Ananya Sharma',
     userRole: 'citizen',
-    area: 'Ward 04 - MG Road & Commercial Center',
-    coords: { lat: 28.6250, lng: 77.2150 },
-    latitude: 28.6250,
-    longitude: 77.2150,
-    landmark: 'City Plaza Market Gate 2 Bin Point',
-    resolvedAddress: 'City Plaza Market Gate 2, MG Road, Ward 04',
+    area: 'Ward G/South - Dadar & Elphinstone',
+    coords: { lat: 19.0210, lng: 72.8350 },
+    latitude: 19.0210,
+    longitude: 72.8350,
+    landmark: 'Dadar Commercial Plaza Gate 2 Bin Point',
+    resolvedAddress: 'Dadar Commercial Plaza Gate 2, Senapati Bapat Marg, Ward G/South',
     category: 'plastic',
     severity: 'overflowing',
     notes: 'Plastic packaging spillage blocking pedestrian footpath.',
@@ -160,12 +163,12 @@ const SEED_REPORTS = [
     userId: 'usr-1',
     userName: 'Ananya Sharma',
     userRole: 'citizen',
-    area: 'Ward 12 - Indiranagar Residential',
-    coords: { lat: 28.6050, lng: 77.1950 },
-    latitude: 28.6050,
-    longitude: 77.1950,
-    landmark: 'Community Park Main Gate',
-    resolvedAddress: 'Indiranagar 5th Cross, Community Park Gate, Ward 12',
+    area: 'Ward H/West - Bandra Residential',
+    coords: { lat: 19.0580, lng: 72.8300 },
+    latitude: 19.0580,
+    longitude: 72.8300,
+    landmark: 'Bandra Community Park Main Gate',
+    resolvedAddress: 'Bandra 5th Cross, Community Park Gate, Ward H/West',
     category: 'organic',
     severity: 'full',
     notes: 'Dry leaves and organic bins filled after morning sweep.',
@@ -181,18 +184,18 @@ const SEED_REPORTS = [
   {
     id: 'BULK-2001',
     userId: 'usr-2',
-    userName: 'Delhi Public School, Sector 12',
+    userName: 'Bombay Scottish School, Powai',
     institutionType: 'school',
-    schoolName: 'Delhi Public School, Sector 12',
+    schoolName: 'Bombay Scottish School, Powai',
     branchId: 'br-dps-main',
-    branchName: 'Sector 12 Senior Campus',
+    branchName: 'Powai Senior Campus',
     userRole: 'institution',
-    area: 'Ward 18 - Sector 62 Tech Hub',
-    coords: { lat: 28.5920, lng: 77.2280 },
-    latitude: 28.5920,
-    longitude: 77.2280,
+    area: 'Ward S - Powai Lake & Tech Enclave',
+    coords: { lat: 19.1250, lng: 72.9150 },
+    latitude: 19.1250,
+    longitude: 72.9150,
     landmark: 'School Cafeteria Loading Dock',
-    resolvedAddress: 'Plot 4 Institutional Area, Sector 12, Ward 18',
+    resolvedAddress: 'Plot 4 Technology Corridor, Powai, Ward S',
     category: 'commercial_food',
     severity: 'overflowing',
     notes: 'Bulk organic food waste from annual school environmental assembly.',
@@ -208,19 +211,19 @@ const SEED_REPORTS = [
   {
     id: 'BULK-2002',
     userId: 'usr-6',
-    userName: 'Infosys Ltd, Whitefield Campus',
+    userName: 'Tata Consultancy Services, Andheri (E)',
     institutionType: 'company',
-    companyName: 'Infosys Ltd, Whitefield Campus',
+    companyName: 'Tata Consultancy Services, Andheri (E)',
     businessType: 'IT / Tech Office',
     branchId: 'br-infy-main',
-    branchName: 'Whitefield Main Tech Park',
+    branchName: 'Andheri Tech Park',
     userRole: 'institution',
-    area: 'Ward 18 - Sector 62 Tech Hub',
-    coords: { lat: 28.5880, lng: 77.2210 },
-    latitude: 28.5880,
-    longitude: 77.2210,
+    area: 'Ward K/East - Andheri Industrial Estate',
+    coords: { lat: 19.1150, lng: 72.8680 },
+    latitude: 19.1150,
+    longitude: 72.8680,
     landmark: 'Server Room Recycling Bay #3',
-    resolvedAddress: 'Plot 22 Software Innovation Corridor, Ward 18',
+    resolvedAddress: 'Plot 22 MIDC Innovation Park, Andheri East, Ward K/East',
     category: 'office_paper',
     severity: 'full',
     notes: 'Disposal of 420 kg confidential shredded documentation and corrugated paperboard.',
@@ -250,7 +253,7 @@ const SEED_HOSPITAL_REPORTS = [
     containerCode: 'BMW-BAG-8841',
     volumeKg: 14.5,
     lifecycleStage: 'In Transit',
-    treatmentFacility: 'CBWTF Sector 9 Central Treatment Plant',
+    treatmentFacility: 'SMS Envoclean CBWTF, Govandi, Mumbai',
     status: 'assigned',
     createdAt: Date.now() - 90 * 60 * 1000
   },
@@ -265,7 +268,7 @@ const SEED_HOSPITAL_REPORTS = [
     containerCode: 'BMW-BAG-9912',
     volumeKg: 12.0,
     lifecycleStage: 'Registered',
-    treatmentFacility: 'Eco-Care Incinerator & Autoclave Unit 4',
+    treatmentFacility: 'Mumbai Central Bio-Hazard Autoclave Unit 4',
     status: 'reported',
     createdAt: Date.now() - 180 * 60 * 1000
   }
@@ -303,18 +306,18 @@ const SEED_REDEMPTIONS = [
 ];
 
 const SEED_COMPLIANCE_METRICS = [
-  { ward: 'Ward 04 - MG Road & Commercial Center', segregationRate: 74, coverageRate: 92, processingRate: 85, status: 'ontrack' },
-  { ward: 'Ward 12 - Indiranagar Residential', segregationRate: 68, coverageRate: 88, processingRate: 82, status: 'ontrack' },
-  { ward: 'Ward 18 - Sector 62 Tech Hub', segregationRate: 78, coverageRate: 86, processingRate: 80, status: 'ontrack' },
-  { ward: 'Ward 07 - Civil Lines Market', segregationRate: 44, coverageRate: 68, processingRate: 59, status: 'offtarget' },
-  { ward: 'Ward 02 - Central Railway Station', segregationRate: 62, coverageRate: 84, processingRate: 81, status: 'ontrack' }
+  { ward: 'Ward G/South - Dadar & Elphinstone', segregationRate: 74, coverageRate: 92, processingRate: 85, status: 'ontrack' },
+  { ward: 'Ward H/West - Bandra Residential', segregationRate: 68, coverageRate: 88, processingRate: 82, status: 'ontrack' },
+  { ward: 'Ward K/East - Andheri Industrial Estate', segregationRate: 78, coverageRate: 86, processingRate: 80, status: 'ontrack' },
+  { ward: 'Ward S - Powai Lake & Tech Enclave', segregationRate: 44, coverageRate: 68, processingRate: 59, status: 'offtarget' },
+  { ward: 'Ward A - Colaba & Fort Commercial', segregationRate: 62, coverageRate: 84, processingRate: 81, status: 'ontrack' }
 ];
 
 const SEED_FLEET = [
-  { id: 'FLT-CT-401', type: 'Heavy Hydraulic Compactor (10T)', regNo: 'DL-01-GA-4401', ward: 'Ward 04 - MG Road & Commercial Center', driver: 'Rajesh Singh', contact: '+91 98112-40192', capacityTon: 10.0, currentPayloadTon: 7.8, fuelPercent: 84, status: 'Active Collection', icon: '🚛' },
-  { id: 'FLT-ET-108', type: 'Electric Multi-Bin Tipper Auto (1.5T)', regNo: 'DL-04-EV-1088', ward: 'Ward 12 - Indiranagar Residential', driver: 'Sunita Devi', contact: '+91 98711-20984', capacityTon: 1.5, currentPayloadTon: 1.35, fuelPercent: 68, status: 'Transfer Station Transit', icon: '🛺' },
-  { id: 'FLT-BM-09', type: 'Biomedical Closed-Chamber Van (2T)', regNo: 'DL-02-HA-0912', ward: 'Ward 18 - Sector 62 Tech Hub', driver: 'Amit Verma', contact: '+91 98104-55120', capacityTon: 2.0, currentPayloadTon: 0.7, fuelPercent: 92, status: 'En Route to CBWTF', icon: '🚐' },
-  { id: 'FLT-CD-550', type: 'C&D Debris Hydraulic Dumper (14T)', regNo: 'DL-07-CD-5501', ward: 'Ward 07 - Civil Lines Market', driver: 'Harish Kumar', contact: '+91 98119-33829', capacityTon: 14.0, currentPayloadTon: 8.4, fuelPercent: 76, status: 'Active Route', icon: '🚜' }
+  { id: 'FLT-CT-401', type: 'Heavy Hydraulic Compactor (10T)', regNo: 'MH-01-GA-4401', ward: 'Ward G/South - Dadar & Elphinstone', driver: 'Rajesh Singh', driverId: 'usr-4', contact: '+91 98112-40192', capacityTon: 10.0, currentPayloadTon: 7.8, fuelPercent: 84, status: 'Active Collection', icon: '🚛', lastKnownLat: 19.0200, lastKnownLng: 72.8350, lastLocationUpdatedAt: Date.now() - 120000 },
+  { id: 'FLT-ET-108', type: 'Electric Multi-Bin Tipper Auto (1.5T)', regNo: 'MH-02-EV-1088', ward: 'Ward H/West - Bandra Residential', driver: 'Sunita Devi', contact: '+91 98711-20984', capacityTon: 1.5, currentPayloadTon: 1.35, fuelPercent: 68, status: 'Transfer Station Transit', icon: '🛺' },
+  { id: 'FLT-BM-09', type: 'Biomedical Closed-Chamber Van (2T)', regNo: 'MH-03-HA-0912', ward: 'Ward K/East - Andheri Industrial Estate', driver: 'Amit Verma', contact: '+91 98104-55120', capacityTon: 2.0, currentPayloadTon: 0.7, fuelPercent: 92, status: 'En Route to CBWTF', icon: '🚐' },
+  { id: 'FLT-CD-550', type: 'C&D Debris Hydraulic Dumper (14T)', regNo: 'MH-04-CD-5501', ward: 'Ward S - Powai Lake & Tech Enclave', driver: 'Harish Kumar', contact: '+91 98119-33829', capacityTon: 14.0, currentPayloadTon: 8.4, fuelPercent: 76, status: 'Active Route', icon: '🚜' }
 ];
 
 let currentUser = null;
@@ -653,7 +656,7 @@ function initAuth() {
       verificationCode,
       credits: (role === 'citizen' || role === 'hospital') ? 30 : 0,
       branches: role === 'institution' ? [
-        { id: 'br-main', name: 'Main Campus / Facility', address: 'Loading Gate #1', ward: 'Ward 18 - Sector 62 Tech Hub', lat: 28.59, lng: 77.225 }
+        { id: 'br-main', name: 'Main Campus / Facility', address: 'Loading Gate #1', ward: 'Ward K/East - Andheri Industrial Estate', lat: 19.1136, lng: 72.8697 }
       ] : null,
       activeBranchId: role === 'institution' ? 'br-main' : null,
       recurringSchedule: role === 'institution' ? { frequency: 'daily', timeSlot: '06:00 - 08:00 AM' } : null,
@@ -790,8 +793,63 @@ function checkSession() {
 }
 
 /* ==========================================================================
-   4. REAL LOCATION PICKER ENGINE (LEAFLET + NOMINATIM REVERSE GEOCODING)
+   4. REAL LOCATION PICKER ENGINE (LEAFLET + NOMINATIM REVERSE GEOCODING + WARD AUTO-FILL)
    ========================================================================== */
+const KNOWN_MUNICIPAL_WARDS = [
+  { name: 'Ward K/East - Andheri Industrial Estate', lat: 19.1136, lng: 72.8697, keywords: ['andheri', 'midc', 'k/east', 'k-east', 'chakala', 'marol', 'saki naka', 'seepz', 'industrial'] },
+  { name: 'Ward G/South - Dadar & Elphinstone', lat: 19.0178, lng: 72.8302, keywords: ['dadar', 'elphinstone', 'lower parel', 'prabhadevi', 'g/south', 'g-south', 'worli', 'currey road', 'commercial'] },
+  { name: 'Ward H/West - Bandra Residential', lat: 19.0596, lng: 72.8295, keywords: ['bandra', 'khar', 'h/west', 'h-west', 'residential', 'pali hill', 'carter road', 'linking road', 'turner road'] },
+  { name: 'Ward S - Powai Lake & Tech Enclave', lat: 19.1250, lng: 72.9150, keywords: ['powai', 'hiranandani', 'iit', 's ward', 'vikhroli', 'chandivali', 'kanjurmarg', 'tech enclave'] },
+  { name: 'Ward A - Colaba & Fort Commercial', lat: 18.9220, lng: 72.8347, keywords: ['colaba', 'fort', 'cst', 'cstm', 'railway', 'nariman point', 'marine drive', 'ward a', 'churchgate'] }
+];
+
+function deriveWardFromCoordinates(lat, lng, addressData) {
+  if (addressData) {
+    const addrStr = (typeof addressData === 'string' ? addressData : JSON.stringify(addressData)).toLowerCase();
+    for (const ward of KNOWN_MUNICIPAL_WARDS) {
+      for (const kw of ward.keywords) {
+        if (addrStr.includes(kw)) {
+          return { wardName: ward.name, isExact: true, label: ward.name };
+        }
+      }
+    }
+  }
+
+  // Fallback to nearest known seed ward using Haversine distance
+  let nearestWard = KNOWN_MUNICIPAL_WARDS[0];
+  let minDistance = Infinity;
+  for (const ward of KNOWN_MUNICIPAL_WARDS) {
+    const dist = calcDistance(lat, lng, ward.lat, ward.lng);
+    if (dist < minDistance) {
+      minDistance = dist;
+      nearestWard = ward;
+    }
+  }
+
+  return {
+    wardName: nearestWard.name,
+    isExact: false,
+    label: `Approximate zone — nearest match: ${nearestWard.name}`
+  };
+}
+
+function updateWardFieldFromCoords(lat, lng, addressData, isCitizen) {
+  const derivation = deriveWardFromCoordinates(lat, lng, addressData);
+  const inputId = isCitizen ? 'citizenArea' : 'instArea';
+  const noticeId = isCitizen ? 'citizenWardNotice' : 'instWardNotice';
+  const input = document.getElementById(inputId);
+  const notice = document.getElementById(noticeId);
+  if (input) {
+    input.value = derivation.label;
+  }
+  if (notice) {
+    notice.textContent = derivation.isExact 
+      ? `📍 Verified statutory zone: ${derivation.wardName}`
+      : `📍 ${derivation.label}`;
+  }
+  return derivation;
+}
+
 let citizenPickerMap = null;
 let citizenPickerMarker = null;
 let instPickerMap = null;
@@ -809,8 +867,12 @@ function initLeafletLocationPicker(role) {
   const mapElem = document.getElementById(mapContainerId);
   if (!mapElem) return;
 
-  const defaultLat = isCitizen ? 28.6139 : 28.5900;
-  const defaultLng = isCitizen ? 77.2090 : 77.2250;
+  // Mumbai defaults: City center for Citizen, Andheri Industrial for Institution
+  const defaultLat = isCitizen ? 19.0760 : 19.1136;
+  const defaultLng = isCitizen ? 72.8777 : 72.8697;
+
+  // Auto-fill initial ward from default coordinates
+  updateWardFieldFromCoords(defaultLat, defaultLng, null, isCitizen);
 
   if (isCitizen && citizenPickerMap) {
     citizenPickerMap.invalidateSize();
@@ -832,10 +894,14 @@ function initLeafletLocationPicker(role) {
   function updateCoords(lat, lng) {
     const fixedLat = Number(lat.toFixed(5));
     const fixedLng = Number(lng.toFixed(5));
-    document.getElementById(latInputId).value = fixedLat;
-    document.getElementById(lngInputId).value = fixedLng;
-    document.getElementById(badgeId).textContent = `Lat: ${fixedLat}, Lng: ${fixedLng}`;
-    reverseGeocode(fixedLat, fixedLng, landmarkInputId, statusId);
+    const latInp = document.getElementById(latInputId);
+    const lngInp = document.getElementById(lngInputId);
+    const badge = document.getElementById(badgeId);
+    if (latInp) latInp.value = fixedLat;
+    if (lngInp) lngInp.value = fixedLng;
+    if (badge) badge.textContent = `Lat: ${fixedLat}, Lng: ${fixedLng}`;
+    updateWardFieldFromCoords(fixedLat, fixedLng, null, isCitizen);
+    reverseGeocode(fixedLat, fixedLng, landmarkInputId, statusId, isCitizen);
   }
 
   marker.on('dragend', (e) => {
@@ -856,12 +922,55 @@ function initLeafletLocationPicker(role) {
     instPickerMarker = marker;
   }
 
+  // --- Real Location Priority on Map Load ---
+  // Show brief loading indicator on map while attempting GPS detection
+  let loadingChip = mapElem.querySelector('.map-gps-loading-indicator');
+  if (!loadingChip) {
+    loadingChip = document.createElement('div');
+    loadingChip.className = 'map-gps-loading-indicator';
+    loadingChip.innerHTML = '<span>📡</span> <span>Detecting your location...</span>';
+    mapElem.style.position = 'relative';
+    mapElem.appendChild(loadingChip);
+  }
+
+  const statusElem = document.getElementById(statusId);
+  if (statusElem) statusElem.textContent = 'Detecting your current location via device GPS...';
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        if (loadingChip && loadingChip.parentNode) loadingChip.remove();
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        map.setView([lat, lng], 16);
+        marker.setLatLng([lat, lng]);
+        updateCoords(lat, lng);
+        if (statusElem) statusElem.textContent = '📍 Real current location acquired.';
+      },
+      (err) => {
+        if (loadingChip && loadingChip.parentNode) loadingChip.remove();
+        map.setView([defaultLat, defaultLng], 14);
+        marker.setLatLng([defaultLat, defaultLng]);
+        updateCoords(defaultLat, defaultLng);
+        if (statusElem) {
+          statusElem.textContent = "Location access unavailable — showing default area. Tap the map or click 'Use My Current Location' to set your exact spot.";
+        }
+      },
+      { timeout: 7000 }
+    );
+  } else {
+    if (loadingChip && loadingChip.parentNode) loadingChip.remove();
+    if (statusElem) {
+      statusElem.textContent = "Location access unavailable — showing default area. Tap the map or click 'Use My Current Location' to set your exact spot.";
+    }
+  }
+
   setTimeout(() => map.invalidateSize(), 200);
 }
 
-function reverseGeocode(lat, lng, landmarkInputId, statusId) {
+function reverseGeocode(lat, lng, landmarkInputId, statusId, isCitizen) {
   const statusElem = document.getElementById(statusId);
-  if (statusElem) statusElem.textContent = 'Resolving street address via OpenStreetMap...';
+  if (statusElem) statusElem.textContent = 'Resolving street address & municipal ward via OpenStreetMap...';
 
   fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
     .then(res => res.json())
@@ -870,12 +979,15 @@ function reverseGeocode(lat, lng, landmarkInputId, statusId) {
         const landmarkInput = document.getElementById(landmarkInputId);
         if (landmarkInput) landmarkInput.value = data.display_name;
         if (statusElem) statusElem.textContent = '📍 Address resolved: ' + data.display_name.slice(0, 60) + '...';
+        updateWardFieldFromCoords(lat, lng, data.display_name, isCitizen);
       } else {
         if (statusElem) statusElem.textContent = 'Coordinates pinned. Enter specific landmark details.';
+        updateWardFieldFromCoords(lat, lng, null, isCitizen);
       }
     })
     .catch(() => {
       if (statusElem) statusElem.textContent = 'Pin placed at exact GPS coordinates.';
+      updateWardFieldFromCoords(lat, lng, null, isCitizen);
     });
 }
 
@@ -907,7 +1019,8 @@ window.locateUser = function(role) {
         document.getElementById(latInputId).value = Number(lat.toFixed(5));
         document.getElementById(lngInputId).value = Number(lng.toFixed(5));
         document.getElementById(badgeId).textContent = `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
-        reverseGeocode(lat, lng, landmarkInputId, isCitizen ? 'citizenLocStatus' : 'instLocStatus');
+        updateWardFieldFromCoords(lat, lng, null, isCitizen);
+        reverseGeocode(lat, lng, landmarkInputId, isCitizen ? 'citizenLocStatus' : 'instLocStatus', isCitizen);
       }
     },
     (error) => {
@@ -918,6 +1031,43 @@ window.locateUser = function(role) {
     { timeout: 8000 }
   );
 };
+
+window.locateNewBranch = function() {
+  const statusNotice = document.getElementById('newBranchWardNotice');
+  if (!navigator.geolocation) {
+    applyBranchCoordinates(19.1136, 72.8697);
+    return;
+  }
+  if (statusNotice) statusNotice.textContent = 'Requesting device GPS coordinates...';
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      applyBranchCoordinates(pos.coords.latitude, pos.coords.longitude);
+    },
+    () => {
+      applyBranchCoordinates(19.1136, 72.8697);
+      if (statusNotice) {
+        statusNotice.textContent = "Location access unavailable — showing default area. Tap to detect again.";
+      }
+    },
+    { timeout: 6000 }
+  );
+};
+
+function applyBranchCoordinates(lat, lng) {
+  const badge = document.getElementById('newBranchCoordBadge');
+  const latInput = document.getElementById('newBranchLat');
+  const lngInput = document.getElementById('newBranchLng');
+  const wardInput = document.getElementById('newBranchWard');
+  const notice = document.getElementById('newBranchWardNotice');
+  const fixedLat = Number(lat.toFixed(5));
+  const fixedLng = Number(lng.toFixed(5));
+  if (badge) badge.textContent = `Lat: ${fixedLat}, Lng: ${fixedLng}`;
+  if (latInput) latInput.value = fixedLat;
+  if (lngInput) lngInput.value = fixedLng;
+  const derivation = deriveWardFromCoordinates(fixedLat, fixedLng);
+  if (wardInput) wardInput.value = derivation.label;
+  if (notice) notice.textContent = derivation.isExact ? `Verified statutory zone: ${derivation.wardName}` : derivation.label;
+}
 
 /* ==========================================================================
    5. CITIZEN DASHBOARD: SEVERITY SELECTOR, VOICE RECORDER & CREDIT STORE
@@ -964,8 +1114,8 @@ function renderCitizenDashboard() {
 
       const area = document.getElementById('citizenArea').value;
       const landmark = document.getElementById('citizenLandmark').value.trim();
-      const lat = parseFloat(document.getElementById('citizenLat').value) || 28.6139;
-      const lng = parseFloat(document.getElementById('citizenLng').value) || 77.2090;
+      const lat = parseFloat(document.getElementById('citizenLat').value) || 19.0760;
+      const lng = parseFloat(document.getElementById('citizenLng').value) || 72.8777;
       const notes = document.getElementById('citizenNotes').value;
       const audioData = document.getElementById('citizenAudioData').value;
 
@@ -1370,7 +1520,7 @@ function renderCitizenReportsFeed() {
         </div>
         <div style="font-weight: 700; font-size: 1.05rem;">${r.landmark}</div>
         <div style="font-size: 0.85rem; color: #556960;">${r.notes || 'No extra notes.'}</div>
-        <div style="font-size: 0.78rem; font-family: monospace; color: #64748b; margin-top: 0.2rem;">Coordinates: Lat ${r.latitude || r.coords?.lat || 28.6139}, Lng ${r.longitude || r.coords?.lng || 77.2090}</div>
+        <div style="font-size: 0.78rem; font-family: monospace; color: #64748b; margin-top: 0.2rem;">Coordinates: Lat ${r.latitude || r.coords?.lat || 19.0760}, Lng ${r.longitude || r.coords?.lng || 72.8777}</div>
         ${r.assignedWorkerName ? `<div style="font-size: 0.82rem; color: var(--civic-cobalt-accent); margin-top: 0.2rem;">🚛 Field Crew: <strong>${r.assignedWorkerName}</strong></div>` : ''}
       </div>
     </div>
@@ -1391,12 +1541,12 @@ window.triggerEmergencyModal = function() {
     userId: currentUser.id,
     userName: currentUser.name,
     userRole: 'citizen',
-    area: 'Ward 04 - MG Road & Commercial Center',
-    coords: { lat: 28.6250, lng: 77.2150 },
-    latitude: 28.6250,
-    longitude: 77.2150,
+    area: 'Ward G/South - Dadar & Elphinstone',
+    coords: { lat: 19.0210, lng: 72.8350 },
+    latitude: 19.0210,
+    longitude: 72.8350,
     landmark,
-    resolvedAddress: landmark + ', Ward 04',
+    resolvedAddress: landmark + ', Ward G/South',
     category: 'hazard_spill',
     severity: 'overflowing',
     notes: 'EMERGENCY HAZARD SPILL: Immediate dispatch required.',
@@ -1466,8 +1616,8 @@ function renderInstitutionDashboard() {
     const wasteType = document.getElementById('instWasteType').value;
     const area = document.getElementById('instArea').value;
     const landmark = document.getElementById('instLandmark').value.trim();
-    const lat = parseFloat(document.getElementById('instLat').value) || 28.5900;
-    const lng = parseFloat(document.getElementById('instLng').value) || 77.2250;
+    const lat = parseFloat(document.getElementById('instLat').value) || 19.1136;
+    const lng = parseFloat(document.getElementById('instLng').value) || 72.8697;
     const volumeKg = parseFloat(document.getElementById('instVolume').value) || 200;
     const containerCount = parseInt(document.getElementById('instContainerCount').value) || 3;
 
@@ -1570,8 +1720,8 @@ window.openAddBranchModal = function() {
       name,
       ward,
       address,
-      lat: 28.6000 + (Math.random() * 0.04),
-      lng: 77.2000 + (Math.random() * 0.04)
+      lat: (parseFloat(document.getElementById('newBranchLat')?.value) || 19.1136),
+      lng: (parseFloat(document.getElementById('newBranchLng')?.value) || 72.8697)
     };
 
     currentUser.branches.push(newBranch);
@@ -1617,14 +1767,14 @@ function renderInstitutionList() {
         </div>
         <div style="font-weight: 700; font-size: 1.05rem;">${r.landmark}</div>
         <div style="font-size: 0.85rem; color: #556960;">Bulk Volume: <strong>${r.volumeKg} kg</strong> (${r.containerCount || 1} Containers) — Stream: ${r.category.toUpperCase()}</div>
-        <div style="font-size: 0.78rem; font-family: monospace; color: #64748b; margin-top: 0.2rem;">Location: Lat ${r.latitude || 28.59}, Lng ${r.longitude || 77.225}</div>
+        <div style="font-size: 0.78rem; font-family: monospace; color: #64748b; margin-top: 0.2rem;">Location: Lat ${r.latitude || 19.1136}, Lng ${r.longitude || 72.8697}</div>
       </div>
     </div>
   `).join('');
 }
 
 window.triggerInstitutionOverloadAlert = function() {
-  const currentBranch = (currentUser.branches && currentUser.branches.find(b => b.id === currentUser.activeBranchId)) || { name: 'Main Campus', ward: 'Ward 18 - Sector 62 Tech Hub', lat: 28.59, lng: 77.225 };
+  const currentBranch = (currentUser.branches && currentUser.branches.find(b => b.id === currentUser.activeBranchId)) || { name: 'Main Campus', ward: 'Ward K/East - Andheri Industrial Estate', lat: 19.1136, lng: 72.8697 };
   
   const newReport = {
     id: 'OVERLOAD-' + Math.floor(1000 + Math.random() * 9000),
@@ -1945,10 +2095,10 @@ function calcDistance(lat1, lon1, lat2, lon2) {
   } else {
     const p1 = lat1;
     const p2 = lon1;
-    p1Lat = p1.lat !== undefined ? p1.lat : (p1.latitude !== undefined ? p1.latitude : 28.6139);
-    p1Lon = p1.lng !== undefined ? p1.lng : (p1.longitude !== undefined ? p1.longitude : 77.2090);
-    p2Lat = p2.lat !== undefined ? p2.lat : (p2.latitude !== undefined ? p2.latitude : 28.6139);
-    p2Lon = p2.lng !== undefined ? p2.lng : (p2.longitude !== undefined ? p2.longitude : 77.2090);
+    p1Lat = p1.lat !== undefined ? p1.lat : (p1.latitude !== undefined ? p1.latitude : 19.0760);
+    p1Lon = p1.lng !== undefined ? p1.lng : (p1.longitude !== undefined ? p1.longitude : 72.8777);
+    p2Lat = p2.lat !== undefined ? p2.lat : (p2.latitude !== undefined ? p2.latitude : 19.0760);
+    p2Lon = p2.lng !== undefined ? p2.lng : (p2.longitude !== undefined ? p2.longitude : 72.8777);
   }
   const R = 6371; // Earth radius in km
   const dLat = (p2Lat - p1Lat) * Math.PI / 180;
@@ -1959,6 +2109,17 @@ function calcDistance(lat1, lon1, lat2, lon2) {
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
+
+/* Worker Turn-by-Turn Route Navigation & Live Geolocation Engine */
+let workerMapObj = null;
+let workerLocationMarker = null;
+let workerRoutePolyline = null;
+let workerDirectGuidanceLine = null;
+let workerStopMarkers = [];
+let workerCurrentPos = { lat: 19.0760, lng: 72.8777, accuracy: null, updatedAt: Date.now() };
+let workerWatchId = null;
+let activeWorkerTargetStopId = null;
+const PROXIMITY_THRESHOLD_METERS = 50;
 
 function runSoftwareRouteOptimizer() {
   const reports = getReports().filter(r => r.status !== 'cleared');
@@ -1971,7 +2132,7 @@ function runSoftwareRouteOptimizer() {
   const priorityPickupStops = priorityPassReports;
   const regularStops = unassigned.filter(r => !r.isEmergency && !r.isPriorityPickup);
 
-  let currentPos = { lat: 28.6139, lng: 77.2090 };
+  let currentPos = { lat: workerCurrentPos.lat, lng: workerCurrentPos.lng };
 
   // Nearest-Neighbor implementation using Haversine distance
   function optimizeNearestNeighbor(stops, startPos) {
@@ -1986,8 +2147,8 @@ function runSoftwareRouteOptimizer() {
 
       for (let i = 0; i < unvisited.length; i++) {
         const targetCoords = unvisited[i].coords || {
-          lat: unvisited[i].latitude !== undefined ? unvisited[i].latitude : 28.6139,
-          lng: unvisited[i].longitude !== undefined ? unvisited[i].longitude : 77.2090
+          lat: unvisited[i].latitude !== undefined ? unvisited[i].latitude : 19.0760,
+          lng: unvisited[i].longitude !== undefined ? unvisited[i].longitude : 72.8777
         };
         const dist = calcDistance(pos, targetCoords);
         if (dist < minDistance) {
@@ -1999,8 +2160,8 @@ function runSoftwareRouteOptimizer() {
       const nextStop = unvisited.splice(nearestIdx, 1)[0];
       totalDist += (minDistance === Infinity ? 0 : minDistance);
       pos = nextStop.coords || {
-        lat: nextStop.latitude !== undefined ? nextStop.latitude : 28.6139,
-        lng: nextStop.longitude !== undefined ? nextStop.longitude : 77.2090
+        lat: nextStop.latitude !== undefined ? nextStop.latitude : 19.0760,
+        lng: nextStop.longitude !== undefined ? nextStop.longitude : 72.8777
       };
       ordered.push(nextStop);
     }
@@ -2025,38 +2186,333 @@ function runSoftwareRouteOptimizer() {
 
   if (finalRoute.length === 0) {
     container.innerHTML = `<div class="card" style="text-align: center; color: #64748b;">No active stops pending for your shift route.</div>`;
+    initWorkerRouteMap([]);
     return;
+  }
+
+  // Ensure an active target stop is selected
+  if (!activeWorkerTargetStopId || !finalRoute.some(s => s.id === activeWorkerTargetStopId)) {
+    activeWorkerTargetStopId = finalRoute[0].id;
   }
 
   container.innerHTML = finalRoute.map((stop, idx) => {
     const isEmg = stop.isEmergency;
     const isPriority = stop.isPriorityPickup;
+    const isTarget = stop.id === activeWorkerTargetStopId;
     const originLabel = stop.userRole === 'institution'
       ? (stop.institutionType === 'school' ? `🏫 ${stop.schoolName || stop.userName}` : `🏢 ${stop.companyName || stop.userName}`)
       : `👤 Resident (${stop.userName})`;
 
     return `
-      <div class="route-stop-card ${isEmg ? 'emergency' : ''}" style="${isPriority && !isEmg ? 'border-left: 4px solid var(--civic-signal-amber);' : ''}">
+      <div class="route-stop-card ${isEmg ? 'emergency' : ''} ${isTarget ? 'highlighted-target-stop' : ''}" data-report-id="${stop.id}" onclick="selectWorkerTargetStop('${stop.id}')" style="cursor: pointer; ${isPriority && !isEmg ? 'border-left: 4px solid var(--civic-signal-amber);' : ''}">
         <div class="stop-number ${isEmg ? 'emergency-stop' : ''}">${isEmg ? '🚨' : idx + 1}</div>
-        <div>
+        <div style="flex: 1;">
           <div class="report-meta">
             <span class="badge badge-${stop.status}">${stop.status}</span>
             ${isEmg ? `<span class="badge badge-emergency">TOP PRIORITY EMERGENCY</span>` : ''}
             ${isPriority && !isEmg ? `<span class="badge" style="background: var(--civic-signal-amber-soft); color: var(--civic-signal-amber); font-weight: 800;">⚡ PRIORITY PICKUP PASS</span>` : ''}
-            <span>📍 ${stop.area}</span>
+            <span>📍 ${stop.area || stop.wardZone}</span>
             <span>Origin: <strong>${originLabel}</strong></span>
           </div>
           <div style="font-weight: 700; font-size: 1.1rem;">${stop.landmark}</div>
           <div style="font-size: 0.88rem; color: #556960;">${stop.notes || 'No extra notes.'}</div>
-          <div style="font-size: 0.78rem; font-family: monospace; color: #64748b; margin-top: 0.2rem;">Coordinates: Lat ${stop.latitude || stop.coords?.lat || 28.6139}, Lng ${stop.longitude || stop.coords?.lng || 77.2090}</div>
+          <div style="font-size: 0.78rem; font-family: monospace; color: #64748b; margin-top: 0.2rem;">Coordinates: Lat ${stop.latitude || stop.coords?.lat || 19.0760}, Lng ${stop.longitude || stop.coords?.lng || 72.8777}</div>
         </div>
-        <div>
-          <button class="btn btn-primary btn-sm" onclick="openWorkerProofModal('${stop.id}')">📷 Mark Collected</button>
+        <div style="display: flex; flex-direction: column; gap: 0.4rem; align-items: flex-end;">
+          <button class="btn btn-outline btn-xs" onclick="event.stopPropagation(); selectWorkerTargetStop('${stop.id}')">🎯 Focus Stop</button>
+          <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); openWorkerProofModal('${stop.id}')">📷 Mark Collected</button>
         </div>
       </div>
     `;
   }).join('');
+
+  // Initialize and update Turn-by-Turn Leaflet Route Map
+  initWorkerRouteMap(finalRoute);
+  startWorkerGeolocationWatch(finalRoute);
 }
+
+function initWorkerRouteMap(finalRoute) {
+  const mapElement = document.getElementById('workerRouteMap');
+  if (!mapElement) return;
+
+  if (typeof L === 'undefined') return;
+
+  if (workerMapObj) {
+    workerMapObj.invalidateSize();
+  } else {
+    workerMapObj = L.map('workerRouteMap', { zoomControl: true }).setView([workerCurrentPos.lat, workerCurrentPos.lng], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(workerMapObj);
+  }
+
+  // Clear previous stop markers & lines
+  workerStopMarkers.forEach(m => m.remove());
+  workerStopMarkers = [];
+  if (workerRoutePolyline) {
+    workerRoutePolyline.remove();
+    workerRoutePolyline = null;
+  }
+  if (workerDirectGuidanceLine) {
+    workerDirectGuidanceLine.remove();
+    workerDirectGuidanceLine = null;
+  }
+
+  // Worker Live Location Marker (draggable in demo to simulate driving/walking)
+  if (workerLocationMarker) {
+    workerLocationMarker.setLatLng([workerCurrentPos.lat, workerCurrentPos.lng]);
+  } else {
+    workerLocationMarker = L.marker([workerCurrentPos.lat, workerCurrentPos.lng], {
+      draggable: true,
+      icon: L.divIcon({
+        className: 'worker-pulse-container',
+        html: `<div class="worker-pulse-marker" title="Worker Location (Drag to test proximity)">🚛</div>`,
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
+      })
+    }).addTo(workerMapObj).bindPopup('<strong>👷 Worker (You)</strong><br>Live GPS starting point.<br><small style="color: #64748b;">(Drag marker to test 50m proximity auto-advance)</small>');
+
+    workerLocationMarker.on('dragend', (e) => {
+      const pos = e.target.getLatLng();
+      updateWorkerLocation(pos.lat, pos.lng);
+      updateWorkerNavigationGuidance(finalRoute);
+    });
+  }
+
+  if (finalRoute.length === 0) return;
+
+  // Draw full optimized route polyline from worker current position through stops in order
+  const pathCoords = [
+    [workerCurrentPos.lat, workerCurrentPos.lng],
+    ...finalRoute.map(s => [
+      s.latitude !== undefined ? s.latitude : (s.coords?.lat || 19.0760),
+      s.longitude !== undefined ? s.longitude : (s.coords?.lng || 72.8777)
+    ])
+  ];
+
+  if (pathCoords.length > 1) {
+    workerRoutePolyline = L.polyline(pathCoords, {
+      color: '#1c52d8',
+      weight: 5,
+      opacity: 0.85,
+      dashArray: '6, 8',
+      lineJoin: 'round'
+    }).addTo(workerMapObj);
+  }
+
+  // Add numbered markers for each stop
+  finalRoute.forEach((stop, idx) => {
+    const lat = stop.latitude !== undefined ? stop.latitude : (stop.coords?.lat || 19.0760);
+    const lng = stop.longitude !== undefined ? stop.longitude : (stop.coords?.lng || 72.8777);
+    const isEmg = stop.isEmergency;
+    const isPriority = stop.isPriorityPickup;
+    const markerColor = isEmg ? '#dc2626' : (isPriority ? '#d97706' : '#1c52d8');
+    const stopLabel = isEmg ? '🚨' : (idx + 1);
+
+    const marker = L.marker([lat, lng], {
+      icon: L.divIcon({
+        className: 'stop-pin-icon',
+        html: `<div style="background: ${markerColor}; color: #fff; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.3); cursor: pointer;">${stopLabel}</div>`,
+        iconSize: [26, 26],
+        iconAnchor: [13, 13]
+      })
+    }).addTo(workerMapObj);
+
+    marker.bindPopup(`
+      <div style="font-family: var(--font-body);">
+        <strong>Stop #${idx + 1}: ${stop.landmark}</strong><br>
+        Status: ${stop.status.toUpperCase()}<br>
+        Ward: ${stop.area || stop.wardZone}<br>
+        <button class="btn btn-primary btn-xs" style="width: 100%; margin-top: 0.4rem;" onclick="selectWorkerTargetStop('${stop.id}')">🎯 Focus & Navigate</button>
+      </div>
+    `);
+
+    marker.on('click', () => {
+      selectWorkerTargetStop(stop.id);
+    });
+
+    workerStopMarkers.push({ id: stop.id, marker, stop });
+  });
+
+  updateWorkerNavigationGuidance(finalRoute);
+  setTimeout(() => {
+    if (workerMapObj) workerMapObj.invalidateSize();
+  }, 200);
+}
+
+function updateWorkerLocation(lat, lng) {
+  workerCurrentPos.lat = Number(lat.toFixed(5));
+  workerCurrentPos.lng = Number(lng.toFixed(5));
+  workerCurrentPos.updatedAt = Date.now();
+
+  if (currentUser) {
+    currentUser.lastKnownLat = workerCurrentPos.lat;
+    currentUser.lastKnownLng = workerCurrentPos.lng;
+    currentUser.lastLocationUpdatedAt = workerCurrentPos.updatedAt;
+    updateUserRecord(currentUser);
+  }
+
+  // Sync to fleet record
+  let fleet = getFleet();
+  const fIdx = fleet.findIndex(f => f.driverId === currentUser?.id || f.driver === currentUser?.name);
+  if (fIdx !== -1) {
+    fleet[fIdx].lastKnownLat = workerCurrentPos.lat;
+    fleet[fIdx].lastKnownLng = workerCurrentPos.lng;
+    fleet[fIdx].lastLocationUpdatedAt = workerCurrentPos.updatedAt;
+    saveFleet(fleet);
+  }
+
+  // Sync to REST API backend
+  if (isBackendConnected && currentUser) {
+    fetch('/api/worker-location', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        workerId: currentUser.id,
+        lat: workerCurrentPos.lat,
+        lng: workerCurrentPos.lng,
+        timestamp: workerCurrentPos.updatedAt
+      })
+    }).catch(() => {});
+  }
+}
+
+window.selectWorkerTargetStop = function(stopId) {
+  activeWorkerTargetStopId = stopId;
+  const reports = getReports().filter(r => r.status !== 'cleared');
+  updateWorkerNavigationGuidance(reports);
+
+  // Scroll target card into view and highlight
+  const stopCards = document.querySelectorAll('.route-stop-card');
+  stopCards.forEach(c => {
+    if (c.getAttribute('data-report-id') === stopId) {
+      c.classList.add('highlighted-target-stop');
+      c.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else {
+      c.classList.remove('highlighted-target-stop');
+    }
+  });
+};
+
+function updateWorkerNavigationGuidance(finalRoute) {
+  if (!finalRoute || finalRoute.length === 0) return;
+
+  const targetStop = finalRoute.find(s => s.id === activeWorkerTargetStopId) || finalRoute[0];
+  if (!targetStop) return;
+
+  const stopIdx = finalRoute.findIndex(s => s.id === targetStop.id);
+  const targetLat = targetStop.latitude !== undefined ? targetStop.latitude : (targetStop.coords?.lat || 19.0760);
+  const targetLng = targetStop.longitude !== undefined ? targetStop.longitude : (targetStop.coords?.lng || 72.8777);
+
+  const distKm = calcDistance(workerCurrentPos.lat, workerCurrentPos.lng, targetLat, targetLng);
+  const distMeters = Math.round(distKm * 1000);
+
+  // Update Navigation Guidance HUD
+  const titleElem = document.getElementById('workerTargetStopTitle');
+  const addrElem = document.getElementById('workerTargetStopAddress');
+  const badgeElem = document.getElementById('workerTargetDistanceBadge');
+  const proximityElem = document.getElementById('workerProximityNotice');
+
+  if (titleElem) titleElem.textContent = `Stop #${stopIdx + 1}: ${targetStop.landmark}`;
+  if (addrElem) addrElem.textContent = `📍 ${targetStop.resolvedAddress || targetStop.area || 'Ward Target Point'}`;
+  if (badgeElem) badgeElem.textContent = distMeters < 1000 ? `${distMeters} m` : `${distKm.toFixed(2)} km`;
+
+  const isNearby = distMeters <= PROXIMITY_THRESHOLD_METERS;
+  if (proximityElem) proximityElem.style.display = isNearby ? 'block' : 'none';
+
+  // Highlight card in DOM
+  const stopCards = document.querySelectorAll('.route-stop-card');
+  stopCards.forEach(c => {
+    if (c.getAttribute('data-report-id') === targetStop.id) {
+      c.classList.add('highlighted-target-stop');
+    } else {
+      c.classList.remove('highlighted-target-stop');
+    }
+  });
+
+  // Draw direct guidance line on Leaflet map from worker position to target destination
+  if (workerMapObj) {
+    if (workerDirectGuidanceLine) {
+      workerDirectGuidanceLine.remove();
+    }
+    workerDirectGuidanceLine = L.polyline([
+      [workerCurrentPos.lat, workerCurrentPos.lng],
+      [targetLat, targetLng]
+    ], {
+      color: '#059669',
+      weight: 4,
+      opacity: 0.95,
+      dashArray: '4, 6'
+    }).addTo(workerMapObj);
+  }
+}
+
+function startWorkerGeolocationWatch(finalRoute) {
+  const badge = document.getElementById('workerGpsStatusBadge');
+  if (!navigator.geolocation) {
+    if (badge) {
+      badge.textContent = '📍 Manual GPS Mode';
+      badge.style.background = 'rgba(217, 119, 6, 0.15)';
+      badge.style.color = '#b45309';
+    }
+    return;
+  }
+
+  if (workerWatchId) return;
+
+  workerWatchId = navigator.geolocation.watchPosition(
+    (pos) => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      updateWorkerLocation(lat, lng);
+      if (workerLocationMarker) {
+        workerLocationMarker.setLatLng([lat, lng]);
+      }
+      if (badge) {
+        badge.textContent = '🟢 Live GPS Active';
+        badge.style.background = 'rgba(16, 185, 129, 0.15)';
+        badge.style.color = '#047857';
+      }
+      updateWorkerNavigationGuidance(finalRoute);
+    },
+    (err) => {
+      if (badge) {
+        badge.textContent = '📍 Manual GPS Mode';
+        badge.style.background = 'rgba(217, 119, 6, 0.15)';
+        badge.style.color = '#b45309';
+      }
+    },
+    { enableHighAccuracy: true, maximumAge: 10000, timeout: 12000 }
+  );
+}
+
+window.refreshWorkerLiveLocation = function() {
+  if (!navigator.geolocation) {
+    alert('Geolocation not supported. You can drag the 🚛 marker on the map to test locations.');
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      updateWorkerLocation(pos.coords.latitude, pos.coords.longitude);
+      if (workerLocationMarker) workerLocationMarker.setLatLng([pos.coords.latitude, pos.coords.longitude]);
+      if (workerMapObj) workerMapObj.setView([pos.coords.latitude, pos.coords.longitude], 15);
+      const reports = getReports().filter(r => r.status !== 'cleared');
+      updateWorkerNavigationGuidance(reports);
+      alert('Live worker coordinates updated!');
+    },
+    (err) => {
+      alert('Unable to retrieve GPS coordinates. Drag the marker on the map to manually set your location.');
+    },
+    { timeout: 8000 }
+  );
+};
+
+window.recenterWorkerMap = function() {
+  if (workerMapObj) {
+    workerMapObj.setView([workerCurrentPos.lat, workerCurrentPos.lng], 15);
+  }
+};
 
 window.openWorkerProofModal = function(reportId) {
   document.getElementById('proofReportId').value = reportId;
@@ -2070,15 +2526,23 @@ window.openWorkerProofModal = function(reportId) {
     let reports = getReports();
     const index = reports.findIndex(r => r.id === id);
     if (index !== -1) {
+      const clearedStop = reports[index];
       reports[index].status = 'cleared';
       reports[index].clearedAt = Date.now();
       reports[index].clearedByWorker = currentUser.name;
       saveReports(reports);
 
+      // Log stop location as worker's last known position
+      const stopLat = clearedStop.latitude || clearedStop.coords?.lat || workerCurrentPos.lat;
+      const stopLng = clearedStop.longitude || clearedStop.coords?.lng || workerCurrentPos.lng;
+      updateWorkerLocation(stopLat, stopLng);
+
       alert(`Stop ${id} confirmed CLEARED! Photo proof logged.`);
     }
 
     closeModal('workerProofModal');
+    // Clear active target so optimizer advances to next stop
+    activeWorkerTargetStopId = null;
     renderWorkerDashboard();
   };
 };
@@ -2136,8 +2600,8 @@ function renderAdminFeedTable(customReports) {
       }
     }
 
-    const lat = r.latitude !== undefined ? r.latitude : (r.coords?.lat || 28.6139);
-    const lng = r.longitude !== undefined ? r.longitude : (r.coords?.lng || 77.2090);
+    const lat = r.latitude !== undefined ? r.latitude : (r.coords?.lat || 19.0760);
+    const lng = r.longitude !== undefined ? r.longitude : (r.coords?.lng || 72.8777);
 
     return `
       <tr class="${r.isEscalated ? 'escalated' : ''}">
@@ -2292,7 +2756,7 @@ window.handleDispatchStandbySubmit = async function(e) {
   const newVehicle = {
     id: `FLT-ST-${Date.now().toString().slice(-3)}`,
     type,
-    regNo: regNo || `DL-09-EV-${Math.floor(1000 + Math.random() * 9000)}`,
+    regNo: regNo || `MH-02-EV-${Math.floor(1000 + Math.random() * 9000)}`,
     driver: driver || 'Depot Relief Driver',
     contact: '+91 98100-77210',
     ward,
@@ -2493,11 +2957,11 @@ function renderAdminLeaderboardTable() {
   if (!tbody) return;
 
   const wardsData = [
-    { rank: 1, medal: '🥇', ward: 'Ward 18 - Sector 62 Tech Hub', rating: '⭐⭐⭐⭐⭐', score: 92.4, avgResponse: '1.2h', diversion: '88%', policy: 'Model Ward: Extend Green Corridor Grant' },
-    { rank: 2, medal: '🥈', ward: 'Ward 04 - MG Road & Commercial Center', rating: '⭐⭐⭐⭐', score: 86.8, avgResponse: '2.4h', diversion: '82%', policy: 'Deploy Night Shift Hydraulic Compactor' },
-    { rank: 3, medal: '🥉', ward: 'Ward 12 - Indiranagar Residential', rating: '⭐⭐⭐⭐', score: 84.1, avgResponse: '3.1h', diversion: '79%', policy: 'Distribute Citizen Home Composting Kits' },
-    { rank: 4, medal: '4', ward: 'Ward 02 - Central Railway Station', rating: '⭐⭐⭐', score: 71.5, avgResponse: '4.8h', diversion: '65%', policy: 'Increase Bin Density at Transit Terminals' },
-    { rank: 5, medal: '5', ward: 'Ward 07 - Civil Lines Market', rating: '⭐⭐', score: 58.0, avgResponse: '7.5h', diversion: '44%', policy: 'Statutory Remediation: Compulsory Segregation Drive' }
+    { rank: 1, medal: '🥇', ward: 'Ward K/East - Andheri Industrial Estate', rating: '⭐⭐⭐⭐⭐', score: 92.4, avgResponse: '1.2h', diversion: '88%', policy: 'Model Ward: Extend Green Corridor Grant' },
+    { rank: 2, medal: '🥈', ward: 'Ward G/South - Dadar & Elphinstone', rating: '⭐⭐⭐⭐', score: 86.8, avgResponse: '2.4h', diversion: '82%', policy: 'Deploy Night Shift Hydraulic Compactor' },
+    { rank: 3, medal: '🥉', ward: 'Ward H/West - Bandra Residential', rating: '⭐⭐⭐⭐', score: 84.1, avgResponse: '3.1h', diversion: '79%', policy: 'Distribute Citizen Home Composting Kits' },
+    { rank: 4, medal: '4', ward: 'Ward A - Colaba & Fort Commercial', rating: '⭐⭐⭐', score: 71.5, avgResponse: '4.8h', diversion: '65%', policy: 'Increase Bin Density at Transit Terminals' },
+    { rank: 5, medal: '5', ward: 'Ward S - Powai Lake & Tech Enclave', rating: '⭐⭐', score: 58.0, avgResponse: '7.5h', diversion: '44%', policy: 'Statutory Remediation: Compulsory Segregation Drive' }
   ];
 
   tbody.innerHTML = wardsData.map(w => `
@@ -2869,7 +3333,7 @@ function initAdminHotspotMap() {
     return;
   }
 
-  adminMapObj = L.map('adminHotspotMap').setView([28.6139, 77.2090], 12);
+  adminMapObj = L.map('adminHotspotMap').setView([19.0760, 72.8777], 12);
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
@@ -2899,6 +3363,158 @@ function initAdminHotspotMap() {
     }
   });
 }
+
+/* Admin Live Worker Tracking Map Engine */
+let adminWorkerMapObj = null;
+let adminWorkerMarkers = [];
+let adminWorkerRouteLine = null;
+let adminWorkerRouteStopMarkers = [];
+
+function initAdminWorkerLocationsMap(forceRefresh) {
+  const mapElement = document.getElementById('adminWorkerLocationsMap');
+  if (!mapElement) return;
+
+  if (typeof L === 'undefined') return;
+
+  if (adminWorkerMapObj) {
+    adminWorkerMapObj.invalidateSize();
+  } else {
+    adminWorkerMapObj = L.map('adminWorkerLocationsMap', { zoomControl: true }).setView([19.0760, 72.8777], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(adminWorkerMapObj);
+  }
+
+  // Clear existing worker markers
+  adminWorkerMarkers.forEach(m => m.remove());
+  adminWorkerMarkers = [];
+
+  const workers = getUsers().filter(u => u.role === 'worker');
+  const fleet = getFleet();
+  const reports = getReports().filter(r => r.status !== 'cleared');
+
+  workers.forEach(w => {
+    const lat = w.lastKnownLat || 19.0200;
+    const lng = w.lastKnownLng || 72.8350;
+    const vehicle = fleet.find(f => f.driverId === w.id || f.driver === w.name || (w.name && f.driver && w.name.includes(f.driver)) || (w.name && f.driver && f.driver.includes(w.name))) || fleet[0];
+    const assignedStops = reports.filter(r => r.assignedWorkerId === w.id || !r.assignedWorkerId);
+    const updatedStr = w.lastLocationUpdatedAt ? new Date(w.lastLocationUpdatedAt).toLocaleTimeString() : 'Just now';
+
+    const marker = L.marker([lat, lng], {
+      icon: L.divIcon({
+        className: 'custom-admin-worker-icon',
+        html: `<div class="admin-worker-marker" style="cursor: pointer;">👷 ${w.name.split(' ')[0]}</div>`,
+        iconSize: [90, 28],
+        iconAnchor: [45, 14]
+      })
+    }).addTo(adminWorkerMapObj);
+
+    marker.bindPopup(`
+      <div style="min-width: 220px; font-family: var(--font-body);">
+        <h4 style="margin: 0 0 0.35rem 0; font-size: 1rem;">👷 ${w.name}</h4>
+        <div style="font-size: 0.78rem; color: #64748b;">Worker ID: <code>${w.id}</code></div>
+        <div style="font-size: 0.82rem; margin: 0.35rem 0;">🚛 Vehicle: <strong>${vehicle ? vehicle.type : 'Heavy Compactor'}</strong> (${vehicle ? vehicle.regNo : 'MH-01-GA-4401'})</div>
+        <div style="font-size: 0.82rem; margin-bottom: 0.35rem;">📋 Stops Remaining: <strong>${assignedStops.length}</strong></div>
+        <div style="font-size: 0.75rem; color: #64748b;">🕒 Last Updated: ${updatedStr}</div>
+        <button class="btn btn-primary btn-xs" style="width: 100%; margin-top: 0.5rem;" onclick="adminOverlayWorkerRoute('${w.id}')">🗺️ Overlay Assigned Route</button>
+      </div>
+    `);
+
+    marker.on('click', () => {
+      adminOverlayWorkerRoute(w.id);
+    });
+
+    adminWorkerMarkers.push({ id: w.id, marker, worker: w });
+  });
+
+  setTimeout(() => {
+    if (adminWorkerMapObj) adminWorkerMapObj.invalidateSize();
+  }, 200);
+}
+
+window.adminOverlayWorkerRoute = function(workerId) {
+  if (!adminWorkerMapObj) return;
+
+  const workers = getUsers().filter(u => u.role === 'worker');
+  const worker = workers.find(w => w.id === workerId) || workers[0];
+  if (!worker) return;
+
+  // Clear previous route overlays
+  clearAdminWorkerRouteOverlay();
+
+  const workerLat = worker.lastKnownLat || 19.0200;
+  const workerLng = worker.lastKnownLng || 72.8350;
+  const fleet = getFleet();
+  const vehicle = fleet.find(f => f.driverId === worker.id || f.driver === worker.name || (worker.name && f.driver && worker.name.includes(f.driver)) || (worker.name && f.driver && f.driver.includes(worker.name))) || fleet[0];
+  const reports = getReports().filter(r => r.status !== 'cleared');
+  const assignedStops = reports.filter(r => r.assignedWorkerId === worker.id || !r.assignedWorkerId);
+
+  // Draw overlay path connecting worker's location through their stops in order
+  const pathCoords = [
+    [workerLat, workerLng],
+    ...assignedStops.map(s => [
+      s.latitude !== undefined ? s.latitude : (s.coords?.lat || 19.0760),
+      s.longitude !== undefined ? s.longitude : (s.coords?.lng || 72.8777)
+    ])
+  ];
+
+  if (pathCoords.length > 1) {
+    adminWorkerRouteLine = L.polyline(pathCoords, {
+      color: '#059669',
+      weight: 5,
+      opacity: 0.85,
+      dashArray: '8, 8'
+    }).addTo(adminWorkerMapObj);
+
+    adminWorkerMapObj.fitBounds(adminWorkerRouteLine.getBounds(), { padding: [40, 40] });
+  }
+
+  // Draw numbered stop markers on admin map
+  assignedStops.forEach((stop, idx) => {
+    const lat = stop.latitude !== undefined ? stop.latitude : (stop.coords?.lat || 19.0760);
+    const lng = stop.longitude !== undefined ? stop.longitude : (stop.coords?.lng || 72.8777);
+    const m = L.marker([lat, lng], {
+      icon: L.divIcon({
+        html: `<div style="background: #059669; color: #fff; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">${idx + 1}</div>`,
+        iconSize: [22, 22],
+        iconAnchor: [11, 11]
+      })
+    }).addTo(adminWorkerMapObj);
+    m.bindPopup(`<strong>Stop #${idx + 1}: ${stop.landmark}</strong><br>Status: ${stop.status.toUpperCase()}<br>Ward: ${stop.area || stop.wardZone}`);
+    adminWorkerRouteStopMarkers.push(m);
+  });
+
+  // Display details panel below the map
+  const panel = document.getElementById('adminWorkerRouteOverlayPanel');
+  const nameElem = document.getElementById('adminOverlayWorkerName');
+  const countElem = document.getElementById('adminOverlayStopsCount');
+  const listElem = document.getElementById('adminOverlayStopsList');
+
+  if (panel) panel.style.display = 'block';
+  if (nameElem) nameElem.textContent = `Route Overlay: 👷 ${worker.name} (${vehicle ? vehicle.type : 'Compactor'})`;
+  if (countElem) countElem.textContent = `${assignedStops.length} Stops Active`;
+  if (listElem) {
+    listElem.innerHTML = assignedStops.length === 0 
+      ? 'No active pending stops assigned.'
+      : assignedStops.map((s, idx) => `<div style="padding: 0.25rem 0; border-bottom: 1px dashed var(--civic-border);"><strong>${idx + 1}.</strong> ${s.landmark} <span style="color: #64748b;">(${s.area || s.wardZone})</span></div>`).join('');
+  }
+};
+
+window.clearAdminWorkerRouteOverlay = function() {
+  if (adminWorkerRouteLine) {
+    adminWorkerRouteLine.remove();
+    adminWorkerRouteLine = null;
+  }
+  adminWorkerRouteStopMarkers.forEach(m => m.remove());
+  adminWorkerRouteStopMarkers = [];
+  const panel = document.getElementById('adminWorkerRouteOverlayPanel');
+  if (panel) panel.style.display = 'none';
+};
+
+window.renderAdminWorkerLocationsMap = function(forceRefresh) {
+  initAdminWorkerLocationsMap(forceRefresh);
+};
 
 function renderAdminRedemptionsQueue() {
   const tbody = document.getElementById('adminRedemptionsTableBody');
@@ -2950,6 +3566,7 @@ window.switchAdminTab = function(tabName) {
     { id: 'adminPanelLeaderboard', tab: 'adminTabLeaderboard', name: 'leaderboard' },
     { id: 'adminPanelCompliance', tab: 'adminTabCompliance', name: 'compliance' },
     { id: 'adminPanelHotspot', tab: 'adminTabHotspot', name: 'hotspot' },
+    { id: 'adminPanelWorkerLocations', tab: 'adminTabWorkerLocations', name: 'workerLocations' },
     { id: 'adminPanelHospital', tab: 'adminTabHospital', name: 'hospital' },
     { id: 'adminPanelWorkers', tab: 'adminTabWorkers', name: 'workers' },
     { id: 'adminPanelRedemptions', tab: 'adminTabRedemptions', name: 'redemptions' },
@@ -2969,6 +3586,7 @@ window.switchAdminTab = function(tabName) {
   if (tabName === 'leaderboard') renderAdminLeaderboardTable();
   if (tabName === 'compliance') renderAdminComplianceTable();
   if (tabName === 'hotspot') setTimeout(() => initAdminHotspotMap(), 150);
+  if (tabName === 'workerLocations') setTimeout(() => initAdminWorkerLocationsMap(), 150);
   if (tabName === 'hospital') renderAdminHospitalTable();
   if (tabName === 'workers') renderAdminWorkerTable();
   if (tabName === 'redemptions') renderAdminRedemptionsQueue();

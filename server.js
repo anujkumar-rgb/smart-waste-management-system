@@ -42,14 +42,14 @@ const DEFAULT_DB = {
       id: 'usr-2', 
       email: 'school@cityedu.org', 
       pass: 'demo123', 
-      name: 'Delhi Public School, Sector 12', 
+      name: 'Bombay Scottish School, Powai', 
       role: 'institution', 
       institutionType: 'school',
-      schoolName: 'Delhi Public School, Sector 12',
+      schoolName: 'Bombay Scottish School, Powai',
       verificationCode: 'INST-SCH-8821',
       branches: [
-        { id: 'br-dps-main', name: 'Sector 12 Senior Campus', ward: 'Ward 18 - Sector 62 Tech Hub', address: 'Plot 4, Institutional Area, Sector 12', lat: 28.5920, lng: 77.2280 },
-        { id: 'br-dps-junior', name: 'Sector 4 Junior Wing', ward: 'Ward 04 - MG Road & Commercial Center', address: 'Near City Square, Sector 4', lat: 28.6270, lng: 77.2180 }
+        { id: 'br-dps-main', name: 'Powai Senior Campus', ward: 'Ward S - Powai Lake & Tech Enclave', address: 'Plot 4, Technology Corridor, Powai', lat: 19.1250, lng: 72.9150 },
+        { id: 'br-dps-junior', name: 'Dadar Junior Wing', ward: 'Ward G/South - Dadar & Elphinstone', address: 'Near Shivaji Park, Dadar West', lat: 19.0220, lng: 72.8380 }
       ],
       activeBranchId: 'br-dps-main',
       recurringSchedule: { frequency: 'daily', timeSlot: '06:00 - 08:00 AM' },
@@ -61,15 +61,15 @@ const DEFAULT_DB = {
       id: 'usr-6', 
       email: 'infosys@campus.org', 
       pass: 'demo123', 
-      name: 'Infosys Ltd, Whitefield Campus', 
+      name: 'Tata Consultancy Services, Andheri (E)', 
       role: 'institution', 
       institutionType: 'company',
-      companyName: 'Infosys Ltd, Whitefield Campus',
+      companyName: 'Tata Consultancy Services, Andheri (E)',
       businessType: 'IT / Tech Office',
-      verificationCode: 'CORP-INFY-4401',
+      verificationCode: 'CORP-TCS-4401',
       branches: [
-        { id: 'br-infy-main', name: 'Whitefield Main Tech Park', ward: 'Ward 18 - Sector 62 Tech Hub', address: 'Plot 22, Software Innovation Corridor', lat: 28.5880, lng: 77.2210 },
-        { id: 'br-infy-dev', name: 'Development Center Wing B', ward: 'Ward 04 - MG Road & Commercial Center', address: 'Tower 3, Central IT Plaza', lat: 28.6210, lng: 77.2130 }
+        { id: 'br-infy-main', name: 'Andheri Tech Park', ward: 'Ward K/East - Andheri Industrial Estate', address: 'Plot 22, MIDC Innovation Park, Andheri East', lat: 19.1150, lng: 72.8680 },
+        { id: 'br-infy-dev', name: 'Bandra Development Center', ward: 'Ward H/West - Bandra Residential', address: 'Tower 3, Hill Road Tech Center, Bandra', lat: 19.0580, lng: 72.8310 }
       ],
       activeBranchId: 'br-infy-main',
       recurringSchedule: { frequency: 'daily', timeSlot: '20:00 - 22:00 PM' },
@@ -97,7 +97,10 @@ const DEFAULT_DB = {
       pass: 'demo123', 
       name: 'Rajesh Singh (Crew #101)', 
       role: 'worker', 
-      verificationCode: 'WRK-101' 
+      verificationCode: 'WRK-101',
+      lastKnownLat: 19.0200,
+      lastKnownLng: 72.8350,
+      lastLocationUpdatedAt: Date.now() - 120000
     },
     { 
       id: 'usr-5', 
@@ -114,12 +117,12 @@ const DEFAULT_DB = {
       userId: 'usr-1',
       userName: 'Ananya Sharma',
       userRole: 'citizen',
-      area: 'Ward 04 - MG Road & Commercial Center',
-      coords: { lat: 28.6250, lng: 77.2150 },
-      latitude: 28.6250,
-      longitude: 77.2150,
+      area: 'Ward G/South - Dadar & Elphinstone',
+      coords: { lat: 19.0210, lng: 72.8350 },
+      latitude: 19.0210,
+      longitude: 72.8350,
       landmark: 'City Plaza Market Gate 2 Bin Point',
-      resolvedAddress: 'City Plaza Market Gate 2, MG Road, Ward 04',
+      resolvedAddress: 'Dadar Commercial Plaza Gate 2, Senapati Bapat Marg, Ward G/South',
       category: 'plastic',
       severity: 'overflowing',
       notes: 'Plastic packaging spillage blocking pedestrian footpath.',
@@ -134,12 +137,12 @@ const DEFAULT_DB = {
       userId: 'usr-1',
       userName: 'Ananya Sharma',
       userRole: 'citizen',
-      area: 'Ward 12 - Indiranagar Residential',
-      coords: { lat: 28.6050, lng: 77.1950 },
-      latitude: 28.6050,
-      longitude: 77.1950,
+      area: 'Ward H/West - Bandra Residential',
+      coords: { lat: 19.0580, lng: 72.8300 },
+      latitude: 19.0580,
+      longitude: 72.8300,
       landmark: 'Community Park Main Gate',
-      resolvedAddress: 'Indiranagar 5th Cross, Community Park Gate, Ward 12',
+      resolvedAddress: 'Bandra 5th Cross, Community Park Gate, Ward H/West',
       category: 'organic',
       severity: 'full',
       notes: 'Dry leaves and organic bins filled after morning sweep.',
@@ -155,18 +158,18 @@ const DEFAULT_DB = {
     {
       id: 'BULK-2001',
       userId: 'usr-2',
-      userName: 'Delhi Public School, Sector 12',
+      userName: 'Bombay Scottish School, Powai',
       institutionType: 'school',
-      schoolName: 'Delhi Public School, Sector 12',
+      schoolName: 'Bombay Scottish School, Powai',
       branchId: 'br-dps-main',
-      branchName: 'Sector 12 Senior Campus',
+      branchName: 'Powai Senior Campus',
       userRole: 'institution',
-      area: 'Ward 18 - Sector 62 Tech Hub',
-      coords: { lat: 28.5920, lng: 77.2280 },
-      latitude: 28.5920,
-      longitude: 77.2280,
+      area: 'Ward S - Powai Lake & Tech Enclave',
+      coords: { lat: 19.1250, lng: 72.9150 },
+      latitude: 19.1250,
+      longitude: 72.9150,
       landmark: 'School Cafeteria Loading Dock',
-      resolvedAddress: 'Plot 4 Institutional Area, Sector 12, Ward 18',
+      resolvedAddress: 'Plot 4 Technology Corridor, Powai, Ward S',
       category: 'commercial_food',
       severity: 'overflowing',
       notes: 'Bulk organic food waste from annual school environmental assembly.',
@@ -182,19 +185,19 @@ const DEFAULT_DB = {
     {
       id: 'BULK-2002',
       userId: 'usr-6',
-      userName: 'Infosys Ltd, Whitefield Campus',
+      userName: 'Tata Consultancy Services, Andheri (E)',
       institutionType: 'company',
-      companyName: 'Infosys Ltd, Whitefield Campus',
+      companyName: 'Tata Consultancy Services, Andheri (E)',
       businessType: 'IT / Tech Office',
       branchId: 'br-infy-main',
-      branchName: 'Whitefield Main Tech Park',
+      branchName: 'Andheri Tech Park',
       userRole: 'institution',
-      area: 'Ward 18 - Sector 62 Tech Hub',
-      coords: { lat: 28.5880, lng: 77.2210 },
-      latitude: 28.5880,
-      longitude: 77.2210,
+      area: 'Ward K/East - Andheri Industrial Estate',
+      coords: { lat: 19.1150, lng: 72.8680 },
+      latitude: 19.1150,
+      longitude: 72.8680,
       landmark: 'Server Room Recycling Bay #3',
-      resolvedAddress: 'Plot 22 Software Innovation Corridor, Ward 18',
+      resolvedAddress: 'Plot 22 MIDC Innovation Park, Andheri East, Ward K/East',
       category: 'office_paper',
       severity: 'full',
       notes: 'Disposal of 420 kg confidential shredded documentation and corrugated paperboard.',
@@ -273,17 +276,17 @@ const DEFAULT_DB = {
     }
   ],
   compliance_metrics: [
-    { ward: 'Ward 04 - MG Road & Commercial Center', segregationRate: 74, coverageRate: 92, processingRate: 85, status: 'ontrack' },
-    { ward: 'Ward 12 - Indiranagar Residential', segregationRate: 68, coverageRate: 88, processingRate: 82, status: 'ontrack' },
-    { ward: 'Ward 18 - Sector 62 Tech Hub', segregationRate: 78, coverageRate: 86, processingRate: 80, status: 'ontrack' },
-    { ward: 'Ward 07 - Civil Lines Market', segregationRate: 44, coverageRate: 68, processingRate: 59, status: 'offtarget' },
-    { ward: 'Ward 02 - Central Railway Station', segregationRate: 62, coverageRate: 84, processingRate: 81, status: 'ontrack' }
+    { ward: 'Ward G/South - Dadar & Elphinstone', segregationRate: 74, coverageRate: 92, processingRate: 85, status: 'ontrack' },
+    { ward: 'Ward H/West - Bandra Residential', segregationRate: 68, coverageRate: 88, processingRate: 82, status: 'ontrack' },
+    { ward: 'Ward K/East - Andheri Industrial Estate', segregationRate: 78, coverageRate: 86, processingRate: 80, status: 'ontrack' },
+    { ward: 'Ward S - Powai Lake & Tech Enclave', segregationRate: 44, coverageRate: 68, processingRate: 59, status: 'offtarget' },
+    { ward: 'Ward A - Colaba & Fort Commercial', segregationRate: 62, coverageRate: 84, processingRate: 81, status: 'ontrack' }
   ],
   fleet: [
-    { id: 'FLT-CT-401', type: 'Heavy Hydraulic Compactor (10T)', regNo: 'DL-01-GA-4401', ward: 'Ward 04 - MG Road & Commercial Center', driver: 'Rajesh Singh', contact: '+91 98112-40192', capacityTon: 10.0, currentPayloadTon: 7.8, fuelPercent: 84, status: 'Active Collection', icon: '🚛' },
-    { id: 'FLT-ET-108', type: 'Electric Multi-Bin Tipper Auto (1.5T)', regNo: 'DL-04-EV-1088', ward: 'Ward 12 - Indiranagar Residential', driver: 'Sunita Devi', contact: '+91 98711-20984', capacityTon: 1.5, currentPayloadTon: 1.35, fuelPercent: 68, status: 'Transfer Station Transit', icon: '🛺' },
-    { id: 'FLT-BM-09', type: 'Biomedical Closed-Chamber Van (2T)', regNo: 'DL-02-HA-0912', ward: 'Ward 18 - Sector 62 Tech Hub', driver: 'Amit Verma', contact: '+91 98104-55120', capacityTon: 2.0, currentPayloadTon: 0.7, fuelPercent: 92, status: 'En Route to CBWTF', icon: '🚐' },
-    { id: 'FLT-CD-550', type: 'C&D Debris Hydraulic Dumper (14T)', regNo: 'DL-07-CD-5501', ward: 'Ward 07 - Civil Lines Market', driver: 'Harish Kumar', contact: '+91 98119-33829', capacityTon: 14.0, currentPayloadTon: 8.4, fuelPercent: 76, status: 'Active Route', icon: '🚜' }
+    { id: 'FLT-CT-401', type: 'Heavy Hydraulic Compactor (10T)', regNo: 'MH-01-GA-4401', ward: 'Ward G/South - Dadar & Elphinstone', driver: 'Rajesh Singh', driverId: 'usr-4', contact: '+91 98112-40192', capacityTon: 10.0, currentPayloadTon: 7.8, fuelPercent: 84, status: 'Active Collection', icon: '🚛', lastKnownLat: 19.0200, lastKnownLng: 72.8350, lastLocationUpdatedAt: Date.now() - 120000 },
+    { id: 'FLT-ET-108', type: 'Electric Multi-Bin Tipper Auto (1.5T)', regNo: 'MH-02-EV-1088', ward: 'Ward H/West - Bandra Residential', driver: 'Sunita Devi', contact: '+91 98711-20984', capacityTon: 1.5, currentPayloadTon: 1.35, fuelPercent: 68, status: 'Transfer Station Transit', icon: '🛺' },
+    { id: 'FLT-BM-09', type: 'Biomedical Closed-Chamber Van (2T)', regNo: 'MH-03-HA-0912', ward: 'Ward K/East - Andheri Industrial Estate', driver: 'Amit Verma', contact: '+91 98104-55120', capacityTon: 2.0, currentPayloadTon: 0.7, fuelPercent: 92, status: 'En Route to CBWTF', icon: '🚐' },
+    { id: 'FLT-CD-550', type: 'C&D Debris Hydraulic Dumper (14T)', regNo: 'MH-04-CD-5501', ward: 'Ward S - Powai Lake & Tech Enclave', driver: 'Harish Kumar', contact: '+91 98119-33829', capacityTon: 14.0, currentPayloadTon: 8.4, fuelPercent: 76, status: 'Active Route', icon: '🚜' }
   ],
   broadcasts: [
     {
@@ -799,6 +802,54 @@ async function handleApiRequest(req, res, parsedUrl) {
     }
   }
 
+  // 13. Worker Live Location API
+  if (pathname === '/api/worker-location') {
+    if (method === 'POST') {
+      const body = await parseRequestBody(req);
+      const workerId = body.workerId || body.userId || (body.id);
+      const lat = Number(body.lat);
+      const lng = Number(body.lng);
+      const timestamp = body.timestamp || Date.now();
+
+      const user = db.users.find(u => u.id === workerId);
+      if (user) {
+        user.lastKnownLat = lat;
+        user.lastKnownLng = lng;
+        user.lastLocationUpdatedAt = timestamp;
+      }
+
+      const fleetItem = db.fleet.find(f => f.driverId === workerId || (user && f.driver === user.name));
+      if (fleetItem) {
+        fleetItem.lastKnownLat = lat;
+        fleetItem.lastKnownLng = lng;
+        fleetItem.lastLocationUpdatedAt = timestamp;
+      }
+
+      saveDatabase();
+      sendJson(res, 200, { success: true, workerId, lat, lng, timestamp });
+      return true;
+    }
+  }
+
+  if (pathname === '/api/worker-locations') {
+    if (method === 'GET') {
+      const workers = db.users.filter(u => u.role === 'worker').map(w => {
+        const fleetItem = db.fleet.find(f => f.driverId === w.id || f.driver === w.name || (w.name && f.driver && w.name.includes(f.driver)) || (w.name && f.driver && f.driver.includes(w.name)));
+        return {
+          id: w.id,
+          name: w.name,
+          role: w.role,
+          lastKnownLat: w.lastKnownLat || (fleetItem ? fleetItem.lastKnownLat : 19.0200),
+          lastKnownLng: w.lastKnownLng || (fleetItem ? fleetItem.lastKnownLng : 72.8350),
+          lastLocationUpdatedAt: w.lastLocationUpdatedAt || (fleetItem ? fleetItem.lastLocationUpdatedAt : Date.now()),
+          assignedVehicle: fleetItem ? { id: fleetItem.id, type: fleetItem.type, regNo: fleetItem.regNo } : null
+        };
+      });
+      sendJson(res, 200, workers);
+      return true;
+    }
+  }
+
   return false; // Not handled by API
 }
 
@@ -808,11 +859,13 @@ function serveStaticFile(req, res, pathname) {
   if (safePath === '/' || safePath === '' || safePath === '\\') {
     safePath = '/index.html';
   }
+  // Strip leading slashes/backslashes to ensure clean path join
+  safePath = safePath.replace(/^[/\\]+/, '');
 
-  const filePath = path.join(__dirname, safePath);
+  const filePath = path.resolve(__dirname, safePath);
 
-  // Prevent directory traversal
-  if (!filePath.startsWith(__dirname)) {
+  // Prevent directory traversal (case-insensitive for Windows filesystems)
+  if (!filePath.toLowerCase().startsWith(__dirname.toLowerCase())) {
     res.writeHead(403, { 'Content-Type': 'text/plain' });
     res.end('403 Forbidden');
     return;

@@ -113,7 +113,7 @@
           <div style="display: flex; gap: 0.5rem; margin-bottom: 0.65rem;">
             <select id="demoRoleSelect" class="form-control" style="font-size: 0.82rem; padding: 0.35rem 0.5rem;">
               <option value="citizen">👤 Citizen (Ananya Sharma)</option>
-              <option value="institution">🏫 Institution (Delhi Public School)</option>
+              <option value="institution">🏫 Institution (Bombay Scottish School, Powai)</option>
               <option value="hospital">🏥 Hospital (CityCare Super Specialty)</option>
               <option value="worker">👷 Worker (Rajesh Singh - Crew 101)</option>
               <option value="admin">🏛️ Admin (Municipal Commissioner)</option>
@@ -168,14 +168,14 @@
           <!-- School Specific Field -->
           <div id="schoolFieldGroup" class="form-group" style="display: none;">
             <label for="signupSchoolName" class="form-label">School Name <span style="color: var(--civic-signal-crimson);">*</span></label>
-            <input type="text" id="signupSchoolName" class="form-control" placeholder="e.g. Delhi Public School, Sector 12 or St. Xavier's High School">
+            <input type="text" id="signupSchoolName" class="form-control" placeholder="e.g. Bombay Scottish School, Powai or St. Xavier's High School">
             <div style="font-size: 0.78rem; color: #64748b; margin-top: 0.25rem;">Displayed on your dashboard header and bulk collection dispatches.</div>
           </div>
 
           <!-- Company / Office Specific Fields -->
           <div id="companyFieldGroup" class="form-group" style="display: none;">
             <label for="signupCompanyName" class="form-label">Company / Organization Name <span style="color: var(--civic-signal-crimson);">*</span></label>
-            <input type="text" id="signupCompanyName" class="form-control" placeholder="e.g. Infosys Ltd, Whitefield Campus or Tata Consultancy Services, Andheri Branch">
+            <input type="text" id="signupCompanyName" class="form-control" placeholder="e.g. Tata Consultancy Services, Andheri (E) or Godrej Industries, Vikhroli">
             <div style="font-size: 0.78rem; color: #64748b; margin-top: 0.25rem;">Free-text organizational identity shown to Admin & Sanitation Crews.</div>
           </div>
 
@@ -211,7 +211,7 @@
             <select id="demoRoleSelectDropdown" class="form-control" onchange="switchDemoRole(this.value)">
               <option value="">Switch Role (Select Demo Account)...</option>
               <option value="citizen@ecoclear.org">Citizen: Ananya Sharma (Resident)</option>
-              <option value="school@cityedu.org">Institution: Delhi Public School</option>
+              <option value="school@cityedu.org">Institution: Bombay Scottish School, Powai</option>
               <option value="citycare@hospital.org">Hospital: CityCare Super Specialty</option>
               <option value="crew101@cleanward.org">Worker: Rajesh Singh (Crew #101)</option>
               <option value="admin@citygov.org">Admin: Municipal Sanitation Officer</option>
@@ -339,12 +339,12 @@
                 <label class="form-label">Location on Map <span style="color: var(--civic-signal-crimson);">*</span></label>
                 <div class="location-picker-bar">
                   <button type="button" id="citizenLocateBtn" class="btn btn-outline btn-xs" onclick="locateUser('citizen')">📍 Use My Current Location</button>
-                  <span id="citizenCoordBadge" class="coord-display-badge">Lat: 28.6139, Lng: 77.2090</span>
+                  <span id="citizenCoordBadge" class="coord-display-badge">Lat: 19.0760, Lng: 72.8777</span>
                 </div>
                 <div id="citizenMapPicker" class="leaflet-map-picker"></div>
-                <div id="citizenLocStatus" class="location-status-text">Drag the pin or tap on the map to pinpoint exact location.</div>
-                <input type="hidden" id="citizenLat" value="28.6139">
-                <input type="hidden" id="citizenLng" value="77.2090">
+                <div id="citizenLocStatus" class="location-status-text">Detecting your location...</div>
+                <input type="hidden" id="citizenLat" value="19.0760">
+                <input type="hidden" id="citizenLng" value="72.8777">
               </div>
 
               <div class="form-group">
@@ -354,13 +354,8 @@
 
               <div class="form-group">
                 <label for="citizenArea" class="form-label">Municipal Ward Location</label>
-                <select id="citizenArea" class="form-control" required>
-                  <option value="Ward 04 - MG Road & Commercial Center">Ward 04 - MG Road & Commercial Center</option>
-                  <option value="Ward 12 - Indiranagar Residential">Ward 12 - Indiranagar Residential</option>
-                  <option value="Ward 07 - Civil Lines Market">Ward 07 - Civil Lines Market</option>
-                  <option value="Ward 18 - Sector 62 Tech Hub">Ward 18 - Sector 62 Tech Hub</option>
-                  <option value="Ward 02 - Central Railway Station">Ward 02 - Central Railway Station</option>
-                </select>
+                <input type="text" id="citizenArea" class="form-control" readonly style="background: var(--civic-surface-muted); font-weight: 600;" required placeholder="Auto-fills from pin or current location..." value="Ward G/South - Dadar & Elphinstone">
+                <div id="citizenWardNotice" style="font-size: 0.75rem; color: #64748b; margin-top: 0.25rem;">Derived from pin coordinates: Ward G/South - Dadar & Elphinstone</div>
               </div>
 
               <!-- Interactive Severity Level Selector -->
@@ -583,12 +578,12 @@
                 <label class="form-label">Bay / Gate Location on Map <span style="color: var(--civic-signal-crimson);">*</span></label>
                 <div class="location-picker-bar">
                   <button type="button" id="instLocateBtn" class="btn btn-outline btn-xs" onclick="locateUser('inst')">📍 Use My Current Location</button>
-                  <span id="instCoordBadge" class="coord-display-badge">Lat: 28.5900, Lng: 77.2250</span>
+                  <span id="instCoordBadge" class="coord-display-badge">Lat: 19.1136, Lng: 72.8697</span>
                 </div>
                 <div id="instMapPicker" class="leaflet-map-picker"></div>
-                <div id="instLocStatus" class="location-status-text">Pinpoint loading dock or gate coordinates.</div>
-                <input type="hidden" id="instLat" value="28.5900">
-                <input type="hidden" id="instLng" value="77.2250">
+                <div id="instLocStatus" class="location-status-text">Detecting your location...</div>
+                <input type="hidden" id="instLat" value="19.1136">
+                <input type="hidden" id="instLng" value="72.8697">
               </div>
 
               <div class="form-group">
@@ -598,12 +593,8 @@
 
               <div class="form-group">
                 <label for="instArea" class="form-label">Municipal Ward Zone</label>
-                <select id="instArea" class="form-control" required>
-                  <option value="Ward 18 - Sector 62 Tech Hub">Ward 18 - Sector 62 Tech Hub</option>
-                  <option value="Ward 04 - MG Road & Commercial Center">Ward 04 - MG Road & Commercial Center</option>
-                  <option value="Ward 12 - Indiranagar Residential">Ward 12 - Indiranagar Residential</option>
-                  <option value="Ward 07 - Civil Lines Market">Ward 07 - Civil Lines Market</option>
-                </select>
+                <input type="text" id="instArea" class="form-control" readonly style="background: var(--civic-surface-muted); font-weight: 600;" required placeholder="Auto-fills from loading bay coordinates..." value="Ward K/East - Andheri Industrial Estate">
+                <div id="instWardNotice" style="font-size: 0.75rem; color: #64748b; margin-top: 0.25rem;">Derived from bay coordinates: Ward K/East - Andheri Industrial Estate</div>
               </div>
 
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem;">
@@ -805,6 +796,42 @@
         </div>
       </div>
 
+      <!-- Worker Turn-by-Turn Route Navigation Map & Live HUD -->
+      <div class="card" style="margin-bottom: 1.5rem; padding: 1.25rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem;">
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <span style="font-size: 1.35rem;">🧭</span>
+            <div>
+              <h3 style="margin: 0; font-size: 1.15rem;">Turn-by-Turn Shift Navigation</h3>
+              <span id="workerGpsStatusBadge" class="badge" style="background: rgba(16, 185, 129, 0.15); color: #047857; font-weight: 700; margin-top: 0.2rem; display: inline-block;">
+                🟢 Live GPS Active
+              </span>
+            </div>
+          </div>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <button type="button" class="btn btn-outline btn-xs" onclick="refreshWorkerLiveLocation()">🔄 Refresh Location</button>
+            <button type="button" class="btn btn-outline btn-xs" onclick="recenterWorkerMap()">📍 Recenter Map</button>
+          </div>
+        </div>
+
+        <!-- Active Target Navigation HUD Banner -->
+        <div id="workerActiveNavHUD" style="background: var(--civic-surface-muted); border: 1px solid var(--civic-border); border-radius: var(--radius-xs); padding: 0.85rem 1rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+          <div>
+            <div style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: var(--civic-cobalt-accent);">Current Target Destination</div>
+            <div id="workerTargetStopTitle" style="font-size: 1.05rem; font-weight: 800; margin-top: 0.15rem;">Stop #1: Initializing route...</div>
+            <div id="workerTargetStopAddress" style="font-size: 0.82rem; color: #64748b;">Calculating straight-line distance...</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 0.72rem; font-weight: 700; color: #64748b;">Distance Remaining</div>
+            <div id="workerTargetDistanceBadge" style="font-size: 1.35rem; font-weight: 800; color: var(--civic-cobalt-accent);">-- m</div>
+            <div id="workerProximityNotice" style="font-size: 0.75rem; font-weight: 700; color: #059669; display: none;">✅ Within 50m! Destination reached.</div>
+          </div>
+        </div>
+
+        <!-- Leaflet Route Navigation Map Container -->
+        <div id="workerRouteMap" style="height: 420px; border-radius: var(--radius-xs); border: 1px solid var(--civic-border); position: relative;"></div>
+      </div>
+
       <!-- Route Stops Feed -->
       <div>
         <h3 style="font-size: 1.15rem; margin-bottom: 0.85rem;">Prioritized Field Route Stops</h3>
@@ -876,7 +903,7 @@
             <option value="Monsoon Protocol Active: Segregate wet organic waste into covered green bins to prevent drain blockages.">🌧️ Monsoon Protocol</option>
             <option value="Holiday Collection Alert: Door-to-door morning sweep operating on a 2-hour delay today.">📅 Holiday Schedule</option>
             <option value="CBWTF Facility Alert: Scheduled maintenance at Sector 9 Autoclave unit on Sunday morning.">🏥 CBWTF Maintenance</option>
-            <option value="High-Density Cleanliness Drive: Extended compactor vehicle shifts operating in Ward 04 & 18.">🚛 Special Drive</option>
+            <option value="High-Density Cleanliness Drive: Extended compactor vehicle shifts operating in Ward K/East & G/South.">🚛 Special Drive</option>
           </select>
           <button class="btn btn-primary btn-sm" onclick="publishBroadcastAdvisory()">Broadcast</button>
         </div>
@@ -890,6 +917,7 @@
         <div id="adminTabLeaderboard" class="auth-tab" onclick="switchAdminTab('leaderboard')">🏆 Ward Cleanliness Ranking</div>
         <div id="adminTabCompliance" class="auth-tab" onclick="switchAdminTab('compliance')">SBM 2.0 Statutory Compliance</div>
         <div id="adminTabHotspot" class="auth-tab" onclick="switchAdminTab('hotspot')">GPS Density Hotspot Map</div>
+        <div id="adminTabWorkerLocations" class="auth-tab" onclick="switchAdminTab('workerLocations')">👷 Live Worker Tracking</div>
         <div id="adminTabHospital" class="auth-tab" onclick="switchAdminTab('hospital')">Biomedical Compliance</div>
         <div id="adminTabWorkers" class="auth-tab" onclick="switchAdminTab('workers')">Crew Metrics</div>
         <div id="adminTabRedemptions" class="auth-tab" onclick="switchAdminTab('redemptions')">🎁 Redemption Requests</div>
@@ -911,11 +939,11 @@
           </select>
           <select id="adminFeedWardFilter" class="form-control" onchange="filterAdminFeed()">
             <option value="all">All Wards</option>
-            <option value="Ward 04">Ward 04 - MG Road</option>
-            <option value="Ward 12">Ward 12 - Indiranagar</option>
-            <option value="Ward 18">Ward 18 - Sector 62</option>
-            <option value="Ward 07">Ward 07 - Civil Lines</option>
-            <option value="Ward 02">Ward 02 - Central Railway</option>
+            <option value="Ward K/East">Ward K/East - Andheri</option>
+            <option value="Ward G/South">Ward G/South - Dadar</option>
+            <option value="Ward H/West">Ward H/West - Bandra</option>
+            <option value="Ward S">Ward S - Powai</option>
+            <option value="Ward A">Ward A - Colaba & Fort</option>
           </select>
           <button class="btn btn-outline btn-sm" onclick="resetAdminFeedFilters()">Reset Filters</button>
         </div>
@@ -1073,6 +1101,34 @@
         </div>
       </div>
 
+      <!-- Admin Section 3B: Real-Time Worker GPS Tracking -->
+      <div id="adminPanelWorkerLocations" style="display: none;">
+        <div class="card" style="margin-bottom: 1.25rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.75rem;">
+            <div>
+              <h3 style="font-size: 1.15rem; margin-bottom: 0.25rem;">👷 Real-Time Municipal Worker & Crew GPS Tracking</h3>
+              <p style="color: #64748b; font-size: 0.82rem; margin: 0;">Live GPS positions of active field collection crews, assigned fleet vehicles, and on-demand route overlays.</p>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+              <button type="button" class="btn btn-outline btn-xs" onclick="renderAdminWorkerLocationsMap(true)">🔄 Refresh Live Positions</button>
+              <button type="button" class="btn btn-outline btn-xs" onclick="clearAdminWorkerRouteOverlay()">Clear Route Overlay</button>
+            </div>
+          </div>
+
+          <!-- Leaflet Live Worker Map -->
+          <div id="adminWorkerLocationsMap" style="height: 480px; border-radius: var(--radius-xs); border: 1px solid var(--civic-border);"></div>
+
+          <!-- Selected Worker Route Details Panel -->
+          <div id="adminWorkerRouteOverlayPanel" style="display: none; margin-top: 1rem; padding: 1rem; background: var(--civic-surface-muted); border-radius: var(--radius-xs); border: 1px solid var(--civic-border);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <h4 id="adminOverlayWorkerName" style="margin: 0; font-size: 1rem;">Worker Route Overlay</h4>
+              <span id="adminOverlayStopsCount" class="badge badge-assigned">0 Stops Active</span>
+            </div>
+            <div id="adminOverlayStopsList" style="font-size: 0.85rem; color: #556960;"></div>
+          </div>
+        </div>
+      </div>
+
       <!-- Admin Section 4: Hospital Biomedical Compliance -->
       <div id="adminPanelHospital" style="display: none;">
         <div class="card">
@@ -1137,6 +1193,8 @@
             </table>
           </div>
         </div>
+      </div>
+
       <!-- Admin Section 7: Operational Audit Trail -->
       <div id="adminPanelLogs" style="display: none;">
         <div class="card">
@@ -1228,14 +1286,15 @@
           <input type="text" id="newBranchName" class="form-control" placeholder="e.g. North Tech Campus - Gate 2" required>
         </div>
         <div class="form-group">
-          <label for="newBranchWard" class="form-label">Municipal Ward</label>
-          <select id="newBranchWard" class="form-control" required>
-            <option value="Ward 04 - MG Road & Commercial Center">Ward 04 - MG Road & Commercial Center</option>
-            <option value="Ward 12 - Indiranagar Residential">Ward 12 - Indiranagar Residential</option>
-            <option value="Ward 07 - Civil Lines Market">Ward 07 - Civil Lines Market</option>
-            <option value="Ward 18 - Sector 62 Tech Hub">Ward 18 - Sector 62 Tech Hub</option>
-            <option value="Ward 02 - Central Railway Station">Ward 02 - Central Railway Station</option>
-          </select>
+          <label for="newBranchWard" class="form-label">Municipal Ward Location</label>
+          <div style="display: flex; gap: 0.5rem; margin-bottom: 0.35rem;">
+            <button type="button" class="btn btn-outline btn-xs" onclick="locateNewBranch()">📍 Auto-Detect Location</button>
+            <span id="newBranchCoordBadge" class="coord-display-badge">Lat: 19.1136, Lng: 72.8697</span>
+          </div>
+          <input type="hidden" id="newBranchLat" value="19.1136">
+          <input type="hidden" id="newBranchLng" value="72.8697">
+          <input type="text" id="newBranchWard" class="form-control" readonly style="background: var(--civic-surface-muted); font-weight: 600;" required placeholder="Auto-detected from coordinates..." value="Ward K/East - Andheri Industrial Estate">
+          <div id="newBranchWardNotice" style="font-size: 0.75rem; color: #64748b; margin-top: 0.25rem;">Derived from campus coordinates: Ward K/East - Andheri Industrial Estate</div>
         </div>
         <div class="form-group">
           <label for="newBranchAddress" class="form-label">Street Address</label>
@@ -1321,7 +1380,7 @@
       <form id="dispatchStandbyForm">
         <div class="form-group">
           <label for="standbyRegNo" class="form-label">Vehicle Registration Number</label>
-          <input type="text" id="standbyRegNo" class="form-control" placeholder="e.g. DL-08-EV-9921" required>
+          <input type="text" id="standbyRegNo" class="form-control" placeholder="e.g. MH-02-EV-9921" required>
         </div>
         <div class="form-group">
           <label for="standbyDriver" class="form-label">Designated Driver Name</label>
@@ -1339,16 +1398,18 @@
         <div class="form-group">
           <label for="standbyTargetWard" class="form-label">Target Municipal Ward</label>
           <select id="standbyTargetWard" class="form-control" required>
-            <option value="Ward 04 - MG Road & Commercial Center">Ward 04 - MG Road & Commercial Center</option>
-            <option value="Ward 12 - Indiranagar Residential">Ward 12 - Indiranagar Residential</option>
-            <option value="Ward 18 - Sector 62 Tech Hub">Ward 18 - Sector 62 Tech Hub</option>
-            <option value="Ward 07 - Civil Lines Market">Ward 07 - Civil Lines Market</option>
-            <option value="Ward 02 - Central Railway Station">Ward 02 - Central Railway Station</option>
+            <option value="Ward K/East - Andheri Industrial Estate">Ward K/East - Andheri Industrial Estate</option>
+            <option value="Ward G/South - Dadar & Elphinstone">Ward G/South - Dadar & Elphinstone</option>
+            <option value="Ward H/West - Bandra Residential">Ward H/West - Bandra Residential</option>
+            <option value="Ward S - Powai Lake & Tech Enclave">Ward S - Powai Lake & Tech Enclave</option>
+            <option value="Ward A - Colaba & Fort Commercial">Ward A - Colaba & Fort Commercial</option>
           </select>
         </div>
         <button type="submit" class="btn btn-primary" style="width: 100%;">Authorize Standby Dispatch</button>
       </form>
     </div>
+  </div>
+
   <!-- About This Project Modal (In-App Static Briefing) -->
   <div id="aboutProjectModal" class="modal-overlay">
     <div class="modal-card" style="max-width: 720px; max-height: 88vh; overflow-y: auto;">
@@ -1427,11 +1488,11 @@
         <div class="form-group">
           <label for="complianceWardSelect" class="form-label">Municipal Ward</label>
           <select id="complianceWardSelect" class="form-control" required onchange="onComplianceWardSelectChange(this.value)">
-            <option value="Ward 04 - MG Road & Commercial Center">Ward 04 - MG Road & Commercial Center</option>
-            <option value="Ward 12 - Indiranagar Residential">Ward 12 - Indiranagar Residential</option>
-            <option value="Ward 18 - Sector 62 Tech Hub">Ward 18 - Sector 62 Tech Hub</option>
-            <option value="Ward 07 - Civil Lines Market">Ward 07 - Civil Lines Market</option>
-            <option value="Ward 02 - Central Railway Station">Ward 02 - Central Railway Station</option>
+            <option value="Ward K/East - Andheri Industrial Estate">Ward K/East - Andheri Industrial Estate</option>
+            <option value="Ward G/South - Dadar & Elphinstone">Ward G/South - Dadar & Elphinstone</option>
+            <option value="Ward H/West - Bandra Residential">Ward H/West - Bandra Residential</option>
+            <option value="Ward S - Powai Lake & Tech Enclave">Ward S - Powai Lake & Tech Enclave</option>
+            <option value="Ward A - Colaba & Fort Commercial">Ward A - Colaba & Fort Commercial</option>
           </select>
         </div>
         <div class="form-group">

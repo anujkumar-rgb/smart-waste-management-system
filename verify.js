@@ -106,9 +106,9 @@ runTest('HTML Markup: Recurring Schedule and Monthly Self-Audit forms in place',
 
 runTest('App Logic: Seed users include both School and Company profiles', () => {
   assert(appContent.includes("institutionType: 'school'"), 'School institution type missing in SEED_USERS');
-  assert(appContent.includes("schoolName: 'Delhi Public School, Sector 12'"), 'School Name missing in SEED_USERS');
+  assert(appContent.includes("schoolName: 'Bombay Scottish School, Powai'"), 'School Name missing in SEED_USERS');
   assert(appContent.includes("institutionType: 'company'"), 'Company institution type missing in SEED_USERS');
-  assert(appContent.includes("companyName: 'Infosys Ltd, Whitefield Campus'"), 'Company Name missing in SEED_USERS');
+  assert(appContent.includes("companyName: 'Tata Consultancy Services, Andheri (E)'"), 'Company Name missing in SEED_USERS');
   assert(appContent.includes("businessType: 'IT / Tech Office'"), 'Business Type missing in SEED_USERS');
 });
 
@@ -433,6 +433,104 @@ runTest('Backend Server: Atomic persistence to data/db.json', () => {
   assert(serverContent.includes('data/db.json'), 'Missing data/db.json path in server.js');
   assert(serverContent.includes('saveDatabase()'), 'Missing saveDatabase function in server.js');
   assert(fs.existsSync(path.join(__dirname, 'data', 'db.json')), 'data/db.json does not exist');
+});
+
+// --------------------------------------------------------------------------
+// 11. WORKER NAVIGATION, LIVE TRACKING & WARD AUTO-FILL
+// --------------------------------------------------------------------------
+console.log('\n🧭 11. Testing Worker Navigation, Live Admin Tracking & Ward Auto-Fill...');
+
+runTest('Worker Dashboard: Route line drawn on Leaflet map from worker location through optimized stops', () => {
+  assert(htmlContent.includes('id="workerRouteMap"'), 'workerRouteMap container missing in HTML');
+  assert(htmlContent.includes('id="workerActiveNavHUD"'), 'workerActiveNavHUD banner missing in HTML');
+  assert(appContent.includes('function initWorkerRouteMap'), 'initWorkerRouteMap function missing in app.js');
+  assert(appContent.includes('workerRoutePolyline = L.polyline(pathCoords'), 'L.polyline route line connecting stops missing in app.js');
+  assert(appContent.includes('workerCurrentPos'), 'workerCurrentPos live starting point missing in app.js');
+  assert(appContent.includes('navigator.geolocation.watchPosition'), 'watchPosition geolocation tracking missing in app.js');
+});
+
+runTest('Worker Dashboard: Target stop highlighting, remaining distance, and 50m proximity auto-advance', () => {
+  assert(appContent.includes('selectWorkerTargetStop'), 'selectWorkerTargetStop function missing in app.js');
+  assert(appContent.includes('PROXIMITY_THRESHOLD_METERS = 50'), '50m proximity threshold constant missing in app.js');
+  assert(appContent.includes('workerProximityNotice'), 'workerProximityNotice handler missing in app.js');
+  assert(appContent.includes('workerDirectGuidanceLine'), 'workerDirectGuidanceLine direct destination line missing in app.js');
+  assert(htmlContent.includes('id="workerTargetDistanceBadge"'), 'workerTargetDistanceBadge missing in HTML');
+});
+
+runTest('Admin Dashboard: Live Worker Location Tracking panel & active worker markers', () => {
+  assert(htmlContent.includes('id="adminTabWorkerLocations"'), 'adminTabWorkerLocations tab missing in HTML');
+  assert(htmlContent.includes('id="adminPanelWorkerLocations"'), 'adminPanelWorkerLocations panel missing in HTML');
+  assert(htmlContent.includes('id="adminWorkerLocationsMap"'), 'adminWorkerLocationsMap map container missing in HTML');
+  assert(appContent.includes('function initAdminWorkerLocationsMap'), 'initAdminWorkerLocationsMap function missing in app.js');
+  assert(appContent.includes('Stops Remaining:'), 'Remaining stops detail in worker marker popup missing');
+  assert(appContent.includes('Last Updated:'), 'Last updated timestamp in worker marker popup missing');
+});
+
+runTest('Admin Dashboard: Clicking worker marker overlays full assigned route on map', () => {
+  assert(appContent.includes('adminOverlayWorkerRoute'), 'adminOverlayWorkerRoute function missing in app.js');
+  assert(appContent.includes('adminWorkerRouteLine = L.polyline('), 'adminWorkerRouteLine overlay missing in app.js');
+  assert(htmlContent.includes('id="adminWorkerRouteOverlayPanel"'), 'adminWorkerRouteOverlayPanel missing in HTML');
+});
+
+runTest('Auto-Fill Municipal Ward: Derived from map picker coordinates across Citizen, Institution & Branch setup', () => {
+  assert(htmlContent.includes('id="citizenArea"') && htmlContent.includes('readonly'), 'citizenArea must be read-only auto-filled input');
+  assert(htmlContent.includes('id="instArea"') && htmlContent.includes('readonly'), 'instArea must be read-only auto-filled input');
+  assert(htmlContent.includes('id="newBranchWard"') && htmlContent.includes('readonly'), 'newBranchWard must be read-only auto-filled input');
+  assert(appContent.includes('function deriveWardFromCoordinates'), 'deriveWardFromCoordinates function missing in app.js');
+  assert(appContent.includes('function updateWardFieldFromCoords'), 'updateWardFieldFromCoords function missing in app.js');
+  assert(appContent.includes('locateNewBranch'), 'locateNewBranch branch auto-detect function missing in app.js');
+});
+
+runTest('Auto-Fill Municipal Ward: Fallback to Approximate zone nearest match', () => {
+  assert(appContent.includes('Approximate zone — nearest match:'), 'Approximate zone labeling missing in fallback logic');
+});
+
+runTest('Data Models: Worker profile and fleet include lastKnownLat, lastKnownLng, lastLocationUpdatedAt', () => {
+  assert(appContent.includes('lastKnownLat'), 'lastKnownLat missing in app.js');
+  assert(appContent.includes('lastKnownLng'), 'lastKnownLng missing in app.js');
+  assert(appContent.includes('lastLocationUpdatedAt'), 'lastLocationUpdatedAt missing in app.js');
+  assert(serverContent.includes('lastKnownLat'), 'lastKnownLat missing in server.js');
+  assert(appContent.includes('wardZone'), 'wardZone property missing in report/branch models');
+});
+
+// --------------------------------------------------------------------------
+// 12. MUMBAI LOCATION DEFAULTS & REAL CURRENT LOCATION PRIORITIZATION
+// --------------------------------------------------------------------------
+console.log('\n🌆 12. Testing Mumbai Location Defaults & Geolocation Prioritization...');
+
+runTest('Mumbai Default Coordinates: Map centers and defaults use Mumbai coordinates (19.0760, 72.8777)', () => {
+  assert(appContent.includes('19.0760'), 'Mumbai default latitude 19.0760 missing in app.js');
+  assert(appContent.includes('72.8777'), 'Mumbai default longitude 72.8777 missing in app.js');
+  assert(htmlContent.includes('19.0760') && htmlContent.includes('72.8777'), 'Mumbai default coords missing in index.html');
+  assert(appContent.includes("adminMapObj = L.map('adminHotspotMap').setView([19.0760, 72.8777]"), 'Admin hotspot map not centered on Mumbai');
+  assert(appContent.includes("adminWorkerMapObj = L.map('adminWorkerLocationsMap', { zoomControl: true }).setView([19.0760, 72.8777]"), 'Admin worker tracking map not centered on Mumbai');
+});
+
+runTest('Mumbai Statutory Wards: Real Mumbai wards defined with localized search keywords', () => {
+  assert(appContent.includes('Ward K/East - Andheri Industrial Estate'), 'Ward K/East missing in app.js');
+  assert(appContent.includes('Ward G/South - Dadar & Elphinstone'), 'Ward G/South missing in app.js');
+  assert(appContent.includes('Ward H/West - Bandra Residential'), 'Ward H/West missing in app.js');
+  assert(appContent.includes('Ward S - Powai Lake & Tech Enclave'), 'Ward S missing in app.js');
+  assert(appContent.includes('Ward A - Colaba & Fort Commercial'), 'Ward A missing in app.js');
+  assert(htmlContent.includes('Ward K/East - Andheri Industrial Estate'), 'Ward K/East missing in index.html');
+});
+
+runTest('Mumbai Fleet & Seed Data: Vehicles use MH registration and Mumbai locations', () => {
+  assert(appContent.includes('MH-01-GA-4401'), 'MH-01-GA-4401 compactor missing');
+  assert(appContent.includes('MH-02-EV-1088'), 'MH-02-EV-1088 tipper missing');
+  assert(appContent.includes('MH-03-HA-0912'), 'MH-03-HA-0912 biomedical van missing');
+  assert(appContent.includes('MH-04-CD-5501'), 'MH-04-CD-5501 debris dumper missing');
+  assert(htmlContent.includes('MH-02-EV-9921'), 'MH-02-EV-9921 standby placeholder missing in index.html');
+});
+
+runTest('Real Current Location Prioritization: Map load initiates GPS detection with loading state', () => {
+  assert(appContent.includes('map-gps-loading-indicator'), 'Loading indicator class missing in app.js');
+  assert(stylesContent.includes('.map-gps-loading-indicator'), 'Loading indicator style missing in styles.css');
+  assert(appContent.includes('Detecting your location...'), 'Detecting location banner missing');
+});
+
+runTest('Geolocation Fallback Notice: Clear inline guidance when location access is unavailable', () => {
+  assert(appContent.includes("Location access unavailable — showing default area. Tap the map or click 'Use My Current Location' to set your exact spot."), 'Inline location access fallback message missing in app.js');
 });
 
 // --------------------------------------------------------------------------
