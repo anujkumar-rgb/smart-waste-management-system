@@ -802,6 +802,66 @@ runTest('Institution Waste Audit Certificate & Peer Benchmarking: Printable cert
 });
 
 // --------------------------------------------------------------------------
+// 16. PURPOSEFUL ANIMATIONS & SELF-CONTAINED INLINE SVG GRAPHICS
+// --------------------------------------------------------------------------
+console.log('\n🎨 16. Testing Purposeful Animations & Self-Contained Inline SVG Graphics...');
+
+runTest('Signup Animations: Interactive Role selection cards, Google Sign-In & conditional reveals', () => {
+  assert(stylesContent.includes('.role-select-card'), 'role-select-card CSS missing');
+  assert(stylesContent.includes('.role-card-grid'), 'role-card-grid CSS missing');
+  assert(htmlContent.includes('role-card-grid'), 'role-card-grid container missing in HTML');
+  assert(htmlContent.includes('selectSignupRole(\'citizen\')'), 'Role selection trigger citizen missing');
+  assert(htmlContent.includes('selectSignupRole(\'hospital\')'), 'Role selection trigger hospital missing');
+  assert(appContent.includes('window.selectSignupRole = function(role)'), 'selectSignupRole function missing in app.js');
+  assert(appContent.includes('window.switchAuthTab = function(tab)'), 'switchAuthTab function missing in app.js');
+  assert(htmlContent.includes('btn-google'), 'Google Sign-In button missing in index.html');
+  assert(stylesContent.includes('.btn-google'), 'btn-google styling missing in styles.css');
+  assert(appContent.includes('window.handleGoogleSignIn = function()'), 'handleGoogleSignIn function missing in app.js');
+});
+
+runTest('Form Validation & Submission: Feedback shake animation and button loading spinner', () => {
+  assert(stylesContent.includes('.form-input-error'), 'form-input-error class missing in styles.css');
+  assert(stylesContent.includes('@keyframes formShake'), 'formShake keyframes missing in styles.css');
+  assert(stylesContent.includes('.btn-loading'), 'btn-loading class missing in styles.css');
+  assert(stylesContent.includes('.btn-spinner'), 'btn-spinner class missing in styles.css');
+  assert(appContent.includes('function triggerFieldValidationError('), 'triggerFieldValidationError function missing in app.js');
+  assert(appContent.includes('btn-loading') && appContent.includes('btn-spinner'), 'Loading spinner triggers on auth submission missing in app.js');
+});
+
+runTest('Live Worker Tracking Map: Smooth marker interpolation, vehicle SVGs & route draw-in', () => {
+  assert(appContent.includes('function animateMarkerTo('), 'animateMarkerTo interpolation function missing in app.js');
+  assert(appContent.includes('adminWorkerMarkersMap = new Map()'), 'adminWorkerMarkersMap diffing map missing in app.js');
+  assert(appContent.includes('function getVehicleSvgIcon('), 'getVehicleSvgIcon function missing in app.js');
+  assert(stylesContent.includes('.emergency-pulse-marker'), 'emergency-pulse-marker class missing in styles.css');
+  assert(stylesContent.includes('.animated-route-line'), 'animated-route-line class missing in styles.css');
+  assert(appContent.includes('function animatePolylineDrawIn('), 'animatePolylineDrawIn progressive draw function missing in app.js');
+  assert(stylesContent.includes('.stop-count-badge-pop'), 'stop-count-badge-pop class missing in styles.css');
+  assert(stylesContent.includes('.spin-refresh-icon'), 'spin-refresh-icon class missing in styles.css');
+});
+
+runTest('Self-Contained Inline SVGs: Hero illustration, segregation guide, rewards & empty states', () => {
+  // Hero illustration in HTML
+  assert(htmlContent.includes('hero-svg-graphic'), 'hero-svg-graphic SVG missing in index.html');
+  assert(htmlContent.includes('Mumbai Skyline'), 'Skyline layer missing in hero SVG');
+  assert(htmlContent.includes('Smart Waste Compactor Truck'), 'Compactor layer missing in hero SVG');
+  
+  // Inline category & reward SVGs
+  assert(appContent.includes('function getCategorySvgIcon('), 'getCategorySvgIcon missing in app.js');
+  assert(appContent.includes('function getRewardSvgIcon('), 'getRewardSvgIcon missing in app.js');
+  assert(appContent.includes('function getEmptyStateHTML('), 'getEmptyStateHTML helper missing in app.js');
+  
+  // Zero external photo stock CDNs
+  assert(!htmlContent.includes('images.unsplash.com'), 'Unsplash external photo found in index.html');
+  assert(!htmlContent.includes('images.pexels.com'), 'Pexels external photo found in index.html');
+});
+
+runTest('Accessibility: Comprehensive prefers-reduced-motion overrides in CSS and JS', () => {
+  assert(stylesContent.includes('@media (prefers-reduced-motion: reduce)'), 'prefers-reduced-motion media query missing in styles.css');
+  assert(stylesContent.includes('animation-duration: 0.001ms !important'), 'Reduced motion duration override missing');
+  assert(appContent.includes("window.matchMedia('(prefers-reduced-motion: reduce)')"), 'Reduced motion media query check missing in app.js');
+});
+
+// --------------------------------------------------------------------------
 // TEST SUMMARY
 // --------------------------------------------------------------------------
 console.log('\n======================================================');

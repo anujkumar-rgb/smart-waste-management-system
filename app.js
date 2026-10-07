@@ -851,26 +851,85 @@ function initAuth() {
   const verificationLabel = document.getElementById('verificationLabel');
   const logoutBtn = document.getElementById('logoutBtn');
 
-  tabLogin.addEventListener('click', () => {
-    tabLogin.classList.add('active');
-    tabSignup.classList.remove('active');
-    loginForm.style.display = 'block';
-    signupForm.style.display = 'none';
-  });
+  window.switchAuthTab = function(tab) {
+    if (tab === 'login') {
+      tabLogin.classList.add('active');
+      tabSignup.classList.remove('active');
+      loginForm.style.display = 'block';
+      signupForm.style.display = 'none';
+      loginForm.classList.remove('conditional-field-reveal');
+      void loginForm.offsetWidth;
+      loginForm.classList.add('conditional-field-reveal');
+    } else {
+      tabSignup.classList.add('active');
+      tabLogin.classList.remove('active');
+      signupForm.style.display = 'block';
+      loginForm.style.display = 'none';
+      signupForm.classList.remove('conditional-field-reveal');
+      void signupForm.offsetWidth;
+      signupForm.classList.add('conditional-field-reveal');
+    }
+  };
 
-  tabSignup.addEventListener('click', () => {
-    tabSignup.classList.add('active');
-    tabLogin.classList.remove('active');
-    signupForm.style.display = 'block';
-    loginForm.style.display = 'none';
-  });
+  tabLogin.addEventListener('click', () => window.switchAuthTab('login'));
+  tabSignup.addEventListener('click', () => window.switchAuthTab('signup'));
+
+  window.selectSignupRole = function(role) {
+    const cards = document.querySelectorAll('.role-select-card');
+    cards.forEach(c => {
+      if (c.getAttribute('data-role') === role) {
+        c.classList.add('active');
+      } else {
+        c.classList.remove('active');
+      }
+    });
+    if (signupRole) {
+      signupRole.value = role;
+      signupRole.dispatchEvent(new Event('change'));
+    }
+  };
+
+  window.handleGoogleSignIn = function() {
+    const btn = document.querySelector('.btn-google');
+    if (btn) {
+      btn.innerHTML = `<span class="btn-spinner"></span> Connecting Google Account...`;
+      btn.classList.add('btn-loading');
+    }
+    setTimeout(() => {
+      const users = getUsers();
+      const citizen = users.find(u => u.email === 'citizen@ecoclear.org') || users[0];
+      if (btn) btn.innerHTML = `✓ Google Verified`;
+      setTimeout(() => {
+        setCurrentUser(citizen);
+      }, 250);
+    }, 450);
+  };
+
+  function triggerFieldValidationError(element) {
+    if (!element) return;
+    element.classList.remove('form-input-error');
+    void element.offsetWidth;
+    element.classList.add('form-input-error');
+    element.focus();
+    setTimeout(() => {
+      element.classList.remove('form-input-error');
+    }, 1200);
+  }
 
   function updateSignupRoleFields() {
     const role = signupRole.value;
     if (role === 'institution') {
       institutionTypeGroup.style.display = 'block';
+      institutionTypeGroup.classList.remove('conditional-field-reveal');
+      void institutionTypeGroup.offsetWidth;
+      institutionTypeGroup.classList.add('conditional-field-reveal');
+
       updateInstitutionTypeFields();
+
       verificationFieldGroup.style.display = 'block';
+      verificationFieldGroup.classList.remove('conditional-field-reveal');
+      void verificationFieldGroup.offsetWidth;
+      verificationFieldGroup.classList.add('conditional-field-reveal');
       verificationLabel.textContent = 'Institution Registration Code';
     } else {
       institutionTypeGroup.style.display = 'none';
@@ -882,6 +941,9 @@ function initAuth() {
         verificationFieldGroup.style.display = 'none';
       } else {
         verificationFieldGroup.style.display = 'block';
+        verificationFieldGroup.classList.remove('conditional-field-reveal');
+        void verificationFieldGroup.offsetWidth;
+        verificationFieldGroup.classList.add('conditional-field-reveal');
         if (role === 'hospital') verificationLabel.textContent = 'NABH License / Hospital Registration ID';
         if (role === 'worker') verificationLabel.textContent = 'Sanitation Crew Badge ID';
         if (role === 'admin') verificationLabel.textContent = 'Admin Secret Master Passcode';
@@ -893,6 +955,10 @@ function initAuth() {
     const type = signupInstType.value;
     if (type === 'school') {
       schoolFieldGroup.style.display = 'block';
+      schoolFieldGroup.classList.remove('conditional-field-reveal');
+      void schoolFieldGroup.offsetWidth;
+      schoolFieldGroup.classList.add('conditional-field-reveal');
+
       companyFieldGroup.style.display = 'none';
       businessTypeFieldGroup.style.display = 'none';
       document.getElementById('signupSchoolName').setAttribute('required', 'true');
@@ -900,7 +966,15 @@ function initAuth() {
     } else if (type === 'company') {
       schoolFieldGroup.style.display = 'none';
       companyFieldGroup.style.display = 'block';
+      companyFieldGroup.classList.remove('conditional-field-reveal');
+      void companyFieldGroup.offsetWidth;
+      companyFieldGroup.classList.add('conditional-field-reveal');
+
       businessTypeFieldGroup.style.display = 'block';
+      businessTypeFieldGroup.classList.remove('conditional-field-reveal');
+      void businessTypeFieldGroup.offsetWidth;
+      businessTypeFieldGroup.classList.add('conditional-field-reveal');
+
       document.getElementById('signupCompanyName').setAttribute('required', 'true');
       document.getElementById('signupSchoolName').removeAttribute('required');
     } else {
@@ -917,55 +991,93 @@ function initAuth() {
 
   loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    const email = document.getElementById('loginEmail').value.trim();
-    const pass = document.getElementById('loginPassword').value;
+    const emailInput = document.getElementById('loginEmail');
+    const passInput = document.getElementById('loginPassword');
+    const submitBtn = document.getElementById('loginSubmitBtn') || loginForm.querySelector('button[type="submit"]');
+
+    const email = emailInput.value.trim();
+    const pass = passInput.value;
 
     const users = getUsers();
     const found = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.pass === pass);
 
     if (found) {
-      setCurrentUser(found);
+      if (submitBtn) {
+        submitBtn.classList.add('btn-loading');
+        submitBtn.innerHTML = `<span class="btn-spinner"></span> Authenticating...`;
+      }
+      setTimeout(() => {
+        if (submitBtn) submitBtn.innerHTML = `✓ Access Authorized`;
+        setTimeout(() => {
+          if (submitBtn) {
+            submitBtn.classList.remove('btn-loading');
+            submitBtn.innerHTML = `Sign In`;
+          }
+          setCurrentUser(found);
+        }, 180);
+      }, 350);
     } else {
+      triggerFieldValidationError(emailInput);
+      triggerFieldValidationError(passInput);
       alert('Invalid login credentials! Please use one of the quick test login buttons below.');
     }
   });
 
   signupForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    const name = document.getElementById('signupName').value.trim();
-    const email = document.getElementById('signupEmail').value.trim();
-    const pass = document.getElementById('signupPassword').value;
+    const nameInput = document.getElementById('signupName');
+    const emailInput = document.getElementById('signupEmail');
+    const passInput = document.getElementById('signupPassword');
+    const submitBtn = signupForm.querySelector('button[type="submit"]');
+
+    const name = nameInput.value.trim();
+    const email = emailInput.value.trim();
+    const pass = passInput.value;
     const role = signupRole.value;
     const instType = signupInstType.value;
-    const schoolName = document.getElementById('signupSchoolName').value.trim();
-    const companyName = document.getElementById('signupCompanyName').value.trim();
-    const businessType = document.getElementById('signupBusinessType').value;
-    const verificationCode = document.getElementById('signupVerificationCode').value.trim();
+    const schoolNameInput = document.getElementById('signupSchoolName');
+    const companyNameInput = document.getElementById('signupCompanyName');
+    const verificationCodeInput = document.getElementById('signupVerificationCode');
+
+    const schoolName = schoolNameInput ? schoolNameInput.value.trim() : '';
+    const companyName = companyNameInput ? companyNameInput.value.trim() : '';
+    const businessType = document.getElementById('signupBusinessType')?.value || '';
+    const verificationCode = verificationCodeInput ? verificationCodeInput.value.trim() : '';
 
     if (role === 'institution') {
       if (instType === 'school' && !schoolName) {
+        triggerFieldValidationError(schoolNameInput);
         alert('School Name is required when registering an educational institution.');
         return;
       }
       if (instType === 'company' && !companyName) {
+        triggerFieldValidationError(companyNameInput);
         alert('Company Name is required when registering a corporate office institution.');
         return;
       }
     }
 
     if (role !== 'citizen' && !verificationCode) {
+      triggerFieldValidationError(verificationCodeInput);
       alert(`Registration ID is required for official role: ${role.toUpperCase()}`);
       return;
     }
     if (role === 'admin' && verificationCode !== 'ADMIN2026') {
+      triggerFieldValidationError(verificationCodeInput);
       alert('Incorrect Admin Secret Passcode! (Use "ADMIN2026")');
       return;
     }
 
     const users = getUsers();
     if (users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
+      triggerFieldValidationError(emailInput);
       alert('An account with this email address already exists!');
       return;
+    }
+
+    if (submitBtn) {
+      submitBtn.classList.add('btn-loading');
+      submitBtn.innerHTML = `<span class="btn-spinner"></span> Creating Account...`;
     }
 
     const primaryOrgName = (role === 'institution') 
@@ -997,10 +1109,23 @@ function initAuth() {
       ]
     };
 
-    users.push(newUser);
-    saveUsers(users);
-    alert(`Account created for ${primaryOrgName} (${role.toUpperCase()})!`);
-    setCurrentUser(newUser);
+    setTimeout(() => {
+      users.push(newUser);
+      saveUsers(users);
+
+      addAuditLog(newUser.name, 'ACCOUNT_CREATED', `Registered new ${role.toUpperCase()} account: ${email}`);
+
+      if (submitBtn) {
+        submitBtn.innerHTML = `✓ Registered Successfully`;
+      }
+      setTimeout(() => {
+        if (submitBtn) {
+          submitBtn.classList.remove('btn-loading');
+          submitBtn.innerHTML = `Create Account`;
+        }
+        setCurrentUser(newUser);
+      }, 200);
+    }, 380);
   });
 
   logoutBtn.addEventListener('click', () => {
@@ -1713,6 +1838,32 @@ const CREDIT_STORE_CATALOG = [
   { id: 'digital_badge', name: 'Digital Eco-Champion Public Recognition Badge', cost: 0, icon: '🥇', isPhysical: false, desc: 'Official digital recognition credential displayed on your civic resident profile.' }
 ];
 
+/* Reward Specific Inline SVG Icons */
+function getRewardSvgIcon(itemId = '') {
+  switch (itemId) {
+    case 'sapling':
+      return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M12 22v-9"/><path d="M9 10a5 5 0 0 1 5-5 5 5 0 0 1 5 5c0 3-3 4-7 4-2 0-3-.5-3-1.5z"/><path d="M12 13a4.5 4.5 0 0 0-4.5-4.5C5 8.5 4 10 4 11.5c0 2 2 3.5 5 3.5"/></svg>`;
+    case 'segregation_bin_set':
+      return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1c52d8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M3 6h7v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6zm11 0h7v13a2 2 0 0 1-2 2h-3a2 2 0 0 1-2-2V6z"/><path d="M2 6h9M13 6h9M5 3h3M16 3h3"/></svg>`;
+    case 'compost_kit':
+      return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M4 10h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V10z"/><path d="M2 10h20M7 10V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v4"/><path d="M10 15a2 2 0 0 1 4 0v3"/></svg>`;
+    case 'ewaste_voucher':
+      return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><rect x="2" y="7" width="20" height="13" rx="2"/><path d="M16 3v4M8 3v4M7 14h2M15 14h2M11 12h2v4h-2z"/></svg>`;
+    case 'seed_paper':
+      return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-4M10 16a2 2 0 0 1 4 0"/></svg>`;
+    case 'priority_pickup_pass':
+      return `<svg width="24" height="24" viewBox="0 0 24 24" fill="#eab308" stroke="#ca8a04" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`;
+    case 'recycler_marketplace_credit':
+      return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><circle cx="12" cy="12" r="10"/><path d="M8 12l2-2 2 2M16 12l-2 2-2-2"/></svg>`;
+    case 'recycled_notebook':
+      return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/></svg>`;
+    case 'digital_badge':
+      return `<svg width="24" height="24" viewBox="0 0 24 24" fill="#fbbf24" stroke="#d97706" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>`;
+    default:
+      return '';
+  }
+}
+
 function renderRedemptionStore() {
   const container = document.getElementById('rewardStoreGrid');
   if (!container) return;
@@ -1723,11 +1874,14 @@ function renderRedemptionStore() {
     const isAffordable = userBalance >= item.cost;
     const costText = item.cost === 0 ? 'FREE' : `${item.cost} Credits`;
     const btnLabel = isAffordable ? 'Redeem Item' : `Need ${item.cost - userBalance} more credits`;
+    const svgIcon = getRewardSvgIcon(item.id);
 
     if (item.featured) {
       return `
         <div class="reward-card featured-card">
-          <div class="featured-icon">${item.icon}</div>
+          <div class="featured-icon" style="display: flex; align-items: center; justify-content: center; gap: 0.35rem;">
+            ${svgIcon || item.icon}
+          </div>
           <div>
             <div style="font-size: 0.72rem; font-weight: 800; color: var(--civic-spruce-green); text-transform: uppercase;">Featured Sustainability Reward</div>
             <h4 style="font-size: 1.25rem; margin: 0.25rem 0;">${item.name}</h4>
@@ -1744,7 +1898,9 @@ function renderRedemptionStore() {
     return `
       <div class="reward-card">
         <div>
-          <div class="reward-icon">${item.icon}</div>
+          <div class="reward-icon" style="display: flex; align-items: center; gap: 0.35rem;">
+            ${svgIcon || item.icon}
+          </div>
           <h4 style="font-size: 1rem; margin-bottom: 0.25rem;">${item.name}</h4>
           <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 0.75rem;">${item.desc}</p>
         </div>
@@ -1817,7 +1973,7 @@ function renderMyRedemptionsList() {
   const redemptions = getRedemptions().filter(r => r.userId === currentUser.id);
 
   if (redemptions.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #64748b;">No redemption records yet. Earn credits to unlock rewards!</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="4">${getEmptyStateHTML('redemptions', 'No redemption records yet', 'Earn EcoCredits by reporting waste or segregating at source to unlock rewards!')}</td></tr>`;
     return;
   }
 
@@ -1847,7 +2003,7 @@ function renderCitizenReportsFeed() {
   });
 
   if (filtered.length === 0) {
-    container.innerHTML = `<div class="card" style="text-align: center; color: #64748b;">No reports found for this filter view.</div>`;
+    container.innerHTML = getEmptyStateHTML('reports', 'No reports found for this filter', 'No civic reports match your current status filter view.');
     return;
   }
 
@@ -2755,8 +2911,10 @@ function initWorkerRouteMap(finalRoute) {
       weight: 5,
       opacity: 0.85,
       dashArray: '6, 8',
-      lineJoin: 'round'
+      lineJoin: 'round',
+      className: 'animated-route-line'
     }).addTo(workerMapObj);
+    animatePolylineDrawIn(workerRoutePolyline, pathCoords, 450);
   }
 
   // Add numbered markers for each stop
@@ -2770,7 +2928,7 @@ function initWorkerRouteMap(finalRoute) {
 
     const marker = L.marker([lat, lng], {
       icon: L.divIcon({
-        className: 'stop-pin-icon',
+        className: `stop-pin-icon ${isEmg ? 'emergency-pulse-marker' : ''}`,
         html: `<div style="background: ${markerColor}; color: #fff; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.3); cursor: pointer;">${stopLabel}</div>`,
         iconSize: [26, 26],
         iconAnchor: [13, 13]
@@ -3831,6 +3989,7 @@ function initAdminHotspotMap() {
    ========================================================================== */
 let adminWorkerMapObj = null;
 let adminWorkerMarkers = [];
+let adminWorkerMarkersMap = new Map();
 let adminWorkerRouteLine = null;
 let adminWorkerRouteStopMarkers = [];
 let currentAdminWorkerFilter = 'all';
@@ -3838,6 +3997,129 @@ let selectedMultiRouteWorkerIds = new Set();
 let adminMultiRoutePolylines = [];
 let adminMultiRouteMarkers = [];
 const MULTI_ROUTE_COLORS = ['#059669', '#1c52d8', '#7c3aed', '#d97706', '#e11d48', '#0891b2'];
+
+/* Vehicle-Specific Inline SVG Icons for Municipal Tracking */
+function getVehicleSvgIcon(vehicleType = '', isIdle = false) {
+  const typeStr = (vehicleType || '').toLowerCase();
+  const fill = isIdle ? '#64748b' : '#047857';
+
+  if (typeStr.includes('biomedical')) {
+    return `<svg width="18" height="18" viewBox="0 0 24 24" fill="${fill}" style="vertical-align: middle;"><path d="M2 7h14v10H2V7zm15 3h4l2 3v4h-6v-7zM6 19a2 2 0 100-4 2 2 0 000 4zm12 0a2 2 0 100-4 2 2 0 000 4z"/><path d="M8 9h2v2h2v2h-2v2H8v-2H6v-2h2V9z" fill="#ef4444"/></svg>`;
+  }
+  if (typeStr.includes('tipper auto') || typeStr.includes('auto')) {
+    return `<svg width="18" height="18" viewBox="0 0 24 24" fill="${fill}" style="vertical-align: middle;"><path d="M3 13l2-6h9v6H3zm12-4h4l2 4h-6V9zM5 18a2 2 0 100-4 2 2 0 000 4zm11 0a2 2 0 100-4 2 2 0 000 4zM11 6l2-3h4l-1 3h-5z"/></svg>`;
+  }
+  if (typeStr.includes('e-rickshaw') || typeStr.includes('mini')) {
+    return `<svg width="18" height="18" viewBox="0 0 24 24" fill="${fill}" style="vertical-align: middle;"><path d="M4 11h9v5H4v-5zm10 1h4l2 2v2h-6v-4zM6 18a2 2 0 100-4 2 2 0 000 4zm10 0a2 2 0 100-4 2 2 0 000 4z"/><path d="M10 4l-2 4h3l-1 3 4-5h-3l1-2h-2z" fill="#10b981"/></svg>`;
+  }
+  if (typeStr.includes('dumper') || typeStr.includes('debris')) {
+    return `<svg width="18" height="18" viewBox="0 0 24 24" fill="${fill}" style="vertical-align: middle;"><path d="M3 14l2-6h10l-2 6H3zm11-3h5l3 3v3h-8v-6zM6 19a2 2 0 100-4 2 2 0 000 4zm12 0a2 2 0 100-4 2 2 0 000 4z"/></svg>`;
+  }
+  return `<svg width="18" height="18" viewBox="0 0 24 24" fill="${fill}" style="vertical-align: middle;"><path d="M1 8h13v8H1V8zm14 2h4l3 3v3h-7v-6zM5 19a2 2 0 100-4 2 2 0 000 4zm13 0a2 2 0 100-4 2 2 0 000 4z"/><path d="M4 10h4v4H4z" fill="#fff" opacity="0.6"/></svg>`;
+}
+
+/* Marker LatLng Smooth Interpolation (Respects prefers-reduced-motion) */
+function animateMarkerTo(marker, newLatLng, duration = 1200) {
+  if (!marker) return;
+  const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReduced || duration <= 0) {
+    marker.setLatLng(newLatLng);
+    return;
+  }
+
+  const startLatLng = marker.getLatLng();
+  const startLat = startLatLng.lat;
+  const startLng = startLatLng.lng;
+  const targetLat = Array.isArray(newLatLng) ? newLatLng[0] : newLatLng.lat;
+  const targetLng = Array.isArray(newLatLng) ? newLatLng[1] : newLatLng.lng;
+
+  if (Math.abs(startLat - targetLat) < 0.00001 && Math.abs(startLng - targetLng) < 0.00001) {
+    return;
+  }
+
+  const startTime = performance.now();
+  function step(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const ease = progress < 0.5 ? 2 * progress * progress : -1 + (4 - 2 * progress) * progress;
+    const currentLat = startLat + (targetLat - startLat) * ease;
+    const currentLng = startLng + (targetLng - startLng) * ease;
+    marker.setLatLng([currentLat, currentLng]);
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    }
+  }
+  requestAnimationFrame(step);
+}
+
+/* Progressive Route Polyline Draw-in Animation */
+function animatePolylineDrawIn(polyline, fullCoords, duration = 450) {
+  if (!polyline || !fullCoords || fullCoords.length < 2) return;
+  const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReduced) {
+    polyline.setLatLngs(fullCoords);
+    return;
+  }
+  let stepIdx = 2;
+  const interval = Math.max(25, Math.floor(duration / fullCoords.length));
+  polyline.setLatLngs(fullCoords.slice(0, 2));
+  const timer = setInterval(() => {
+    if (stepIdx <= fullCoords.length) {
+      polyline.setLatLngs(fullCoords.slice(0, stepIdx));
+      stepIdx++;
+    } else {
+      clearInterval(timer);
+    }
+  }, interval);
+}
+
+/* Empty State Modern SVG Renderer */
+function getEmptyStateHTML(iconType, message, subtext) {
+  let svgIcon = '';
+  if (iconType === 'reports') {
+    svgIcon = `<svg class="empty-state-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="14" y="8" width="36" height="48" rx="6" stroke="#94a3b8" stroke-width="2.5" fill="none"/>
+      <path d="M22 6h20a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H22a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z" fill="#cbd5e1" stroke="#94a3b8" stroke-width="2"/>
+      <path d="M22 22h20M22 30h16M22 38h12" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="44" cy="44" r="10" fill="#f8fafc" stroke="#10b981" stroke-width="2"/>
+      <path d="M40 44l3 3 6-6" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>`;
+  } else if (iconType === 'redemptions') {
+    svgIcon = `<svg class="empty-state-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="10" y="24" width="44" height="32" rx="4" stroke="#94a3b8" stroke-width="2.5"/>
+      <path d="M32 24v32M10 34h44" stroke="#94a3b8" stroke-width="2"/>
+      <path d="M32 24c-4-8-12-8-12-3s12 11 12 11 12-6 12-11-8-5-12 3z" fill="rgba(16,185,129,0.15)" stroke="#10b981" stroke-width="2"/>
+    </svg>`;
+  } else if (iconType === 'proofs') {
+    svgIcon = `<svg class="empty-state-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="8" y="16" width="48" height="36" rx="6" stroke="#94a3b8" stroke-width="2.5"/>
+      <circle cx="32" cy="34" r="10" stroke="#94a3b8" stroke-width="2.5"/>
+      <path d="M22 16l3-6h14l3 6" stroke="#94a3b8" stroke-width="2"/>
+      <circle cx="46" cy="22" r="2" fill="#94a3b8"/>
+    </svg>`;
+  } else if (iconType === 'expiry') {
+    svgIcon = `<svg class="empty-state-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="20" y="10" width="24" height="44" rx="4" stroke="#94a3b8" stroke-width="2.5"/>
+      <path d="M26 10V6h12v4" stroke="#94a3b8" stroke-width="2"/>
+      <path d="M32 24v14M25 31h14" stroke="#10b981" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M20 40h24" stroke="#cbd5e1" stroke-width="2"/>
+    </svg>`;
+  } else {
+    svgIcon = `<svg class="empty-state-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="32" cy="32" r="22" stroke="#94a3b8" stroke-width="2.5"/>
+      <path d="M32 18v14l10 6" stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="32" cy="32" r="3" fill="#10b981"/>
+    </svg>`;
+  }
+
+  return `
+    <div class="empty-state-card">
+      ${svgIcon}
+      <div style="font-weight: 700; color: var(--civic-forest-ink); font-size: 0.95rem; margin-bottom: 0.25rem;">${message}</div>
+      ${subtext ? `<div style="color: #64748b; font-size: 0.8rem;">${subtext}</div>` : ''}
+    </div>
+  `;
+}
 
 window.setAdminWorkerFilter = function(filter) {
   currentAdminWorkerFilter = filter;
@@ -3898,6 +4180,14 @@ function initAdminWorkerLocationsMap(forceRefresh) {
 
   if (typeof L === 'undefined') return;
 
+  // Spin refresh icon animation
+  const refreshBtns = document.querySelectorAll('#btnAdminRefreshWorkerMap .refresh-icon, .admin-map-refresh-icon');
+  refreshBtns.forEach(icon => {
+    icon.classList.remove('spin-refresh-icon');
+    void icon.offsetWidth;
+    icon.classList.add('spin-refresh-icon');
+  });
+
   if (adminWorkerMapObj) {
     adminWorkerMapObj.invalidateSize();
   } else {
@@ -3907,10 +4197,6 @@ function initAdminWorkerLocationsMap(forceRefresh) {
       attribution: '© OpenStreetMap contributors'
     }).addTo(adminWorkerMapObj);
   }
-
-  // Clear existing worker markers
-  adminWorkerMarkers.forEach(m => m.remove());
-  adminWorkerMarkers = [];
 
   const workers = getUsers().filter(u => u.role === 'worker');
   const fleet = getFleet();
@@ -3935,7 +4221,18 @@ function initAdminWorkerLocationsMap(forceRefresh) {
   const countBadge = document.getElementById('adminFilteredWorkerCount');
   if (countBadge) countBadge.textContent = `${filteredWorkers.length} Crews Shown`;
 
-  // Plot markers for filtered workers
+  // Remove markers no longer in filteredWorkers
+  const currentWorkerIds = new Set(filteredWorkers.map(w => w.id));
+  for (const [wId, entry] of adminWorkerMarkersMap.entries()) {
+    if (!currentWorkerIds.has(wId)) {
+      entry.marker.remove();
+      adminWorkerMarkersMap.delete(wId);
+    }
+  }
+
+  adminWorkerMarkers = [];
+
+  // Plot or smoothly update markers for filtered workers
   filteredWorkers.forEach(w => {
     const lat = w.lastKnownLat || 19.0200;
     const lng = w.lastKnownLng || 72.8350;
@@ -3943,17 +4240,9 @@ function initAdminWorkerLocationsMap(forceRefresh) {
     const assignedStops = reports.filter(r => r.assignedWorkerId === w.id || (w.name && r.assignedWorkerName && (r.assignedWorkerName.includes(w.name) || w.name.includes(r.assignedWorkerName))));
     const isIdle = w.shiftStatus === 'off-shift' || (Date.now() - (w.lastLocationUpdatedAt || 0)) > 30 * 60 * 1000;
     const updatedStr = w.lastLocationUpdatedAt ? formatTimeAgo(w.lastLocationUpdatedAt) : 'Just now';
+    const vehicleSvg = getVehicleSvgIcon(vehicle ? vehicle.type : '', isIdle);
 
-    const marker = L.marker([lat, lng], {
-      icon: L.divIcon({
-        className: 'custom-admin-worker-icon',
-        html: `<div class="admin-worker-marker ${isIdle ? 'idle' : ''}" style="cursor: pointer;">${isIdle ? '⏸️' : '👷'} ${w.name.split(' ')[0]}</div>`,
-        iconSize: [95, 28],
-        iconAnchor: [47, 14]
-      })
-    }).addTo(adminWorkerMapObj);
-
-    marker.bindPopup(`
+    const popupHtml = `
       <div style="min-width: 240px; font-family: var(--font-body);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
           <h4 style="margin: 0; font-size: 1rem;">👷 ${w.name}</h4>
@@ -3970,20 +4259,46 @@ function initAdminWorkerLocationsMap(forceRefresh) {
           <button class="btn btn-outline btn-xs" style="width: 100%;" onclick="reassignNearestWorkerStop('${w.id}')">🔄 Reassign Nearest Stop</button>
         </div>
       </div>
-    `);
+    `;
 
-    marker.on('click', () => {
-      adminOverlayWorkerRoute(w.id);
-    });
+    if (adminWorkerMarkersMap.has(w.id)) {
+      const entry = adminWorkerMarkersMap.get(w.id);
+      entry.worker = w;
+      animateMarkerTo(entry.marker, [lat, lng], 1200);
+      entry.marker.setIcon(L.divIcon({
+        className: 'custom-admin-worker-icon',
+        html: `<div class="admin-worker-marker ${isIdle ? 'idle' : ''}" style="cursor: pointer; display: flex; align-items: center; gap: 4px;">${vehicleSvg} <span>${w.name.split(' ')[0]}</span></div>`,
+        iconSize: [105, 30],
+        iconAnchor: [52, 15]
+      }));
+      entry.marker.setPopupContent(popupHtml);
+      adminWorkerMarkers.push(entry);
+    } else {
+      const marker = L.marker([lat, lng], {
+        icon: L.divIcon({
+          className: 'custom-admin-worker-icon marker-pin-drop',
+          html: `<div class="admin-worker-marker ${isIdle ? 'idle' : ''}" style="cursor: pointer; display: flex; align-items: center; gap: 4px;">${vehicleSvg} <span>${w.name.split(' ')[0]}</span></div>`,
+          iconSize: [105, 30],
+          iconAnchor: [52, 15]
+        })
+      }).addTo(adminWorkerMapObj);
 
-    adminWorkerMarkers.push({ id: w.id, marker, worker: w });
+      marker.bindPopup(popupHtml);
+      marker.on('click', () => {
+        adminOverlayWorkerRoute(w.id);
+      });
+
+      const entry = { id: w.id, marker, worker: w };
+      adminWorkerMarkersMap.set(w.id, entry);
+      adminWorkerMarkers.push(entry);
+    }
   });
 
   // Render Worker List Panel beside the map
   const listPanel = document.getElementById('adminWorkerListPanel');
   if (listPanel) {
     if (filteredWorkers.length === 0) {
-      listPanel.innerHTML = `<div style="text-align: center; color: #64748b; padding: 1.5rem; font-size: 0.85rem;">No workers match the "${currentAdminWorkerFilter}" filter criteria.</div>`;
+      listPanel.innerHTML = getEmptyStateHTML('workers', 'No crews match filter', `No municipal workers found matching "${currentAdminWorkerFilter}".`);
     } else {
       listPanel.innerHTML = filteredWorkers.map(w => {
         const vehicle = fleet.find(f => f.driverId === w.id || f.driver === w.name || (w.name && f.driver && w.name.includes(f.driver)) || (w.name && f.driver && f.driver.includes(w.name))) || fleet[0];
@@ -4122,17 +4437,21 @@ window.renderMultiWorkerRouteOverlays = function() {
         color: color,
         weight: 4,
         opacity: 0.9,
-        dashArray: '6, 6'
+        dashArray: '6, 6',
+        className: 'animated-route-line'
       }).addTo(adminWorkerMapObj);
+      animatePolylineDrawIn(poly, pathCoords, 450);
       adminMultiRoutePolylines.push(poly);
     }
 
     assignedStops.forEach((stop, idx) => {
       const lat = stop.latitude !== undefined ? stop.latitude : (stop.coords?.lat || 19.0760);
       const lng = stop.longitude !== undefined ? stop.longitude : (stop.coords?.lng || 72.8777);
+      const isEmg = stop.isEmergency;
       const m = L.marker([lat, lng], {
         icon: L.divIcon({
-          html: `<div style="background: ${color}; color: #fff; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 10px; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">${stop.isEmergency ? '🚨' : idx + 1}</div>`,
+          className: isEmg ? 'emergency-pulse-marker' : '',
+          html: `<div style="background: ${color}; color: #fff; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 10px; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">${isEmg ? '🚨' : idx + 1}</div>`,
           iconSize: [22, 22],
           iconAnchor: [11, 11]
         })
@@ -4280,9 +4599,11 @@ window.adminOverlayWorkerRoute = function(workerId) {
       color: '#059669',
       weight: 5,
       opacity: 0.85,
-      dashArray: '8, 8'
+      dashArray: '8, 8',
+      className: 'animated-route-line'
     }).addTo(adminWorkerMapObj);
 
+    animatePolylineDrawIn(adminWorkerRouteLine, pathCoords, 450);
     adminWorkerMapObj.fitBounds(adminWorkerRouteLine.getBounds(), { padding: [40, 40] });
   }
 
@@ -4290,9 +4611,11 @@ window.adminOverlayWorkerRoute = function(workerId) {
   assignedStops.forEach((stop, idx) => {
     const lat = stop.latitude !== undefined ? stop.latitude : (stop.coords?.lat || 19.0760);
     const lng = stop.longitude !== undefined ? stop.longitude : (stop.coords?.lng || 72.8777);
+    const isEmg = stop.isEmergency;
     const m = L.marker([lat, lng], {
       icon: L.divIcon({
-        html: `<div style="background: ${stop.isEmergency ? '#dc2626' : '#059669'}; color: #fff; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">${stop.isEmergency ? '🚨' : idx + 1}</div>`,
+        className: isEmg ? 'emergency-pulse-marker' : '',
+        html: `<div style="background: ${isEmg ? '#dc2626' : '#059669'}; color: #fff; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">${isEmg ? '🚨' : idx + 1}</div>`,
         iconSize: [22, 22],
         iconAnchor: [11, 11]
       })
@@ -4309,7 +4632,12 @@ window.adminOverlayWorkerRoute = function(workerId) {
 
   if (panel) panel.style.display = 'block';
   if (nameElem) nameElem.textContent = `Route Overlay: 👷 ${worker.name} (${vehicle ? vehicle.type : 'Compactor'})`;
-  if (countElem) countElem.textContent = `${assignedStops.length} Stops Active`;
+  if (countElem) {
+    countElem.textContent = `${assignedStops.length} Stops Active`;
+    countElem.classList.remove('stop-count-badge-pop');
+    void countElem.offsetWidth;
+    countElem.classList.add('stop-count-badge-pop');
+  }
   if (listElem) {
     listElem.innerHTML = assignedStops.length === 0 
       ? 'No active pending stops assigned.'
@@ -5240,6 +5568,24 @@ const SEGREGATION_ITEMS = [
   { name: 'Glass Beverage Bottles', bin: 'Dry Recyclable', tag: 'bin-tag-blue', tip: 'Infinitely recyclable; rinse clean of organic residues.' }
 ];
 
+/* Category SVG Icons for Waste Segregation Guide */
+function getCategorySvgIcon(binName = '') {
+  const b = binName.toLowerCase();
+  if (b.includes('dry') || b.includes('recycl')) {
+    return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><path d="M7 19H4.815a1.83 1.83 0 0 1-1.57-.881 1.785 1.785 0 0 1-.004-1.784L7.196 9.5"/><path d="M11 19h8.2a1.8 1.8 0 0 0 1.57-.88 1.8 1.8 0 0 0 0-1.79L18 12"/><path d="M9.171 4.872l3.414 5.914a1.8 1.8 0 0 0 1.56.914h5.669"/><polyline points="14 16 11 19 14 22"/><polyline points="5 11 7 8 10 9"/><polyline points="17 7 20 7 19 10"/></svg>`;
+  }
+  if (b.includes('wet') || b.includes('organic') || b.includes('compost')) {
+    return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>`;
+  }
+  if (b.includes('hazard') || b.includes('domestic')) {
+    return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+  }
+  if (b.includes('sanitary') || b.includes('red')) {
+    return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="14"/><line x1="9" y1="11" x2="15" y2="11"/></svg>`;
+  }
+  return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: -2px; margin-right: 4px;"><circle cx="12" cy="12" r="10"/></svg>`;
+}
+
 function initSegregationGuide() {
   const input = document.getElementById('segregationSearchInput') || document.getElementById('guideSearchInput');
   const grid = document.getElementById('guideResultsGrid');
@@ -5250,7 +5596,7 @@ function initSegregationGuide() {
       <div class="guide-item-card">
         <div>
           <strong>${i.name}</strong>
-          <div><span class="bin-tag ${i.tag}">${i.bin}</span></div>
+          <div><span class="bin-tag ${i.tag}">${getCategorySvgIcon(i.bin)}${i.bin}</span></div>
         </div>
         <div style="font-size: 0.78rem; color: #64748b; margin-top: 0.4rem;">${i.tip}</div>
       </div>
@@ -5583,7 +5929,7 @@ function renderHospitalPharmaExpiryTable() {
   if (!tbody) return;
   const list = getHospitalPharmaExpiry();
   if (list.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #64748b;">No expiring pharmaceutical stock logged.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7">${getEmptyStateHTML('expiry', 'No expiring pharmaceutical stock logged', 'All registered clinical medicine batches are currently compliant.')}</td></tr>`;
     return;
   }
   const now = Date.now();
@@ -5753,7 +6099,7 @@ function renderWorkerPhotoProofGallery() {
   if (countBadge) countBadge.textContent = `${myClearedReports.length} Proofs Logged`;
 
   if (myClearedReports.length === 0) {
-    grid.innerHTML = `<div style="padding: 1.5rem; text-align: center; color: #64748b; font-size: 0.85rem; grid-column: 1 / -1;">No photo proofs logged for this crew shift yet. Completed clearance photos will appear here.</div>`;
+    grid.innerHTML = `<div style="grid-column: 1 / -1;">${getEmptyStateHTML('proofs', 'No clearance proofs logged yet', 'Completed cleanup photos taken during shifts will appear here.')}</div>`;
     return;
   }
 

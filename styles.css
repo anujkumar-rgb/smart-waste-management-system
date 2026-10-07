@@ -1702,3 +1702,278 @@ button, input, select, textarea {
   font-weight: 800;
   box-shadow: var(--shadow-sm);
 }
+
+/* ==========================================================================
+   21. SIGNUP & AUTHENTICATION ANIMATIONS
+   ========================================================================== */
+/* Role Selection Cards */
+.role-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(115px, 1fr));
+  gap: 0.55rem;
+  margin-top: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+.role-select-card {
+  background: var(--civic-paper-bg);
+  border: 2px solid var(--civic-border);
+  border-radius: var(--radius-xs);
+  padding: 0.75rem 0.5rem;
+  cursor: pointer;
+  text-align: center;
+  transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  user-select: none;
+}
+.role-select-card:hover {
+  transform: scale(1.03);
+  border-color: var(--civic-cobalt-accent);
+  box-shadow: var(--shadow-sm);
+}
+.role-select-card.active {
+  border-color: var(--civic-spruce-green);
+  background: rgba(5, 150, 105, 0.08);
+  animation: roleHighlightPulse 350ms ease-out;
+}
+@keyframes roleHighlightPulse {
+  0% { transform: scale(0.98); box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.4); }
+  50% { transform: scale(1.04); box-shadow: 0 0 0 6px rgba(5, 150, 105, 0); }
+  100% { transform: scale(1); }
+}
+.role-card-icon {
+  width: 26px;
+  height: 26px;
+  margin-bottom: 0.35rem;
+  color: var(--civic-forest-ink);
+  transition: color 150ms ease;
+}
+.role-select-card.active .role-card-icon {
+  color: var(--civic-spruce-green);
+}
+.role-card-title {
+  font-weight: 700;
+  font-size: 0.78rem;
+  line-height: 1.2;
+}
+.role-card-desc {
+  font-size: 0.65rem;
+  color: #64748b;
+  margin-top: 0.15rem;
+}
+.role-check-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--civic-spruce-green);
+  color: #ffffff;
+  font-size: 9px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  animation: checkFadeIn 150ms ease-out;
+}
+.role-select-card.active .role-check-badge {
+  display: flex;
+}
+@keyframes checkFadeIn {
+  from { opacity: 0; transform: scale(0.5); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Conditional Field Reveal */
+.conditional-field-reveal {
+  animation: slideFadeIn 200ms ease-out forwards;
+}
+@keyframes slideFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Form Validation Feedback Shake */
+.form-input-error {
+  animation: formShake 300ms ease-in-out;
+  border-color: var(--civic-signal-crimson) !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+@keyframes formShake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+/* Submit Button State & Spinner */
+.btn-loading {
+  position: relative;
+  pointer-events: none;
+  opacity: 0.9;
+  cursor: wait;
+}
+.btn-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: btnSpin 0.65s linear infinite;
+  vertical-align: middle;
+  margin-right: 0.4rem;
+}
+@keyframes btnSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* Sign In with Google Button */
+.btn-google {
+  background: var(--civic-surface);
+  border: 1px solid var(--civic-border);
+  color: var(--civic-forest-ink);
+  font-weight: 600;
+  font-size: 0.88rem;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.65rem 1rem;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+  margin-bottom: 1rem;
+}
+.btn-google:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: #4285F4;
+}
+
+/* ==========================================================================
+   22. LIVE WORKER TRACKING MAP ANIMATIONS
+   ========================================================================== */
+/* Emergency Report Pulse Ring */
+.emergency-pulse-marker {
+  position: relative;
+}
+.emergency-pulse-marker::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 999px;
+  border: 2px solid #ef4444;
+  animation: emergencyRingPulse 1.8s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+  pointer-events: none;
+}
+@keyframes emergencyRingPulse {
+  0% { transform: scale(0.9); opacity: 1; }
+  70% { transform: scale(1.6); opacity: 0; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+/* New Report Marker Pin Drop */
+.marker-pin-drop {
+  animation: pinDrop 350ms cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+@keyframes pinDrop {
+  from { opacity: 0; transform: translateY(-16px) scale(0.8); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Route Polyline Flow */
+.animated-route-line {
+  stroke-dasharray: 8, 8;
+  animation: routeDashFlow 1.2s linear infinite;
+}
+@keyframes routeDashFlow {
+  to { stroke-dashoffset: -32; }
+}
+
+/* Leaflet Popup Scale & Fade Transition */
+.leaflet-popup-content-wrapper {
+  animation: popupScaleFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: bottom center;
+}
+@keyframes popupScaleFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Spin Refresh Icon */
+.spin-refresh-icon {
+  display: inline-block;
+  animation: spinRotate 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes spinRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Stop Count Badge Scale Pop */
+.stop-count-badge-pop {
+  animation: badgeScalePop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+@keyframes badgeScalePop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); color: var(--civic-cobalt-accent); }
+  100% { transform: scale(1); }
+}
+
+/* Empty State SVG Container */
+.empty-state-card {
+  text-align: center;
+  padding: 2.25rem 1.5rem;
+  color: #64748b;
+  font-size: 0.85rem;
+}
+.empty-state-svg {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 0.75rem auto;
+  display: block;
+}
+
+/* ==========================================================================
+   23. ACCESSIBILITY: PREFERS-REDUCED-MOTION
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .role-select-card,
+  .btn-google,
+  .form-input-error,
+  .conditional-field-reveal,
+  .emergency-pulse-marker::after,
+  .marker-pin-drop,
+  .animated-route-line,
+  .leaflet-popup-content-wrapper,
+  .spin-refresh-icon,
+  .stop-count-badge-pop,
+  .btn-spinner {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
