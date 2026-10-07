@@ -96,11 +96,80 @@ const DEFAULT_DB = {
       email: 'crew101@cleanward.org', 
       pass: 'demo123', 
       name: 'Rajesh Singh (Crew #101)', 
+      crewNumber: '101',
       role: 'worker', 
       verificationCode: 'WRK-101',
+      assignedWard: 'Ward G/South - Dadar & Elphinstone',
+      vehicleType: 'Heavy Hydraulic Compactor (10T)',
+      vehicleRegistration: 'MH-01-GA-4401',
+      shiftStatus: 'active',
       lastKnownLat: 19.0200,
       lastKnownLng: 72.8350,
       lastLocationUpdatedAt: Date.now() - 120000
+    },
+    { 
+      id: 'usr-7', 
+      email: 'crew102@cleanward.org', 
+      pass: 'demo123', 
+      name: 'Sunita Devi (Crew #102)', 
+      crewNumber: '102',
+      role: 'worker', 
+      verificationCode: 'WRK-102',
+      assignedWard: 'Ward H/West - Bandra Residential',
+      vehicleType: 'Electric Multi-Bin Tipper Auto (1.5T)',
+      vehicleRegistration: 'MH-02-EV-1088',
+      shiftStatus: 'active',
+      lastKnownLat: 19.0595,
+      lastKnownLng: 72.8295,
+      lastLocationUpdatedAt: Date.now() - 180000
+    },
+    { 
+      id: 'usr-8', 
+      email: 'crew103@cleanward.org', 
+      pass: 'demo123', 
+      name: 'Amit Verma (Crew #103)', 
+      crewNumber: '103',
+      role: 'worker', 
+      verificationCode: 'WRK-103',
+      assignedWard: 'Ward K/East - Andheri Industrial Estate',
+      vehicleType: 'Biomedical Closed-Chamber Van (2T)',
+      vehicleRegistration: 'MH-03-HA-0912',
+      shiftStatus: 'active',
+      lastKnownLat: 19.1136,
+      lastKnownLng: 72.8697,
+      lastLocationUpdatedAt: Date.now() - 240000
+    },
+    { 
+      id: 'usr-9', 
+      email: 'crew104@cleanward.org', 
+      pass: 'demo123', 
+      name: 'Harish Kumar (Crew #104)', 
+      crewNumber: '104',
+      role: 'worker', 
+      verificationCode: 'WRK-104',
+      assignedWard: 'Ward S - Powai Lake & Tech Enclave',
+      vehicleType: 'C&D Debris Hydraulic Dumper (14T)',
+      vehicleRegistration: 'MH-04-CD-5501',
+      shiftStatus: 'active',
+      lastKnownLat: 19.1255,
+      lastKnownLng: 72.9120,
+      lastLocationUpdatedAt: Date.now() - 300000
+    },
+    { 
+      id: 'usr-10', 
+      email: 'crew105@cleanward.org', 
+      pass: 'demo123', 
+      name: 'Sachin Kamble (Crew #105)', 
+      crewNumber: '105',
+      role: 'worker', 
+      verificationCode: 'WRK-105',
+      assignedWard: 'Ward R/Central - Borivali West',
+      vehicleType: 'Mini Tipper E-Rickshaw (0.8T)',
+      vehicleRegistration: 'MH-02-ET-5055',
+      shiftStatus: 'off-shift',
+      lastKnownLat: 19.2307,
+      lastKnownLng: 72.8567,
+      lastLocationUpdatedAt: Date.now() - 3600000
     },
     { 
       id: 'usr-5', 
@@ -127,9 +196,55 @@ const DEFAULT_DB = {
       severity: 'overflowing',
       notes: 'Plastic packaging spillage blocking pedestrian footpath.',
       isEmergency: false,
-      status: 'reported',
+      status: 'assigned',
+      assignedWorkerId: 'usr-4',
+      assignedWorkerName: 'Rajesh Singh (Crew #101)',
       createdAt: Date.now() - 45 * 60 * 1000,
       duplicateCount: 1,
+      isEscalated: false
+    },
+    {
+      id: 'EMG-401',
+      userId: 'usr-1',
+      userName: 'Ananya Sharma',
+      userRole: 'citizen',
+      area: 'Ward G/South - Dadar & Elphinstone',
+      coords: { lat: 19.0190, lng: 72.8420 },
+      latitude: 19.0190,
+      longitude: 72.8420,
+      landmark: 'Dadar Station Road Chemical Hazard Point',
+      resolvedAddress: 'Near Dadar Station East Exit, Ward G/South',
+      category: 'chemical',
+      severity: 'emergency',
+      notes: 'Corrosive industrial battery leakage spreading on pavement.',
+      isEmergency: true,
+      status: 'assigned',
+      assignedWorkerId: 'usr-4',
+      assignedWorkerName: 'Rajesh Singh (Crew #101)',
+      createdAt: Date.now() - 15 * 60 * 1000,
+      duplicateCount: 0,
+      isEscalated: false
+    },
+    {
+      id: 'REP-1004',
+      userId: 'usr-1',
+      userName: 'Ananya Sharma',
+      userRole: 'citizen',
+      area: 'Ward G/South - Dadar & Elphinstone',
+      coords: { lat: 19.0168, lng: 72.8300 },
+      latitude: 19.0168,
+      longitude: 72.8300,
+      landmark: 'Siddhivinayak Temple Perimeter Bins',
+      resolvedAddress: 'SK Bole Marg, Prabhadevi / Dadar, Ward G/South',
+      category: 'organic',
+      severity: 'full',
+      notes: 'Flower offerings and coconut husk bio-waste accumulating.',
+      isEmergency: false,
+      status: 'assigned',
+      assignedWorkerId: 'usr-4',
+      assignedWorkerName: 'Rajesh Singh (Crew #101)',
+      createdAt: Date.now() - 50 * 60 * 1000,
+      duplicateCount: 0,
       isEscalated: false
     },
     {
@@ -148,38 +263,55 @@ const DEFAULT_DB = {
       notes: 'Dry leaves and organic bins filled after morning sweep.',
       isEmergency: false,
       status: 'assigned',
-      assignedWorkerId: 'usr-4',
-      assignedWorkerName: 'Rajesh Singh (Crew #101)',
+      assignedWorkerId: 'usr-7',
+      assignedWorkerName: 'Sunita Devi (Crew #102)',
       createdAt: Date.now() - (26 * 60 * 60 * 1000),
       assignedAt: Date.now() - (25 * 60 * 60 * 1000),
       duplicateCount: 2,
       isEscalated: true
     },
     {
-      id: 'BULK-2001',
-      userId: 'usr-2',
-      userName: 'Bombay Scottish School, Powai',
-      institutionType: 'school',
-      schoolName: 'Bombay Scottish School, Powai',
-      branchId: 'br-dps-main',
-      branchName: 'Powai Senior Campus',
-      userRole: 'institution',
-      area: 'Ward S - Powai Lake & Tech Enclave',
-      coords: { lat: 19.1250, lng: 72.9150 },
-      latitude: 19.1250,
-      longitude: 72.9150,
-      landmark: 'School Cafeteria Loading Dock',
-      resolvedAddress: 'Plot 4 Technology Corridor, Powai, Ward S',
-      category: 'commercial_food',
+      id: 'REP-1005',
+      userId: 'usr-1',
+      userName: 'Ananya Sharma',
+      userRole: 'citizen',
+      area: 'Ward H/West - Bandra Residential',
+      coords: { lat: 19.0620, lng: 72.8270 },
+      latitude: 19.0620,
+      longitude: 72.8270,
+      landmark: 'Pali Hill Market Dry Waste Point',
+      resolvedAddress: 'Nargis Dutt Road, Pali Hill, Bandra West, Ward H/West',
+      category: 'plastic',
       severity: 'overflowing',
-      notes: 'Bulk organic food waste from annual school environmental assembly.',
-      isBulk: true,
-      volumeKg: 350,
-      containerCount: 5,
+      notes: 'Recyclable packaging from weekend organic food stalls.',
       isEmergency: false,
-      status: 'reported',
-      createdAt: Date.now() - 30 * 60 * 1000,
+      status: 'assigned',
+      assignedWorkerId: 'usr-7',
+      assignedWorkerName: 'Sunita Devi (Crew #102)',
+      createdAt: Date.now() - 80 * 60 * 1000,
       duplicateCount: 1,
+      isEscalated: false
+    },
+    {
+      id: 'EMG-402',
+      userId: 'usr-1',
+      userName: 'Ananya Sharma',
+      userRole: 'citizen',
+      area: 'Ward H/West - Bandra Residential',
+      coords: { lat: 19.0550, lng: 72.8340 },
+      latitude: 19.0550,
+      longitude: 72.8340,
+      landmark: 'Bandra Polyclinic Alleyway',
+      resolvedAddress: 'Waterfield Road Lane 3, Bandra West, Ward H/West',
+      category: 'biomedical',
+      severity: 'emergency',
+      notes: 'Illegal dumping of clinic syringes and biohazard bags.',
+      isEmergency: true,
+      status: 'assigned',
+      assignedWorkerId: 'usr-7',
+      assignedWorkerName: 'Sunita Devi (Crew #102)',
+      createdAt: Date.now() - 20 * 60 * 1000,
+      duplicateCount: 0,
       isEscalated: false
     },
     {
@@ -206,11 +338,194 @@ const DEFAULT_DB = {
       containerCount: 6,
       isEmergency: false,
       status: 'assigned',
-      assignedWorkerId: 'usr-4',
-      assignedWorkerName: 'Rajesh Singh (Crew #101)',
+      assignedWorkerId: 'usr-8',
+      assignedWorkerName: 'Amit Verma (Crew #103)',
       createdAt: Date.now() - 60 * 60 * 1000,
       assignedAt: Date.now() - 40 * 60 * 1000,
       duplicateCount: 1,
+      isEscalated: false
+    },
+    {
+      id: 'REP-1006',
+      userId: 'usr-1',
+      userName: 'Ananya Sharma',
+      userRole: 'citizen',
+      area: 'Ward K/East - Andheri Industrial Estate',
+      coords: { lat: 19.1110, lng: 72.8610 },
+      latitude: 19.1110,
+      longitude: 72.8610,
+      landmark: 'Chakala Metro Station Footbridge Bin',
+      resolvedAddress: 'Andheri-Kurla Road, Chakala, Ward K/East',
+      category: 'plastic',
+      severity: 'overflowing',
+      notes: 'Litter accumulation along metro entry stairway.',
+      isEmergency: false,
+      status: 'assigned',
+      assignedWorkerId: 'usr-8',
+      assignedWorkerName: 'Amit Verma (Crew #103)',
+      createdAt: Date.now() - 75 * 60 * 1000,
+      duplicateCount: 0,
+      isEscalated: false
+    },
+    {
+      id: 'EMG-403',
+      userId: 'usr-1',
+      userName: 'Ananya Sharma',
+      userRole: 'citizen',
+      area: 'Ward K/East - Andheri Industrial Estate',
+      coords: { lat: 19.1180, lng: 72.8750 },
+      latitude: 19.1180,
+      longitude: 72.8750,
+      landmark: 'Marol Pipeline Road Industrial Junction',
+      resolvedAddress: 'Marol Pipeline Rd, Andheri East, Ward K/East',
+      category: 'chemical',
+      severity: 'emergency',
+      notes: 'Hazardous solvent barrel punctured; chemical runoff approaching storm drain.',
+      isEmergency: true,
+      status: 'assigned',
+      assignedWorkerId: 'usr-8',
+      assignedWorkerName: 'Amit Verma (Crew #103)',
+      createdAt: Date.now() - 10 * 60 * 1000,
+      duplicateCount: 0,
+      isEscalated: false
+    },
+    {
+      id: 'BULK-2001',
+      userId: 'usr-2',
+      userName: 'Bombay Scottish School, Powai',
+      institutionType: 'school',
+      schoolName: 'Bombay Scottish School, Powai',
+      branchId: 'br-dps-main',
+      branchName: 'Powai Senior Campus',
+      userRole: 'institution',
+      area: 'Ward S - Powai Lake & Tech Enclave',
+      coords: { lat: 19.1250, lng: 72.9150 },
+      latitude: 19.1250,
+      longitude: 72.9150,
+      landmark: 'School Cafeteria Loading Dock',
+      resolvedAddress: 'Plot 4 Technology Corridor, Powai, Ward S',
+      category: 'commercial_food',
+      severity: 'overflowing',
+      notes: 'Bulk organic food waste from annual school environmental assembly.',
+      isBulk: true,
+      volumeKg: 350,
+      containerCount: 5,
+      isEmergency: false,
+      status: 'assigned',
+      assignedWorkerId: 'usr-9',
+      assignedWorkerName: 'Harish Kumar (Crew #104)',
+      createdAt: Date.now() - 30 * 60 * 1000,
+      duplicateCount: 1,
+      isEscalated: false
+    },
+    {
+      id: 'REP-1007',
+      userId: 'usr-1',
+      userName: 'Ananya Sharma',
+      userRole: 'citizen',
+      area: 'Ward S - Powai Lake & Tech Enclave',
+      coords: { lat: 19.1190, lng: 72.9080 },
+      latitude: 19.1190,
+      longitude: 72.9080,
+      landmark: 'Hiranandani Gardens Central Avenue Bins',
+      resolvedAddress: 'Central Ave, Hiranandani Gardens, Powai, Ward S',
+      category: 'plastic',
+      severity: 'full',
+      notes: 'E-commerce delivery carton packaging overflowing community cage.',
+      isEmergency: false,
+      status: 'assigned',
+      assignedWorkerId: 'usr-9',
+      assignedWorkerName: 'Harish Kumar (Crew #104)',
+      createdAt: Date.now() - 95 * 60 * 1000,
+      duplicateCount: 0,
+      isEscalated: false
+    },
+    {
+      id: 'EMG-404',
+      userId: 'usr-1',
+      userName: 'Ananya Sharma',
+      userRole: 'citizen',
+      area: 'Ward S - Powai Lake & Tech Enclave',
+      coords: { lat: 19.1280, lng: 72.9050 },
+      latitude: 19.1280,
+      longitude: 72.9050,
+      landmark: 'Powai Lake Promenade Storm Drain',
+      resolvedAddress: 'JVLR Promenade near IIT Gate, Powai, Ward S',
+      category: 'construction_debris',
+      severity: 'emergency',
+      notes: 'Illegal masonry debris dumping blocking natural storm water runoff during rain alert.',
+      isEmergency: true,
+      status: 'assigned',
+      assignedWorkerId: 'usr-9',
+      assignedWorkerName: 'Harish Kumar (Crew #104)',
+      createdAt: Date.now() - 25 * 60 * 1000,
+      duplicateCount: 0,
+      isEscalated: false
+    },
+    {
+      id: 'REP-1008',
+      userId: 'usr-1',
+      userName: 'Ananya Sharma',
+      userRole: 'citizen',
+      area: 'Ward R/Central - Borivali West',
+      coords: { lat: 19.2295, lng: 72.8570 },
+      latitude: 19.2295,
+      longitude: 72.8570,
+      landmark: 'Borivali Railway Station West Exit',
+      resolvedAddress: 'Station Road West, Borivali West, Ward R/Central',
+      category: 'plastic',
+      severity: 'overflowing',
+      notes: 'Single-use snack wrappers and plastic bottles surrounding ticket counter entrance.',
+      isEmergency: false,
+      status: 'assigned',
+      assignedWorkerId: 'usr-10',
+      assignedWorkerName: 'Sachin Kamble (Crew #105)',
+      createdAt: Date.now() - 110 * 60 * 1000,
+      duplicateCount: 2,
+      isEscalated: false
+    },
+    {
+      id: 'REP-1009',
+      userId: 'usr-1',
+      userName: 'Ananya Sharma',
+      userRole: 'citizen',
+      area: 'Ward R/Central - Borivali West',
+      coords: { lat: 19.2340, lng: 72.8520 },
+      latitude: 19.2340,
+      longitude: 72.8520,
+      landmark: 'Shimpoli Road Vegetable Market Organic Drop-off',
+      resolvedAddress: 'Shimpoli Rd, Borivali West, Ward R/Central',
+      category: 'organic',
+      severity: 'full',
+      notes: 'Vegetable trimmings and wholesale crate greens ready for compost transit.',
+      isEmergency: false,
+      status: 'assigned',
+      assignedWorkerId: 'usr-10',
+      assignedWorkerName: 'Sachin Kamble (Crew #105)',
+      createdAt: Date.now() - 140 * 60 * 1000,
+      duplicateCount: 0,
+      isEscalated: false
+    },
+    {
+      id: 'EMG-405',
+      userId: 'usr-1',
+      userName: 'Ananya Sharma',
+      userRole: 'citizen',
+      area: 'Ward R/Central - Borivali West',
+      coords: { lat: 19.2380, lng: 72.8460 },
+      latitude: 19.2380,
+      longitude: 72.8460,
+      landmark: 'Gorai Creek Bridge Access Road',
+      resolvedAddress: 'Gorai Rd near Creek Gate, Borivali West, Ward R/Central',
+      category: 'hazardous',
+      severity: 'emergency',
+      notes: 'Overturned industrial grease drum blocking one lane of vehicular traffic.',
+      isEmergency: true,
+      status: 'assigned',
+      assignedWorkerId: 'usr-10',
+      assignedWorkerName: 'Sachin Kamble (Crew #105)',
+      createdAt: Date.now() - 18 * 60 * 1000,
+      duplicateCount: 0,
       isEscalated: false
     }
   ],
@@ -283,10 +598,11 @@ const DEFAULT_DB = {
     { ward: 'Ward A - Colaba & Fort Commercial', segregationRate: 62, coverageRate: 84, processingRate: 81, status: 'ontrack' }
   ],
   fleet: [
-    { id: 'FLT-CT-401', type: 'Heavy Hydraulic Compactor (10T)', regNo: 'MH-01-GA-4401', ward: 'Ward G/South - Dadar & Elphinstone', driver: 'Rajesh Singh', driverId: 'usr-4', contact: '+91 98112-40192', capacityTon: 10.0, currentPayloadTon: 7.8, fuelPercent: 84, status: 'Active Collection', icon: '🚛', lastKnownLat: 19.0200, lastKnownLng: 72.8350, lastLocationUpdatedAt: Date.now() - 120000 },
-    { id: 'FLT-ET-108', type: 'Electric Multi-Bin Tipper Auto (1.5T)', regNo: 'MH-02-EV-1088', ward: 'Ward H/West - Bandra Residential', driver: 'Sunita Devi', contact: '+91 98711-20984', capacityTon: 1.5, currentPayloadTon: 1.35, fuelPercent: 68, status: 'Transfer Station Transit', icon: '🛺' },
-    { id: 'FLT-BM-09', type: 'Biomedical Closed-Chamber Van (2T)', regNo: 'MH-03-HA-0912', ward: 'Ward K/East - Andheri Industrial Estate', driver: 'Amit Verma', contact: '+91 98104-55120', capacityTon: 2.0, currentPayloadTon: 0.7, fuelPercent: 92, status: 'En Route to CBWTF', icon: '🚐' },
-    { id: 'FLT-CD-550', type: 'C&D Debris Hydraulic Dumper (14T)', regNo: 'MH-04-CD-5501', ward: 'Ward S - Powai Lake & Tech Enclave', driver: 'Harish Kumar', contact: '+91 98119-33829', capacityTon: 14.0, currentPayloadTon: 8.4, fuelPercent: 76, status: 'Active Route', icon: '🚜' }
+    { id: 'FLT-CT-401', type: 'Heavy Hydraulic Compactor (10T)', regNo: 'MH-01-GA-4401', ward: 'Ward G/South - Dadar & Elphinstone', driver: 'Rajesh Singh (Crew #101)', driverId: 'usr-4', contact: '+91 98112-40192', capacityTon: 10.0, currentPayloadTon: 7.8, fuelPercent: 84, status: 'Active Collection', icon: '🚛', lastKnownLat: 19.0200, lastKnownLng: 72.8350, lastLocationUpdatedAt: Date.now() - 120000 },
+    { id: 'FLT-ET-108', type: 'Electric Multi-Bin Tipper Auto (1.5T)', regNo: 'MH-02-EV-1088', ward: 'Ward H/West - Bandra Residential', driver: 'Sunita Devi (Crew #102)', driverId: 'usr-7', contact: '+91 98711-20984', capacityTon: 1.5, currentPayloadTon: 1.35, fuelPercent: 68, status: 'Active Collection', icon: '🛺', lastKnownLat: 19.0595, lastKnownLng: 72.8295, lastLocationUpdatedAt: Date.now() - 180000 },
+    { id: 'FLT-BM-09', type: 'Biomedical Closed-Chamber Van (2T)', regNo: 'MH-03-HA-0912', ward: 'Ward K/East - Andheri Industrial Estate', driver: 'Amit Verma (Crew #103)', driverId: 'usr-8', contact: '+91 98104-55120', capacityTon: 2.0, currentPayloadTon: 0.7, fuelPercent: 92, status: 'Active Collection', icon: '🚐', lastKnownLat: 19.1136, lastKnownLng: 72.8697, lastLocationUpdatedAt: Date.now() - 240000 },
+    { id: 'FLT-CD-550', type: 'C&D Debris Hydraulic Dumper (14T)', regNo: 'MH-04-CD-5501', ward: 'Ward S - Powai Lake & Tech Enclave', driver: 'Harish Kumar (Crew #104)', driverId: 'usr-9', contact: '+91 98119-33829', capacityTon: 14.0, currentPayloadTon: 8.4, fuelPercent: 76, status: 'Active Collection', icon: '🚜', lastKnownLat: 19.1255, lastKnownLng: 72.9120, lastLocationUpdatedAt: Date.now() - 300000 },
+    { id: 'FLT-MR-505', type: 'Mini Tipper E-Rickshaw (0.8T)', regNo: 'MH-02-ET-5055', ward: 'Ward R/Central - Borivali West', driver: 'Sachin Kamble (Crew #105)', driverId: 'usr-10', contact: '+91 98200-88411', capacityTon: 0.8, currentPayloadTon: 0.2, fuelPercent: 95, status: 'Idle / Off-Shift', icon: '🛺', lastKnownLat: 19.2307, lastKnownLng: 72.8567, lastLocationUpdatedAt: Date.now() - 3600000 }
   ],
   broadcasts: [
     {
@@ -831,18 +1147,80 @@ async function handleApiRequest(req, res, parsedUrl) {
     }
   }
 
+  // 14. Worker Shift Toggle API
+  if (pathname === '/api/worker-shift') {
+    if (method === 'POST') {
+      const body = await parseRequestBody(req);
+      const workerId = body.workerId || body.id;
+      const shiftStatus = body.shiftStatus === 'active' ? 'active' : 'off-shift';
+
+      const user = db.users.find(u => u.id === workerId);
+      if (user) {
+        user.shiftStatus = shiftStatus;
+      }
+
+      const fleetItem = db.fleet.find(f => f.driverId === workerId || (user && f.driver === user.name));
+      if (fleetItem) {
+        fleetItem.status = shiftStatus === 'active' ? 'Active Collection' : 'Idle / Off-Shift';
+      }
+
+      logAudit(user ? user.name : 'Worker', 'SHIFT_TOGGLE', `Worker ${workerId} shifted to ${shiftStatus}.`);
+      saveDatabase();
+      sendJson(res, 200, { success: true, workerId, shiftStatus });
+      return true;
+    }
+  }
+
+  // 15. Admin Reassign Stop Quick Action API
+  if (pathname === '/api/reassign-stop') {
+    if (method === 'POST') {
+      const body = await parseRequestBody(req);
+      const { reportId, toWorkerId } = body;
+
+      const report = db.reports.find(r => r.id === reportId);
+      if (!report) {
+        sendJson(res, 404, { error: 'Report stop not found' });
+        return true;
+      }
+
+      const toWorker = db.users.find(u => u.id === toWorkerId);
+      if (!toWorker) {
+        sendJson(res, 404, { error: 'Target worker not found' });
+        return true;
+      }
+
+      const oldWorkerName = report.assignedWorkerName || report.assignedWorkerId || 'Unassigned';
+      report.assignedWorkerId = toWorker.id;
+      report.assignedWorkerName = toWorker.name;
+      report.status = 'assigned';
+      report.assignedAt = Date.now();
+
+      logAudit('Admin', 'REASSIGN_STOP', `Reassigned stop ${reportId} (${report.landmark}) from ${oldWorkerName} to ${toWorker.name}.`);
+      saveDatabase();
+      sendJson(res, 200, { success: true, report, oldWorkerName, newWorkerName: toWorker.name });
+      return true;
+    }
+  }
+
   if (pathname === '/api/worker-locations') {
     if (method === 'GET') {
       const workers = db.users.filter(u => u.role === 'worker').map(w => {
         const fleetItem = db.fleet.find(f => f.driverId === w.id || f.driver === w.name || (w.name && f.driver && w.name.includes(f.driver)) || (w.name && f.driver && f.driver.includes(w.name)));
+        const pendingStops = db.reports.filter(r => r.status !== 'cleared' && (r.assignedWorkerId === w.id || (!r.assignedWorkerId && r.area === w.assignedWard))).length;
         return {
           id: w.id,
           name: w.name,
+          crewNumber: w.crewNumber || w.name.match(/Crew #?(\d+)/i)?.[1] || '101',
           role: w.role,
+          shiftStatus: w.shiftStatus || (fleetItem?.status?.toLowerCase().includes('idle') ? 'off-shift' : 'active'),
+          assignedWard: w.assignedWard || (fleetItem ? fleetItem.ward : 'Ward G/South - Dadar & Elphinstone'),
+          vehicleType: w.vehicleType || (fleetItem ? fleetItem.type : 'Compactor Truck'),
+          vehicleRegistration: w.vehicleRegistration || (fleetItem ? fleetItem.regNo : 'MH-01-GA-4401'),
           lastKnownLat: w.lastKnownLat || (fleetItem ? fleetItem.lastKnownLat : 19.0200),
           lastKnownLng: w.lastKnownLng || (fleetItem ? fleetItem.lastKnownLng : 72.8350),
           lastLocationUpdatedAt: w.lastLocationUpdatedAt || (fleetItem ? fleetItem.lastLocationUpdatedAt : Date.now()),
-          assignedVehicle: fleetItem ? { id: fleetItem.id, type: fleetItem.type, regNo: fleetItem.regNo } : null
+          assignedStopsCount: pendingStops,
+          assignedVehicle: fleetItem ? { id: fleetItem.id, type: fleetItem.type, regNo: fleetItem.regNo, status: fleetItem.status } : null
         };
       });
       sendJson(res, 200, workers);

@@ -14,6 +14,13 @@
   <!-- Leaflet CSS for Maps -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 
+  <!-- PWA Manifest & App Icons -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#166534">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="EcoClear">
+
   <!-- App Stylesheet -->
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -31,6 +38,29 @@
       </div>
 
       <div class="nav-user-bar" id="navUserBar" style="display: none;">
+        <!-- Multi-Language Toggle (EN / HI) -->
+        <button type="button" class="lang-toggle-btn" id="langToggleBtn" onclick="toggleAppLanguage()" title="Switch Language / भाषा बदलें">🌐 EN | हिं</button>
+
+        <!-- Notification Bell & Dropdown Inbox -->
+        <div class="notification-bell-wrapper">
+          <button type="button" class="notification-bell-btn" id="notificationBellBtn" onclick="toggleNotificationDropdown()" title="Notifications / सूचनाएं" aria-label="Notifications">
+            🔔
+            <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+          </button>
+          <div class="notification-dropdown" id="notificationDropdown">
+            <div class="notification-header">
+              <h4>🔔 Notification Center</h4>
+              <button type="button" class="btn btn-outline btn-xs" onclick="markAllNotificationsRead()">Mark Read</button>
+            </div>
+            <div class="notification-list" id="notificationList">
+              <div style="padding: 1rem; text-align: center; color: #64748b; font-size: 0.8rem;">No unread notifications</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Keyboard Shortcut Help Trigger -->
+        <button type="button" class="btn btn-outline btn-xs" id="keyboardShortcutsBtn" onclick="openKeyboardShortcutsModal()" title="Keyboard Shortcuts (Shift + ?)">⌨️ ?</button>
+
         <a href="transparency.html" class="btn btn-outline btn-xs" id="navTransparencyBtn" title="Public City-Wide Transparency Dashboard">🌐 Transparency</a>
         <button type="button" class="btn btn-outline btn-xs" id="navAboutBtn" onclick="openAboutProjectModal()">ℹ️ About Project</button>
         <span id="backendStatusPill" class="backend-status-pill" title="Live status of Node.js REST API server">🟢 REST API Online</span>
@@ -45,6 +75,8 @@
       </div>
 
       <div class="nav-user-bar" id="navGuestBar">
+        <button type="button" class="lang-toggle-btn" id="guestLangToggleBtn" onclick="toggleAppLanguage()" title="Switch Language / भाषा बदलें">🌐 EN | हिं</button>
+        <button type="button" class="btn btn-outline btn-xs" id="guestKeyboardShortcutsBtn" onclick="openKeyboardShortcutsModal()" title="Keyboard Shortcuts (Shift + ?)">⌨️ ?</button>
         <a href="transparency.html" class="btn btn-outline btn-xs" id="guestNavTransparencyBtn" title="Public City-Wide Transparency Dashboard">🌐 Public Transparency</a>
         <button type="button" class="btn btn-outline btn-xs" id="guestNavAboutBtn" onclick="openAboutProjectModal()">ℹ️ About Project</button>
         <span id="guestBackendStatusPill" class="backend-status-pill" title="Live status of Node.js REST API server">🟢 REST API Online</span>
@@ -115,7 +147,11 @@
               <option value="citizen">👤 Citizen (Ananya Sharma)</option>
               <option value="institution">🏫 Institution (Bombay Scottish School, Powai)</option>
               <option value="hospital">🏥 Hospital (CityCare Super Specialty)</option>
-              <option value="worker">👷 Worker (Rajesh Singh - Crew 101)</option>
+              <option value="crew101@cleanward.org">👷 Worker #101: Rajesh Singh (Dadar)</option>
+              <option value="crew102@cleanward.org">👷 Worker #102: Sunita Devi (Bandra)</option>
+              <option value="crew103@cleanward.org">👷 Worker #103: Amit Verma (Andheri)</option>
+              <option value="crew104@cleanward.org">👷 Worker #104: Harish Kumar (Powai)</option>
+              <option value="crew105@cleanward.org">👷 Worker #105: Sachin Kamble (Borivali - Off-Shift)</option>
               <option value="admin">🏛️ Admin (Municipal Commissioner)</option>
             </select>
             <button id="demoQuickLoginBtn" type="button" class="btn btn-outline btn-xs" onclick="demoSwitchRole(document.getElementById('demoRoleSelect').value)">Switch</button>
@@ -125,6 +161,11 @@
             <button type="button" class="btn btn-outline btn-xs" onclick="demoSwitchRole('institution')">Institution</button>
             <button type="button" class="btn btn-outline btn-xs" onclick="demoSwitchRole('hospital')">Hospital</button>
             <button type="button" class="btn btn-outline btn-xs" onclick="demoSwitchRole('worker')">Worker</button>
+            <button type="button" class="btn btn-outline btn-xs" onclick="demoSwitchRole('crew101@cleanward.org')">Crew #101</button>
+            <button type="button" class="btn btn-outline btn-xs" onclick="demoSwitchRole('crew102@cleanward.org')">Crew #102</button>
+            <button type="button" class="btn btn-outline btn-xs" onclick="demoSwitchRole('crew103@cleanward.org')">Crew #103</button>
+            <button type="button" class="btn btn-outline btn-xs" onclick="demoSwitchRole('crew104@cleanward.org')">Crew #104</button>
+            <button type="button" class="btn btn-outline btn-xs" onclick="demoSwitchRole('crew105@cleanward.org')">Crew #105</button>
             <button type="button" class="btn btn-outline btn-xs" onclick="demoSwitchRole('admin')">Admin</button>
           </div>
         </div>
@@ -213,7 +254,11 @@
               <option value="citizen@ecoclear.org">Citizen: Ananya Sharma (Resident)</option>
               <option value="school@cityedu.org">Institution: Bombay Scottish School, Powai</option>
               <option value="citycare@hospital.org">Hospital: CityCare Super Specialty</option>
-              <option value="crew101@cleanward.org">Worker: Rajesh Singh (Crew #101)</option>
+              <option value="crew101@cleanward.org">Worker #101: Rajesh Singh (Dadar)</option>
+              <option value="crew102@cleanward.org">Worker #102: Sunita Devi (Bandra)</option>
+              <option value="crew103@cleanward.org">Worker #103: Amit Verma (Andheri)</option>
+              <option value="crew104@cleanward.org">Worker #104: Harish Kumar (Powai)</option>
+              <option value="crew105@cleanward.org">Worker #105: Sachin Kamble (Borivali - Off-Shift)</option>
               <option value="admin@citygov.org">Admin: Municipal Sanitation Officer</option>
             </select>
           </div>
@@ -221,7 +266,11 @@
             <button type="button" class="demo-btn" onclick="switchDemoRole('citizen@ecoclear.org')">Citizen</button>
             <button type="button" class="demo-btn" onclick="switchDemoRole('school@cityedu.org')">Institution</button>
             <button type="button" class="demo-btn" onclick="switchDemoRole('citycare@hospital.org')">Hospital</button>
-            <button type="button" class="demo-btn" onclick="switchDemoRole('crew101@cleanward.org')">Worker</button>
+            <button type="button" class="demo-btn" onclick="switchDemoRole('crew101@cleanward.org')">Crew #101</button>
+            <button type="button" class="demo-btn" onclick="switchDemoRole('crew102@cleanward.org')">Crew #102</button>
+            <button type="button" class="demo-btn" onclick="switchDemoRole('crew103@cleanward.org')">Crew #103</button>
+            <button type="button" class="demo-btn" onclick="switchDemoRole('crew104@cleanward.org')">Crew #104</button>
+            <button type="button" class="demo-btn" onclick="switchDemoRole('crew105@cleanward.org')">Crew #105</button>
             <button type="button" class="demo-btn" onclick="switchDemoRole('admin@citygov.org')">Admin</button>
           </div>
           <div style="text-align: center; margin-top: 1rem;">
@@ -237,7 +286,10 @@
     <section id="citizenDashboard" class="dashboard-view">
       <div class="dashboard-header">
         <div>
-          <h2 class="dashboard-title">Welcome, <span id="citizenWelcomeName">Resident</span></h2>
+          <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+            <h2 class="dashboard-title" style="margin: 0;">Welcome, <span id="citizenWelcomeName">Resident</span></h2>
+            <div class="streak-badge" id="citizenStreakBadge" title="Responsible reporting streak">🔥 <span id="citizenStreakCount">3</span>-Week Green Streak</div>
+          </div>
           <p class="dashboard-subtitle">Report bin overflows, verify segregation, and redeem EcoCredits at the municipal store.</p>
         </div>
         <div class="card" style="padding: 0.65rem 1.15rem; display: flex; align-items: center; gap: 1rem;">
@@ -259,6 +311,15 @@
           <div style="font-size: 0.85rem; color: #556960;">Emergency dispatches bypass standard queues for instant crew response (+25 Credits).</div>
         </div>
         <button class="btn btn-emergency btn-sm" onclick="triggerEmergencyModal()">Submit Emergency Hazard</button>
+      </div>
+
+      <!-- Offline Queued Reports Banner -->
+      <div id="offlineQueueBanner" class="offline-banner">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span>📡</span>
+          <span>Offline Mode Active: <strong id="offlineQueueCount">0</strong> reports queued locally. Auto-syncing upon reconnection.</span>
+        </div>
+        <button type="button" class="btn btn-outline btn-xs" onclick="flushOfflineQueue()">Sync Now</button>
       </div>
 
       <!-- Personal Environmental Impact Tracker -->
@@ -293,9 +354,27 @@
           </div>
         </div>
 
-        <div style="max-height: 200px; position: relative;">
-          <canvas id="impactTrendChart" height="180"></canvas>
-          <canvas id="citizenImpactChart" height="180" style="display: none;"></canvas>
+        <!-- Citizen Multi-Chart Analytics Grid -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-top: 1rem;">
+          <div style="background: var(--civic-surface-muted); padding: 0.85rem; border-radius: var(--radius-xs); border: 1px solid var(--civic-border);">
+            <div style="font-size: 0.78rem; font-weight: 800; color: var(--civic-forest-ink); margin-bottom: 0.5rem; text-transform: uppercase;">📈 6-Week Waste & CO₂ Offset</div>
+            <div style="height: 180px; position: relative;">
+              <canvas id="impactTrendChart" height="180"></canvas>
+              <canvas id="citizenImpactChart" height="180" style="display: none;"></canvas>
+            </div>
+          </div>
+          <div style="background: var(--civic-surface-muted); padding: 0.85rem; border-radius: var(--radius-xs); border: 1px solid var(--civic-border);">
+            <div style="font-size: 0.78rem; font-weight: 800; color: var(--civic-forest-ink); margin-bottom: 0.5rem; text-transform: uppercase;">🪙 Credit Earnings Breakdown</div>
+            <div style="height: 180px; position: relative;">
+              <canvas id="citizenCreditBreakdownChart" height="180"></canvas>
+            </div>
+          </div>
+          <div style="background: var(--civic-surface-muted); padding: 0.85rem; border-radius: var(--radius-xs); border: 1px solid var(--civic-border);">
+            <div style="font-size: 0.78rem; font-weight: 800; color: var(--civic-forest-ink); margin-bottom: 0.5rem; text-transform: uppercase;">📋 My Reports Status</div>
+            <div style="height: 180px; position: relative;">
+              <canvas id="citizenReportStatusChart" height="180"></canvas>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -324,6 +403,22 @@
               </div>
               <button type="submit" class="btn btn-outline btn-sm" style="width: 100%;">Submit Verification (+15 Credits)</button>
             </form>
+          </div>
+
+          <!-- Neighbor Referral Bonus Card -->
+          <div class="card" id="citizenReferralCard" style="background: linear-gradient(135deg, rgba(28, 82, 216, 0.05), rgba(5, 150, 105, 0.05)); border-left: 4px solid var(--civic-cobalt-accent);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem;">
+              <div>
+                <span class="badge" style="background: rgba(28, 82, 216, 0.15); color: var(--civic-cobalt-accent); font-weight: 800;">+15 CREDITS EACH</span>
+                <h4 style="margin: 0.35rem 0 0.2rem 0; font-size: 1.05rem;">🎁 Invite a Neighbor to CleanMumbai</h4>
+                <p style="font-size: 0.8rem; color: #556960; margin: 0 0 0.75rem 0;">Share your referral code. Both of you receive <strong>+15 EcoCredits</strong> as soon as your neighbor submits their first verified report!</p>
+              </div>
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;">
+              <input type="text" id="citizenReferralCodeInput" class="form-control" readonly style="font-family: monospace; font-weight: 800; letter-spacing: 0.05em; background: var(--civic-surface);" value="MUM-REF-4821">
+              <button type="button" class="btn btn-primary btn-sm" onclick="copyCitizenReferralLink()">📋 Copy Link</button>
+            </div>
+            <div id="referralCopyFeedback" style="display: none; font-size: 0.75rem; color: var(--civic-spruce-green); font-weight: 700;">✓ Referral link copied to clipboard!</div>
           </div>
 
           <!-- Standard Citizen Bin Report Form with Real Leaflet Location Picker -->
@@ -400,6 +495,18 @@
         <!-- Right Column: My Reports & Credit Store -->
         <div style="display: flex; flex-direction: column; gap: 1.75rem;">
           
+          <!-- Read-Only Community Nearby Reports Map View -->
+          <div class="card" id="citizenNearbyReportsCard">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+              <div>
+                <h3 style="margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 0.4rem;">🗺️ Neighborhood Activity Map</h3>
+                <p style="margin: 0.2rem 0 0 0; font-size: 0.78rem; color: #64748b;">Live open reports submitted by fellow residents near your ward.</p>
+              </div>
+              <span id="citizenNearbyCountBadge" class="badge badge-assigned">Loading community reports...</span>
+            </div>
+            <div id="citizenNearbyReportsMap" style="height: 260px; width: 100%; border-radius: var(--radius-xs); border: 1px solid var(--civic-border);"></div>
+          </div>
+
           <!-- My Submitted Reports Feed -->
           <div>
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.85rem;">
@@ -485,7 +592,10 @@
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
           <div>
             <div style="font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Commercial Waste Index</div>
-            <div style="font-size: 1.35rem; font-weight: 800; margin-top: 0.2rem;">Segregation Compliance Rating: <span id="instAuditScoreDisplay" style="color: var(--civic-spruce-green);">92%</span></div>
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-top: 0.2rem; flex-wrap: wrap;">
+              <div style="font-size: 1.35rem; font-weight: 800;">Segregation Compliance Rating: <span id="instAuditScoreDisplay" style="color: var(--civic-spruce-green);">92%</span></div>
+              <button type="button" class="btn btn-outline btn-xs" onclick="openWasteAuditCertModal()">📜 Print Monthly Audit Certificate</button>
+            </div>
             <div style="font-size: 0.82rem; color: #64748b;">Higher compliance rates unlock expedited collection dispatch priority from municipal zones.</div>
           </div>
           <div style="display: flex; gap: 1.5rem;">
@@ -497,6 +607,22 @@
               <div style="font-size: 0.75rem; font-weight: 700; color: #64748b;">Cleared Pickups</div>
               <div id="instStatCleared" style="font-size: 1.5rem; font-weight: 800; color: var(--civic-spruce-green);">0</div>
             </div>
+          </div>
+        </div>
+
+        <!-- Peer Benchmarking Widget -->
+        <div id="instPeerBenchmarkCard" class="benchmark-container">
+          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; font-weight: 700;">
+            <span>🏢 Your Establishment: <strong id="instBenchmarkYourRate">92%</strong></span>
+            <span>📊 Ward Peer Benchmark (<span id="instBenchmarkOrgType">Similar Facilities</span>): <strong id="instBenchmarkWardRate">76%</strong></span>
+          </div>
+          <div class="benchmark-bar-wrapper">
+            <div class="benchmark-bar-track">
+              <div id="instBenchmarkBarFill" class="benchmark-bar-fill" style="width: 92%; background: var(--civic-spruce-green);"></div>
+            </div>
+          </div>
+          <div id="instBenchmarkNotice" style="font-size: 0.74rem; color: #64748b;">
+            ⭐ Ranked in the top 15% for waste segregation compliance among institutions in this municipal ward.
           </div>
         </div>
       </div>
@@ -732,27 +858,83 @@
             </div>
           </div>
 
+          <!-- BMW Rules Quick-Reference Panel (CPCB Rules 2016/2026) -->
+          <div class="card" id="hospitalBMWGuideCard">
+            <details>
+              <summary style="font-weight: 700; font-size: 0.95rem; cursor: pointer; color: var(--civic-forest-ink);">
+                📘 Bio-Medical Waste Segregation Quick Guide (CPCB 2016)
+              </summary>
+              <div style="margin-top: 0.75rem; display: flex; flex-direction: column; gap: 0.4rem;">
+                <div class="bmw-guide-chip bmw-chip-yellow">
+                  <strong>🟡 Yellow Category:</strong> Human anatomical, animal tissues, soiled plaster casts, cotton gauze, expired cytotoxic drugs. Treatment: Incineration or Plasma Pyrolysis.
+                </div>
+                <div class="bmw-guide-chip bmw-chip-red">
+                  <strong>🔴 Red Category:</strong> Contaminated plastic waste: IV tubes, catheters, syringes without needle, vacutainers, gloves. Treatment: Autoclaving/Microwaving followed by shredding.
+                </div>
+                <div class="bmw-guide-chip bmw-chip-white">
+                  <strong>⚪ White (Translucent):</strong> Waste sharps including needles, scalpels, blades, contaminated broken glass needles. Treatment: Autoclave followed by shredding/encapsulation.
+                </div>
+                <div class="bmw-guide-chip bmw-chip-blue">
+                  <strong>⚫ Black / Blue Category:</strong> Glassware, metallic implants, chemical containers, expired pharmaceutical tablets. Treatment: Disinfection & recycling.
+                </div>
+                <div class="bmw-guide-chip bmw-chip-green">
+                  <strong>🟢 General Waste:</strong> Office paper, kitchen waste, packaging boxes. Non-infectious municipal solid waste.
+                </div>
+              </div>
+            </details>
+          </div>
+
         </div>
 
-        <!-- Right Side: Compliance Log View with Container Lifecycle Stepper -->
-        <div>
-          <h3 style="font-size: 1.15rem; margin-bottom: 0.85rem;">Facility Disposal Compliance Log</h3>
-          <div class="table-responsive">
-            <table class="custom-table print-include" id="hospitalComplianceTable">
-              <thead>
-                <tr>
-                  <th>Stream Category</th>
-                  <th>Dept / Ward</th>
-                  <th>Container ID</th>
-                  <th>Weight</th>
-                  <th>Container Lifecycle Stage</th>
-                  <th>Treatment Facility</th>
-                  <th>Log Time</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody id="hospitalComplianceTableBody"></tbody>
-            </table>
+        <!-- Right Side: Compliance Log View with Container Lifecycle Stepper & Pharma Expiry Reminders -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+          
+          <!-- Expiry-Based Pharma Waste Reminders Table -->
+          <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; flex-wrap: wrap; gap: 0.5rem;">
+              <div>
+                <h4 style="margin: 0; font-size: 1.05rem; color: var(--civic-forest-ink);">💊 Expiring Medicines & Chemical Reminders</h4>
+                <p style="margin: 0.15rem 0 0 0; font-size: 0.78rem; color: #64748b;">Proactively log medicines nearing expiry date before statutory non-compliance.</p>
+              </div>
+              <button class="btn btn-outline btn-xs" onclick="openAddPharmaExpiryModal()">+ Add Medicine Stock</button>
+            </div>
+            <div class="table-responsive">
+              <table class="custom-table" id="hospitalPharmaExpiryTable">
+                <thead>
+                  <tr>
+                    <th>Medicine / Chemical</th>
+                    <th>Batch ID</th>
+                    <th>Dept / Shelf</th>
+                    <th>Expiry Date</th>
+                    <th>Days Left</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="hospitalPharmaExpiryTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div>
+            <h3 style="font-size: 1.15rem; margin-bottom: 0.85rem;">Facility Disposal Compliance Log</h3>
+            <div class="table-responsive">
+              <table class="custom-table print-include" id="hospitalComplianceTable">
+                <thead>
+                  <tr>
+                    <th>Stream Category</th>
+                    <th>Dept / Ward</th>
+                    <th>Container ID</th>
+                    <th>Weight</th>
+                    <th>Container Lifecycle Stage</th>
+                    <th>Treatment Facility</th>
+                    <th>Log Time</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="hospitalComplianceTableBody"></tbody>
+              </table>
+            </div>
           </div>
         </div>
 
@@ -768,7 +950,111 @@
           <h2 class="dashboard-title">Worker Field Dispatch View</h2>
           <p class="dashboard-subtitle">High-Contrast Route Navigation & Digital Collection Verification</p>
         </div>
-        <button class="btn btn-outline btn-sm" onclick="runSoftwareRouteOptimizer()">🗺️ Recalculate Route</button>
+        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+          <button id="workerShiftToggleBtn" type="button" class="btn btn-outline btn-sm" onclick="toggleWorkerShift()">
+            ⏸️ End Shift
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="runSoftwareRouteOptimizer()">🗺️ Recalculate Route</button>
+        </div>
+      </div>
+
+      <!-- Worker Vehicle & Crew Info Banner -->
+      <div id="workerVehicleCrewBanner" class="card" style="margin-bottom: 1.25rem; background: var(--civic-cobalt-accent); color: white; padding: 0.9rem 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <span style="font-size: 1.75rem;">🚛</span>
+          <div>
+            <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.85; font-weight: 700;">Assigned Crew & Fleet Unit</div>
+            <div style="font-size: 1.15rem; font-weight: 800;">
+              <span id="workerCrewNumBanner">Crew #101</span> &bull; <span id="workerNameBanner">Rajesh Singh</span>
+            </div>
+            <div style="font-size: 0.82rem; opacity: 0.9; margin-top: 0.1rem;">
+              🚛 <span id="workerVehicleTypeBanner">Heavy Hydraulic Compactor (10T)</span> (<code id="workerVehicleRegBanner" style="color: #fff; background: rgba(0,0,0,0.2); padding: 1px 5px; border-radius: 3px;">MH-01-GA-4401</code>) &bull; 📍 <span id="workerWardBanner">Ward G/South - Dadar & Elphinstone</span>
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span id="workerShiftStatusBadge" class="badge" style="background: rgba(255,255,255,0.25); color: #fff; font-weight: 800; font-size: 0.82rem;">
+            🟢 On Shift - Active
+          </span>
+        </div>
+      <!-- Worker Daily Pre-Shift Safety Checklist Log -->
+      <div id="workerSafetyChecklistCard" class="card" style="margin-bottom: 1.25rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; flex-wrap: wrap; gap: 0.5rem;">
+          <h4 style="margin: 0; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--civic-forest-ink);">
+            🛡️ Pre-Shift Safety & Vehicle Inspection Checklist
+          </h4>
+          <span id="workerSafetyLogStatus" class="badge" style="background: rgba(100, 116, 139, 0.2); color: #64748b; font-size: 0.72rem;">Pending Check</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.5rem; margin-bottom: 0.75rem;">
+          <label class="safety-checklist-item" id="checkPpeGlovesLabel">
+            <input type="checkbox" id="checkPpeGloves" onchange="updateWorkerSafetyChecklist()">
+            <span>🧤 Puncture-resistant gloves equipped</span>
+          </label>
+          <label class="safety-checklist-item" id="checkPpeVestLabel">
+            <input type="checkbox" id="checkPpeVest" onchange="updateWorkerSafetyChecklist()">
+            <span>🦺 High-visibility fluorescent vest worn</span>
+          </label>
+          <label class="safety-checklist-item" id="checkPpeBootsLabel">
+            <input type="checkbox" id="checkPpeBoots" onchange="updateWorkerSafetyChecklist()">
+            <span>🥾 Anti-slip steel-toe / gumboots verified</span>
+          </label>
+          <label class="safety-checklist-item" id="checkVehicleHydraulicsLabel">
+            <input type="checkbox" id="checkVehicleHydraulics" onchange="updateWorkerSafetyChecklist()">
+            <span>🚛 Vehicle hydraulics, tires & fluid checked</span>
+          </label>
+          <label class="safety-checklist-item" id="checkFirstAidKitLabel">
+            <input type="checkbox" id="checkFirstAidKit" onchange="updateWorkerSafetyChecklist()">
+            <span>🩹 First-aid kit & sanitizer loaded on-board</span>
+          </label>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; color: #64748b;">
+          <span id="workerSafetyChecklistProgress">0 of 5 safety items verified</span>
+          <button type="button" class="btn btn-outline btn-xs" id="workerSafetySubmitBtn" onclick="saveWorkerSafetyLog()" disabled>✓ Log Daily Safety Compliance</button>
+        </div>
+      </div>
+
+      <!-- Shift Inactive Prompt Alert -->
+      <div id="workerShiftInactivePrompt" style="display: none; margin-bottom: 1.25rem; background: rgba(217, 119, 6, 0.12); border: 1px solid #d97706; border-radius: var(--radius-xs); padding: 1rem 1.25rem; color: #92400e;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
+          <div>
+            <strong>⚠️ Shift Status: Inactive / Off-Duty</strong>
+            <div style="font-size: 0.84rem; margin-top: 0.2rem;">Live GPS tracking is paused and you appear as Idle / Off-Shift on the Municipal Admin map. Click 'Start Shift' to begin turn-by-turn navigation.</div>
+          </div>
+          <button type="button" class="btn btn-primary btn-sm" onclick="toggleWorkerShift()">🟢 Start Shift Now</button>
+        </div>
+      </div>
+
+      <!-- Today's Route Summary Card -->
+      <div id="workerTodayRouteSummaryCard" class="card" style="margin-bottom: 1.25rem; padding: 1.1rem 1.25rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;">
+          <h4 style="margin: 0; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--civic-forest-ink);">📋 Today's Route Summary</h4>
+          <span id="workerSummaryBadge" class="badge badge-assigned">Shift Progress</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 1rem; margin-bottom: 0.85rem;">
+          <div>
+            <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">TOTAL ASSIGNED</div>
+            <div id="workerSummaryTotal" style="font-size: 1.4rem; font-weight: 800;">3</div>
+          </div>
+          <div>
+            <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">STOPS COMPLETED</div>
+            <div id="workerSummaryCompleted" style="font-size: 1.4rem; font-weight: 800; color: var(--civic-spruce-green);">0</div>
+          </div>
+          <div>
+            <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">STOPS REMAINING</div>
+            <div id="workerSummaryRemaining" style="font-size: 1.4rem; font-weight: 800; color: var(--civic-cobalt-accent);">3</div>
+          </div>
+          <div>
+            <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">EST. COVERED</div>
+            <div id="workerSummaryEstDistance" style="font-size: 1.4rem; font-weight: 800; color: var(--civic-forest-ink);">0.0 km</div>
+          </div>
+          <div>
+            <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">ROUTE COMPLETION</div>
+            <div id="workerSummaryProgressPct" style="font-size: 1.4rem; font-weight: 800; color: var(--civic-forest-ink);">0%</div>
+          </div>
+        </div>
+        <div style="background: var(--civic-border); border-radius: 999px; height: 8px; overflow: hidden; width: 100%;">
+          <div id="workerSummaryProgressBar" style="background: var(--civic-spruce-green); height: 100%; width: 0%; transition: width 0.4s ease;"></div>
+        </div>
       </div>
 
       <!-- Route Optimization Stats Banner -->
@@ -814,6 +1100,18 @@
           </div>
         </div>
 
+        <!-- Prominent Live Distance-Remaining Readout HUD -->
+        <div style="margin-bottom: 0.85rem; padding: 0.85rem 1rem; background: var(--civic-surface-muted); border: 2px solid var(--civic-cobalt-accent); border-radius: var(--radius-xs); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+          <div>
+            <div style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em;">Live Navigation Proximity</div>
+            <div id="workerLiveDistanceReadout" style="font-size: 1.6rem; font-weight: 900; color: var(--civic-cobalt-accent); letter-spacing: -0.02em;">Calculating...</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 0.75rem; font-weight: 700; color: #64748b;">Target Threshold: 50m</div>
+            <div id="workerProximityNotice" style="font-size: 0.82rem; font-weight: 800; color: #059669; display: none;">✅ Within 50m! Destination reached.</div>
+          </div>
+        </div>
+
         <!-- Active Target Navigation HUD Banner -->
         <div id="workerActiveNavHUD" style="background: var(--civic-surface-muted); border: 1px solid var(--civic-border); border-radius: var(--radius-xs); padding: 0.85rem 1rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
           <div>
@@ -824,7 +1122,6 @@
           <div style="text-align: right;">
             <div style="font-size: 0.72rem; font-weight: 700; color: #64748b;">Distance Remaining</div>
             <div id="workerTargetDistanceBadge" style="font-size: 1.35rem; font-weight: 800; color: var(--civic-cobalt-accent);">-- m</div>
-            <div id="workerProximityNotice" style="font-size: 0.75rem; font-weight: 700; color: #059669; display: none;">✅ Within 50m! Destination reached.</div>
           </div>
         </div>
 
@@ -836,6 +1133,20 @@
       <div>
         <h3 style="font-size: 1.15rem; margin-bottom: 0.85rem;">Prioritized Field Route Stops</h3>
         <div id="workerRouteStopsList"></div>
+      </div>
+
+      <!-- Stop Clearance Photo Proof Gallery (This Week) -->
+      <div id="workerStopPhotoGalleryCard" class="card" style="margin-top: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+          <div>
+            <h4 style="margin: 0; font-size: 1rem; color: var(--civic-forest-ink);">📸 Weekly Clearance Proof Photo Gallery</h4>
+            <p style="margin: 0.15rem 0 0 0; font-size: 0.78rem; color: #64748b;">Visual record of completed sanitation stops and clearance photo timestamps.</p>
+          </div>
+          <span id="workerPhotoProofCountBadge" class="badge badge-cleared">0 Proofs Logged</span>
+        </div>
+        <div id="workerPhotoProofGrid" class="photo-gallery-grid">
+          <div style="padding: 1.5rem; text-align: center; color: #64748b; font-size: 0.85rem; grid-column: 1 / -1;">No photo proofs logged for this crew shift yet. Completed clearance photos will appear here.</div>
+        </div>
       </div>
     </section>
 
@@ -918,6 +1229,7 @@
         <div id="adminTabCompliance" class="auth-tab" onclick="switchAdminTab('compliance')">SBM 2.0 Statutory Compliance</div>
         <div id="adminTabHotspot" class="auth-tab" onclick="switchAdminTab('hotspot')">GPS Density Hotspot Map</div>
         <div id="adminTabWorkerLocations" class="auth-tab" onclick="switchAdminTab('workerLocations')">👷 Live Worker Tracking</div>
+        <div id="adminTabAnalytics" class="auth-tab" onclick="switchAdminTab('analytics')">📊 City Analytics & Trends</div>
         <div id="adminTabHospital" class="auth-tab" onclick="switchAdminTab('hospital')">Biomedical Compliance</div>
         <div id="adminTabWorkers" class="auth-tab" onclick="switchAdminTab('workers')">Crew Metrics</div>
         <div id="adminTabRedemptions" class="auth-tab" onclick="switchAdminTab('redemptions')">🎁 Redemption Requests</div>
@@ -1066,6 +1378,20 @@
           </div>
         </div>
 
+        <!-- Statutory Compliance Trend Chart Card -->
+        <div class="card" style="margin-bottom: 1.25rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+            <div>
+              <h4 style="margin: 0; font-size: 0.95rem;">📜 Multi-Week Statutory Compliance Trajectory vs SBM 2.0 Targets</h4>
+              <p style="margin: 0.15rem 0 0; font-size: 0.8rem; color: #64748b;">Source Segregation (60%), Door-to-Door Coverage (80%), Scientific Processing (80%)</p>
+            </div>
+            <span class="badge badge-compliant">Statutory Reference Benchmarks</span>
+          </div>
+          <div style="height: 220px; position: relative;">
+            <canvas id="adminComplianceTrendChartEmbedded"></canvas>
+          </div>
+        </div>
+
         <div class="card">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
             <div>
@@ -1109,22 +1435,93 @@
               <h3 style="font-size: 1.15rem; margin-bottom: 0.25rem;">👷 Real-Time Municipal Worker & Crew GPS Tracking</h3>
               <p style="color: #64748b; font-size: 0.82rem; margin: 0;">Live GPS positions of active field collection crews, assigned fleet vehicles, and on-demand route overlays.</p>
             </div>
-            <div style="display: flex; gap: 0.5rem;">
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
               <button type="button" class="btn btn-outline btn-xs" onclick="renderAdminWorkerLocationsMap(true)">🔄 Refresh Live Positions</button>
-              <button type="button" class="btn btn-outline btn-xs" onclick="clearAdminWorkerRouteOverlay()">Clear Route Overlay</button>
+              <button type="button" class="btn btn-outline btn-xs" onclick="clearAllWorkerRouteOverlays()">Clear All Overlays</button>
             </div>
           </div>
 
-          <!-- Leaflet Live Worker Map -->
-          <div id="adminWorkerLocationsMap" style="height: 480px; border-radius: var(--radius-xs); border: 1px solid var(--civic-border);"></div>
-
-          <!-- Selected Worker Route Details Panel -->
-          <div id="adminWorkerRouteOverlayPanel" style="display: none; margin-top: 1rem; padding: 1rem; background: var(--civic-surface-muted); border-radius: var(--radius-xs); border: 1px solid var(--civic-border);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-              <h4 id="adminOverlayWorkerName" style="margin: 0; font-size: 1rem;">Worker Route Overlay</h4>
-              <span id="adminOverlayStopsCount" class="badge badge-assigned">0 Stops Active</span>
+          <!-- Fleet Utilization Summary Stat Strip -->
+          <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin-bottom: 1rem;">
+            <div class="stat-card" style="padding: 0.75rem 1rem;">
+              <div class="stat-icon" style="font-size: 1.35rem;">👷</div>
+              <div>
+                <div id="adminStatActiveCrews" class="stat-number" style="font-size: 1.35rem; color: var(--civic-spruce-green);">4</div>
+                <div class="stat-label">Active Crews</div>
+              </div>
             </div>
-            <div id="adminOverlayStopsList" style="font-size: 0.85rem; color: #556960;"></div>
+            <div class="stat-card" style="padding: 0.75rem 1rem;">
+              <div class="stat-icon" style="font-size: 1.35rem;">⏸️</div>
+              <div>
+                <div id="adminStatIdleCrews" class="stat-number" style="font-size: 1.35rem; color: #64748b;">1</div>
+                <div class="stat-label">Idle / Off-Shift</div>
+              </div>
+            </div>
+            <div class="stat-card" style="padding: 0.75rem 1rem;">
+              <div class="stat-icon" style="font-size: 1.35rem;">📍</div>
+              <div>
+                <div id="adminStatAvgStops" class="stat-number" style="font-size: 1.35rem; color: var(--civic-cobalt-accent);">3.0</div>
+                <div class="stat-label">Avg Stops Remaining</div>
+              </div>
+            </div>
+            <div class="stat-card" style="padding: 0.75rem 1rem;">
+              <div class="stat-icon" style="font-size: 1.35rem;">🚛</div>
+              <div>
+                <div id="adminStatTotalUnits" class="stat-number" style="font-size: 1.35rem; color: var(--civic-forest-ink);">5</div>
+                <div class="stat-label">Fleet Units in Field</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Worker Status Filter Chips -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--civic-border);">
+            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+              <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Filter Status:</span>
+              <button type="button" class="admin-filter-chip active" data-filter="all" onclick="setAdminWorkerFilter('all')">All Crews (<span id="adminFilterCountAll">5</span>)</button>
+              <button type="button" class="admin-filter-chip" data-filter="active" onclick="setAdminWorkerFilter('active')">🟢 Active (<span id="adminFilterCountActive">4</span>)</button>
+              <button type="button" class="admin-filter-chip" data-filter="idle" onclick="setAdminWorkerFilter('idle')">⏸️ Idle / Off-Shift (<span id="adminFilterCountIdle">1</span>)</button>
+              <button type="button" class="admin-filter-chip" data-filter="on_route" onclick="setAdminWorkerFilter('on_route')">🗺️ On Route (<span id="adminFilterCountOnRoute">4</span>)</button>
+            </div>
+            <div style="font-size: 0.78rem; color: #64748b;">
+              <span>Tip: Check boxes to compare multiple route paths</span>
+            </div>
+          </div>
+
+          <!-- Split Layout: Worker List Sidebar Panel + Live Tracking Map -->
+          <div class="admin-tracking-grid" style="display: grid; grid-template-columns: 360px 1fr; gap: 1rem; align-items: stretch;">
+            <!-- Left: Worker List Side Panel -->
+            <div style="background: var(--civic-surface-muted); border: 1px solid var(--civic-border); border-radius: var(--radius-xs); padding: 0.85rem; display: flex; flex-direction: column; max-height: 540px; overflow-y: auto;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <span style="font-size: 0.78rem; font-weight: 800; text-transform: uppercase; color: var(--civic-forest-ink); letter-spacing: 0.04em;">Assigned Crews</span>
+                <span id="adminFilteredWorkerCount" class="badge" style="background: rgba(0,0,0,0.06); font-size: 0.72rem;">5 Crews Shown</span>
+              </div>
+              <div id="adminWorkerListPanel" style="display: flex; flex-direction: column; gap: 0.65rem;">
+                <!-- Dynamically rendered crew cards -->
+              </div>
+            </div>
+
+            <!-- Right: Leaflet Live Worker Map & Route Overlays -->
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+              <div id="adminWorkerLocationsMap" style="height: 470px; border-radius: var(--radius-xs); border: 1px solid var(--civic-border);"></div>
+
+              <!-- Multi-Worker Route Overlay Comparison Legend -->
+              <div id="adminMultiRouteLegend" style="display: none; padding: 0.75rem 1rem; background: var(--civic-surface-muted); border-radius: var(--radius-xs); border: 1px solid var(--civic-border); font-size: 0.82rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                  <strong style="color: var(--civic-forest-ink);">🗺️ Multi-Crew Route Overlays Comparison</strong>
+                  <button type="button" class="btn btn-outline btn-xs" style="padding: 1px 6px; font-size: 0.72rem;" onclick="clearAllWorkerRouteOverlays()">Clear All</button>
+                </div>
+                <div id="adminMultiRouteLegendItems" style="display: flex; flex-wrap: wrap; gap: 0.65rem;"></div>
+              </div>
+
+              <!-- Single Selected Worker Route Details Panel (backward compatibility) -->
+              <div id="adminWorkerRouteOverlayPanel" style="display: none; padding: 0.85rem 1rem; background: var(--civic-surface-muted); border-radius: var(--radius-xs); border: 1px solid var(--civic-border);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                  <h4 id="adminOverlayWorkerName" style="margin: 0; font-size: 0.95rem;">Worker Route Overlay</h4>
+                  <span id="adminOverlayStopsCount" class="badge badge-assigned">0 Stops Active</span>
+                </div>
+                <div id="adminOverlayStopsList" style="font-size: 0.82rem; color: #556960;"></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1152,6 +1549,20 @@
 
       <!-- Admin Section 5: Worker Performance -->
       <div id="adminPanelWorkers" style="display: none;">
+        <!-- Embedded Worker Performance Chart Card -->
+        <div class="card" style="margin-bottom: 1.25rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+            <div>
+              <h4 style="margin: 0; font-size: 0.95rem;">📊 Crew Workload & Completion Distribution</h4>
+              <p style="margin: 0.15rem 0 0; font-size: 0.8rem; color: #64748b;">Visual comparison of stops completed vs remaining across all active municipal crews.</p>
+            </div>
+            <span class="badge badge-assigned" style="font-size: 0.68rem;">Real-time Fleet Comparison</span>
+          </div>
+          <div style="height: 200px; position: relative;">
+            <canvas id="adminWorkerPerformanceChartEmbedded"></canvas>
+          </div>
+        </div>
+
         <div class="card">
           <h3 style="margin-bottom: 1rem;">Sanitation Worker Performance Metrics</h3>
           <div class="table-responsive">
@@ -1224,6 +1635,87 @@
         </div>
       </div>
 
+      <!-- Admin Section: Operational Analytics & Intelligence -->
+      <div id="adminPanelAnalytics" style="display: none;">
+        <div class="card" style="margin-bottom: 1.25rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.25rem;">
+            <div>
+              <h3 style="margin: 0; font-size: 1.25rem;">📊 Municipal Operational Intelligence & Trends</h3>
+              <p style="margin: 0.2rem 0 0; font-size: 0.85rem; color: #64748b;">City-wide civic complaints, fleet workload distribution, waste streams, and statutory compliance progress.</p>
+            </div>
+            <button type="button" class="btn btn-outline btn-sm" onclick="renderAdminAnalyticsCharts()">🔄 Refresh Charts</button>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 1.25rem;">
+            <!-- Chart 1: Reports Over Time (Line Chart) -->
+            <div style="background: var(--civic-surface-muted); padding: 1rem; border-radius: var(--radius-xs); border: 1px solid var(--civic-border);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <strong style="font-size: 0.88rem; color: var(--civic-forest-ink);">📈 Complaint Volume Trend (Last 14-30 Days)</strong>
+                <span class="badge badge-assigned" style="font-size: 0.68rem;">Daily Incident Trajectory</span>
+              </div>
+              <div style="height: 220px; position: relative;">
+                <canvas id="adminReportsOverTimeChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Chart 2: Status Funnel (Doughnut / Stacked Bar) -->
+            <div style="background: var(--civic-surface-muted); padding: 1rem; border-radius: var(--radius-xs); border: 1px solid var(--civic-border);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <strong style="font-size: 0.88rem; color: var(--civic-forest-ink);">🎯 Operational Status Funnel</strong>
+                <span class="badge" style="background: rgba(0,0,0,0.06); font-size: 0.68rem;">City Health Breakdown</span>
+              </div>
+              <div style="height: 220px; position: relative;">
+                <canvas id="adminStatusFunnelChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Chart 3: Reports by Category (Bar Chart) -->
+            <div style="background: var(--civic-surface-muted); padding: 1rem; border-radius: var(--radius-xs); border: 1px solid var(--civic-border);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <strong style="font-size: 0.88rem; color: var(--civic-forest-ink);">🗑️ Reports by Waste Category</strong>
+                <span class="badge" style="background: rgba(0,0,0,0.06); font-size: 0.68rem;">Dominant Waste Streams</span>
+              </div>
+              <div style="height: 220px; position: relative;">
+                <canvas id="adminCategoryChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Chart 4: Reports by Ward (Horizontal Bar Chart) -->
+            <div style="background: var(--civic-surface-muted); padding: 1rem; border-radius: var(--radius-xs); border: 1px solid var(--civic-border);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <strong style="font-size: 0.88rem; color: var(--civic-forest-ink);">🏛️ Ranked Reports by Municipal Ward</strong>
+                <span class="badge" style="background: rgba(0,0,0,0.06); font-size: 0.68rem;">Ward Complaint Density</span>
+              </div>
+              <div style="height: 220px; position: relative;">
+                <canvas id="adminWardReportsChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Chart 5: Worker Performance Comparison (Bar Chart) -->
+            <div style="background: var(--civic-surface-muted); padding: 1rem; border-radius: var(--radius-xs); border: 1px solid var(--civic-border);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <strong style="font-size: 0.88rem; color: var(--civic-forest-ink);">👷 Crew Workload & Completion Rate</strong>
+                <span class="badge badge-assigned" style="font-size: 0.68rem;">Seed Crew Comparison</span>
+              </div>
+              <div style="height: 220px; position: relative;">
+                <canvas id="adminWorkerPerformanceChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Chart 6: Compliance Trend vs SBM 2.0 / SWM 2026 Targets (Line Chart) -->
+            <div style="background: var(--civic-surface-muted); padding: 1rem; border-radius: var(--radius-xs); border: 1px solid var(--civic-border);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <strong style="font-size: 0.88rem; color: var(--civic-forest-ink);">📜 Compliance Trend vs SBM 2.0 Targets</strong>
+                <span class="badge badge-compliant" style="font-size: 0.68rem;">Statutory Target Reference Lines</span>
+              </div>
+              <div style="height: 220px; position: relative;">
+                <canvas id="adminComplianceTrendChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </section>
 
   </main>
@@ -1250,6 +1742,29 @@
         </div>
         <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Verification & Complete Stop</button>
       </form>
+    </div>
+  </div>
+
+  <!-- Admin Reassign Nearest Stop Modal -->
+  <div id="adminReassignStopModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 540px;">
+      <button class="modal-close" onclick="closeModal('adminReassignStopModal')">×</button>
+      <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+        <span style="font-size: 1.35rem;">🔄</span>
+        <h3 style="margin: 0; font-size: 1.15rem;">Reassign Nearest Stop</h3>
+      </div>
+      <p style="color: #64748b; font-size: 0.84rem; margin-bottom: 1rem;">Move this stop to a closer or alternate municipal crew. Both crew route sequences and overlays will recalculate instantly.</p>
+      
+      <div id="adminReassignStopDetails" style="background: var(--civic-surface-muted); padding: 0.85rem; border-radius: var(--radius-xs); border: 1px solid var(--civic-border); margin-bottom: 1rem; font-size: 0.85rem;">
+        <!-- Filled dynamically with stop info -->
+      </div>
+      
+      <div style="font-weight: 800; font-size: 0.82rem; text-transform: uppercase; color: var(--civic-forest-ink); margin-bottom: 0.5rem;">
+        Available Field Crews (Ranked by Proximity):
+      </div>
+      <div id="adminReassignWorkersList" style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 280px; overflow-y: auto;">
+        <!-- Filled dynamically with sorted workers -->
+      </div>
     </div>
   </div>
 
@@ -1478,7 +1993,202 @@
     </div>
   </div>
 
-  <!-- Update Ward Statutory Compliance Modal -->
+  <!-- Keyboard Shortcut Help Modal (Shift + ?) -->
+  <div id="keyboardShortcutsModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 520px;">
+      <button class="modal-close" onclick="closeModal('keyboardShortcutsModal')">×</button>
+      <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+        <span style="font-size: 1.5rem;">⌨️</span>
+        <h3 style="margin: 0; font-size: 1.25rem;">Keyboard Shortcuts</h3>
+      </div>
+      <p style="color: #64748b; font-size: 0.82rem; margin-bottom: 1rem;">Accelerate navigation across municipal operational dashboards.</p>
+      
+      <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+        <div class="shortcut-row">
+          <span>Switch to Citizen Portal</span>
+          <span class="shortcut-key">1</span>
+        </div>
+        <div class="shortcut-row">
+          <span>Switch to Institution Portal</span>
+          <span class="shortcut-key">2</span>
+        </div>
+        <div class="shortcut-row">
+          <span>Switch to Hospital Portal</span>
+          <span class="shortcut-key">3</span>
+        </div>
+        <div class="shortcut-row">
+          <span>Switch to Worker Field View</span>
+          <span class="shortcut-key">4</span>
+        </div>
+        <div class="shortcut-row">
+          <span>Switch to Admin Command Center</span>
+          <span class="shortcut-key">5</span>
+        </div>
+        <div class="shortcut-row">
+          <span>Open Public Transparency</span>
+          <span class="shortcut-key">T</span>
+        </div>
+        <div class="shortcut-row">
+          <span>Toggle Notifications Inbox</span>
+          <span class="shortcut-key">N</span>
+        </div>
+        <div class="shortcut-row">
+          <span>Admin Operational Analytics</span>
+          <span class="shortcut-key">A</span>
+        </div>
+        <div class="shortcut-row">
+          <span>Toggle Keyboard Shortcuts</span>
+          <span class="shortcut-key">?</span>
+        </div>
+        <div class="shortcut-row">
+          <span>Close Active Modal</span>
+          <span class="shortcut-key">Esc</span>
+        </div>
+      </div>
+
+      <div style="margin-top: 1.25rem; text-align: right;">
+        <button type="button" class="btn btn-primary btn-sm" onclick="closeModal('keyboardShortcutsModal')">Got It</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Institution Waste Audit Certificate Modal (Printable) -->
+  <div id="instAuditCertModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 760px; max-height: 92vh; overflow-y: auto;">
+      <button class="modal-close" onclick="closeModal('instAuditCertModal')">×</button>
+      
+      <div class="inst-cert-card" id="instCertPrintArea">
+        <div class="inst-cert-seal">♻</div>
+        <div style="font-size: 0.85rem; font-weight: 800; letter-spacing: 0.1em; color: #166534; text-transform: uppercase;">
+          Municipal Corporation of Greater Mumbai (MCGM)
+        </div>
+        <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.1rem;">
+          Swachh Bharat Mission (Urban) 2.0 &bull; SWM Statutory Audit Wing
+        </div>
+        
+        <h2 style="font-size: 1.6rem; color: #0d1b14; margin: 1.25rem 0 0.5rem 0; font-family: 'Outfit', sans-serif;">
+          CERTIFICATE OF SOURCE SEGREGATION COMPLIANCE
+        </h2>
+        <div style="font-size: 0.85rem; color: #475569; font-style: italic;">
+          Certificate Ref: <strong id="certDocId">MCGM-SWM-2026-9042</strong> &bull; Issued Under SWM Rules 2026
+        </div>
+
+        <div style="margin: 1.75rem 0; line-height: 1.7; font-size: 0.95rem; color: #1e293b;">
+          This is to certify that the bulk waste generating establishment:
+          <div style="font-size: 1.35rem; font-weight: 800; color: #166534; margin: 0.4rem 0;" id="certOrgName">
+            St. Xavier's High School (Main Campus)
+          </div>
+          situated in <strong id="certOrgWard">Ward K/East - Andheri</strong> has successfully conducted its statutory monthly solid waste self-audit and maintained an verified source segregation compliance rating of:
+          <div style="font-size: 2.2rem; font-weight: 900; color: #166534; margin: 0.5rem 0;" id="certAuditRating">
+            92%
+          </div>
+          Total bulk tonnage diverted from municipal landfill: <strong id="certTonnageDiverted">3,450 kg</strong>
+        </div>
+
+        <div style="display: flex; justify-content: space-around; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #cbd5e1; font-size: 0.82rem; color: #475569;">
+          <div>
+            <div style="font-weight: 800; color: #0f172a;">Dr. V. K. Deshmukh, IAS</div>
+            <div>Municipal Commissioner / SWM Directorate</div>
+          </div>
+          <div>
+            <div style="font-weight: 800; color: #0f172a;" id="certDateIssued">October 2026</div>
+            <div>Statutory Audit Validation Date</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 1.25rem; display: flex; justify-content: flex-end; gap: 0.75rem;">
+        <button type="button" class="btn btn-outline btn-sm" onclick="closeModal('instAuditCertModal')">Close</button>
+        <button type="button" class="btn btn-primary btn-sm" onclick="window.print()">🖨️ Print Certificate (PDF)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Scheduled Reports Weekly Digest Modal -->
+  <div id="adminWeeklyDigestModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 720px; max-height: 90vh; overflow-y: auto;">
+      <button class="modal-close" onclick="closeModal('adminWeeklyDigestModal')">×</button>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 2px solid var(--civic-border); padding-bottom: 0.75rem;">
+        <div>
+          <h3 style="margin: 0; font-size: 1.3rem;">📅 Municipal Weekly Digest Report</h3>
+          <p style="margin: 0.2rem 0 0 0; font-size: 0.82rem; color: #64748b;">Consolidated civic performance summary for Executive Operations & SBM oversight.</p>
+        </div>
+        <button type="button" class="btn btn-outline btn-xs" onclick="window.print()">🖨️ Print Digest</button>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem; margin-bottom: 1.25rem;">
+        <div class="stat-card" style="padding: 0.75rem;">
+          <div class="stat-number" id="digestTotalReports" style="font-size: 1.4rem;">15</div>
+          <div class="stat-label">Total Incidents</div>
+        </div>
+        <div class="stat-card" style="padding: 0.75rem;">
+          <div class="stat-number" id="digestClearanceRate" style="font-size: 1.4rem; color: var(--civic-spruce-green);">86.7%</div>
+          <div class="stat-label">Clearance Rate</div>
+        </div>
+        <div class="stat-card" style="padding: 0.75rem;">
+          <div class="stat-number" id="digestAvgSla" style="font-size: 1.4rem; color: var(--civic-cobalt-accent);">3.8h</div>
+          <div class="stat-label">Avg Resolution SLA</div>
+        </div>
+        <div class="stat-card" style="padding: 0.75rem;">
+          <div class="stat-number" id="digestCreditsAwarded" style="font-size: 1.4rem; color: #d97706;">420</div>
+          <div class="stat-label">EcoCredits Distributed</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: 1rem; background: var(--civic-surface-muted);">
+        <h4 style="margin: 0 0 0.5rem 0; font-size: 0.95rem;">🏆 Top Performing Wards This Week</h4>
+        <div id="digestTopWardsList" style="display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.84rem;">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <div class="card" style="background: var(--civic-surface-muted);">
+        <h4 style="margin: 0 0 0.5rem 0; font-size: 0.95rem;">🌱 Environmental Net Impact</h4>
+        <div style="font-size: 0.85rem; color: #334155; line-height: 1.6;">
+          Total waste diverted from Deonar & Mulund landfills: <strong id="digestTonnageDiverted">12.4 Metric Tons</strong>.<br>
+          Estimated CO₂ equivalent emissions abated: <strong id="digestCo2Abated">6.2 Metric Tons</strong>.
+        </div>
+      </div>
+
+      <div style="margin-top: 1.25rem; text-align: right;">
+        <button type="button" class="btn btn-primary btn-sm" onclick="closeModal('adminWeeklyDigestModal')">Close Digest</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hospital: Add Expiring Medicine Stock Modal -->
+  <div id="addPharmaExpiryModal" class="modal-overlay">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeModal('addPharmaExpiryModal')">×</button>
+      <h3 style="margin-bottom: 0.5rem;">💊 Log Expiring Pharmaceutical Stock</h3>
+      <p style="color: #64748b; font-size: 0.85rem; margin-bottom: 1rem;">Track medicine batches nearing expiry to prevent statutory violations under Bio-Medical Waste rules.</p>
+      <form id="addPharmaExpiryForm" onsubmit="handleAddPharmaExpirySubmit(event)">
+        <div class="form-group">
+          <label class="form-label">Medicine / Chemical Compound Name <span style="color: var(--civic-signal-crimson);">*</span></label>
+          <input type="text" id="pharmaMedName" class="form-control" placeholder="e.g. Amoxicillin 500mg (Vials), Formaldehyde Sol." required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Batch ID <span style="color: var(--civic-signal-crimson);">*</span></label>
+          <input type="text" id="pharmaBatchId" class="form-control" placeholder="e.g. BATCH-PH-8891" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Hospital Department / Storage Shelf</label>
+          <input type="text" id="pharmaDepartment" class="form-control" placeholder="e.g. Central Pharmacy Rack B-4, ICU Drug Bay" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Expiry Date <span style="color: var(--civic-signal-crimson);">*</span></label>
+          <input type="date" id="pharmaExpiryDate" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Weight Volume (kg)</label>
+          <input type="number" id="pharmaWeightKg" class="form-control" placeholder="e.g. 5.0" step="0.1" min="0.1" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Add Medicine Expiry Reminder</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Municipal Compliance Ward Metrics Edit Modal -->
   <div id="updateComplianceModal" class="modal-overlay">
     <div class="modal-card">
       <button class="modal-close" onclick="closeModal('updateComplianceModal')">×</button>

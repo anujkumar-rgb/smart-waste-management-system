@@ -534,6 +534,274 @@ runTest('Geolocation Fallback Notice: Clear inline guidance when location access
 });
 
 // --------------------------------------------------------------------------
+// 13. EXPANDED LIVE GPS TRACKING & MULTI-WORKER FLEET OPERATIONS
+// --------------------------------------------------------------------------
+console.log('\n🚚 13. Testing Expanded Live GPS Tracking & Multi-Worker Fleet Operations...');
+
+runTest('Worker Profiles: At least 5 distinct seeded workers across Mumbai localities', () => {
+  const seedWorkers = [
+    { email: 'crew101@cleanward.org', crew: '101', name: 'Rajesh Singh', ward: 'Dadar' },
+    { email: 'crew102@cleanward.org', crew: '102', name: 'Sunita Devi', ward: 'Bandra' },
+    { email: 'crew103@cleanward.org', crew: '103', name: 'Amit Verma', ward: 'Andheri' },
+    { email: 'crew104@cleanward.org', crew: '104', name: 'Harish Kumar', ward: 'Powai' },
+    { email: 'crew105@cleanward.org', crew: '105', name: 'Sachin Kamble', ward: 'Borivali' }
+  ];
+
+  seedWorkers.forEach(w => {
+    assert(appContent.includes(w.email), `Worker email ${w.email} missing in app.js`);
+    assert(appContent.includes(w.name), `Worker name ${w.name} missing in app.js`);
+    assert(serverContent.includes(w.email), `Worker email ${w.email} missing in server.js`);
+  });
+
+  // Verify distinct vehicle types
+  assert(appContent.includes('Heavy Hydraulic Compactor (10T)'), 'Compactor missing');
+  assert(appContent.includes('Electric Multi-Bin Tipper Auto (1.5T)'), 'Tipper auto missing');
+  assert(appContent.includes('Biomedical Closed-Chamber Van (2T)'), 'Biomedical van missing');
+  assert(appContent.includes('C&D Debris Hydraulic Dumper (14T)'), 'Debris dumper missing');
+  assert(appContent.includes('Mini Tipper E-Rickshaw (0.8T)'), 'Mini tipper e-rickshaw missing');
+});
+
+runTest('Worker Stop Lists: Each seeded worker has assigned stops including at least one emergency stop', () => {
+  const emergencyStops = ['EMG-401', 'EMG-402', 'EMG-403', 'EMG-404', 'EMG-405'];
+  emergencyStops.forEach(emg => {
+    assert(appContent.includes(emg), `Emergency stop ${emg} missing in app.js`);
+    assert(serverContent.includes(emg), `Emergency stop ${emg} missing in server.js`);
+  });
+});
+
+runTest('Worker Status Filter: Filter chips narrow map view (All, Active, Idle, On Route)', () => {
+  assert(htmlContent.includes('setAdminWorkerFilter(\'all\')'), 'Filter chip All missing in HTML');
+  assert(htmlContent.includes('setAdminWorkerFilter(\'active\')'), 'Filter chip Active missing in HTML');
+  assert(htmlContent.includes('setAdminWorkerFilter(\'idle\')'), 'Filter chip Idle missing in HTML');
+  assert(htmlContent.includes('setAdminWorkerFilter(\'on_route\')'), 'Filter chip On Route missing in HTML');
+  assert(appContent.includes('window.setAdminWorkerFilter = function(filter)'), 'setAdminWorkerFilter missing in app.js');
+  assert(htmlContent.includes('id="adminFilteredWorkerCount"'), 'adminFilteredWorkerCount missing in HTML');
+});
+
+runTest('Worker List Panel: Compact sidebar renders cards and centers map with popup on click', () => {
+  assert(htmlContent.includes('id="adminWorkerListPanel"'), 'adminWorkerListPanel container missing in HTML');
+  assert(appContent.includes('window.focusAdminWorkerMarker = function(workerId)'), 'focusAdminWorkerMarker missing in app.js');
+  assert(appContent.includes('adminWorkerMapObj.setView([lat, lng], 14);'), 'Map zoom-center on worker click missing in app.js');
+  assert(appContent.includes('found.marker.openPopup();'), 'Marker popup open on card click missing in app.js');
+});
+
+runTest('Multi-Worker Route Overlay Comparison: Multi-crew simultaneous route rendering in distinct colors', () => {
+  assert(htmlContent.includes('id="adminMultiRouteLegend"'), 'adminMultiRouteLegend missing in HTML');
+  assert(htmlContent.includes('id="adminMultiRouteLegendItems"'), 'adminMultiRouteLegendItems missing in HTML');
+  assert(appContent.includes('window.toggleWorkerMultiRouteCompare = function('), 'toggleWorkerMultiRouteCompare missing in app.js');
+  assert(appContent.includes('window.renderMultiWorkerRouteOverlays = function()'), 'renderMultiWorkerRouteOverlays missing in app.js');
+  assert(appContent.includes('MULTI_ROUTE_COLORS ='), 'MULTI_ROUTE_COLORS palette missing in app.js');
+  assert(appContent.includes('window.clearAllWorkerRouteOverlays = function()'), 'clearAllWorkerRouteOverlays missing in app.js');
+});
+
+runTest('Reassign Nearest Stop Quick Action: Reassigns stop to closest nearby crew and recalculates routes', () => {
+  assert(appContent.includes('window.reassignNearestWorkerStop = function(fromWorkerId)'), 'reassignNearestWorkerStop function missing in app.js');
+  assert(appContent.includes('minDistanceKm'), 'Proximity distance calculation for nearest worker missing in app.js');
+  assert(appContent.includes('runSoftwareRouteOptimizer();'), 'Route optimizer re-calculation on reassign missing in app.js');
+  assert(serverContent.includes('/api/reassign-stop'), 'Backend /api/reassign-stop endpoint missing in server.js');
+});
+
+runTest('Fleet Utilization Summary: Dynamic stat strip above tracking map', () => {
+  assert(htmlContent.includes('id="adminStatActiveCrews"'), 'adminStatActiveCrews stat element missing in HTML');
+  assert(htmlContent.includes('id="adminStatIdleCrews"'), 'adminStatIdleCrews stat element missing in HTML');
+  assert(htmlContent.includes('id="adminStatAvgStops"'), 'adminStatAvgStops stat element missing in HTML');
+  assert(htmlContent.includes('id="adminStatTotalUnits"'), 'adminStatTotalUnits stat element missing in HTML');
+  assert(appContent.includes('function renderFleetUtilizationSummary('), 'renderFleetUtilizationSummary function missing in app.js');
+});
+
+runTest('Worker Shift Status: Start Shift / End Shift toggle controls active state and map visibility', () => {
+  assert(htmlContent.includes('id="workerShiftToggleBtn"'), 'workerShiftToggleBtn missing in HTML');
+  assert(htmlContent.includes('id="workerShiftStatusBadge"'), 'workerShiftStatusBadge missing in HTML');
+  assert(htmlContent.includes('id="workerShiftInactivePrompt"'), 'workerShiftInactivePrompt missing in HTML');
+  assert(appContent.includes('window.toggleWorkerShift = function()'), 'toggleWorkerShift function missing in app.js');
+  assert(appContent.includes('shiftStatus = newStatus'), 'shiftStatus update logic missing in app.js');
+});
+
+runTest('Worker Live Distance Remaining Display: Straight-line distance readout updates with location', () => {
+  assert(htmlContent.includes('id="workerLiveDistanceReadout"'), 'workerLiveDistanceReadout element missing in HTML');
+  assert(htmlContent.includes('id="workerTargetDistanceBadge"'), 'workerTargetDistanceBadge element missing in HTML');
+  assert(appContent.includes('liveReadoutElem.textContent ='), 'liveReadoutElem update missing in app.js');
+});
+
+runTest('Worker Today Route Summary Card: Reflects assigned, completed, remaining, and covered distance', () => {
+  assert(htmlContent.includes('id="workerTodayRouteSummaryCard"'), 'workerTodayRouteSummaryCard missing in HTML');
+  assert(htmlContent.includes('id="workerSummaryTotal"'), 'workerSummaryTotal missing in HTML');
+  assert(htmlContent.includes('id="workerSummaryCompleted"'), 'workerSummaryCompleted missing in HTML');
+  assert(htmlContent.includes('id="workerSummaryRemaining"'), 'workerSummaryRemaining missing in HTML');
+  assert(htmlContent.includes('id="workerSummaryEstDistance"'), 'workerSummaryEstDistance missing in HTML');
+  assert(htmlContent.includes('id="workerSummaryProgressPct"'), 'workerSummaryProgressPct missing in HTML');
+  assert(htmlContent.includes('id="workerSummaryProgressBar"'), 'workerSummaryProgressBar missing in HTML');
+});
+
+runTest('Worker Vehicle & Crew Banner: Pulls consistent fleet details for current worker', () => {
+  assert(htmlContent.includes('id="workerVehicleCrewBanner"'), 'workerVehicleCrewBanner missing in HTML');
+  assert(htmlContent.includes('id="workerCrewNumBanner"'), 'workerCrewNumBanner missing in HTML');
+  assert(htmlContent.includes('id="workerVehicleTypeBanner"'), 'workerVehicleTypeBanner missing in HTML');
+  assert(htmlContent.includes('id="workerVehicleRegBanner"'), 'workerVehicleRegBanner missing in HTML');
+  assert(htmlContent.includes('id="workerWardBanner"'), 'workerWardBanner missing in HTML');
+});
+
+// --------------------------------------------------------------------------
+// 14. CITIZEN & ADMIN DASHBOARD CHARTS (CHART.JS)
+// --------------------------------------------------------------------------
+console.log('\n📊 14. Testing Citizen & Admin Dashboard Visual Charts (Chart.js)...');
+
+runTest('Citizen Dashboard: Credit Earnings Breakdown chart implemented with source categories', () => {
+  assert(htmlContent.includes('id="citizenCreditBreakdownChart"'), 'citizenCreditBreakdownChart canvas missing in HTML');
+  assert(appContent.includes('function renderCitizenCreditBreakdownChart()'), 'renderCitizenCreditBreakdownChart function missing in app.js');
+  assert(appContent.includes('type: \'doughnut\''), 'Doughnut chart type for credit breakdown missing');
+  assert(appContent.includes('Segregation Bonus'), 'Segregation bonus label missing in credit chart');
+  assert(appContent.includes('Emergency Tier'), 'Emergency tier label missing in credit chart');
+});
+
+runTest('Citizen Dashboard: Report Status Breakdown chart implemented', () => {
+  assert(htmlContent.includes('id="citizenReportStatusChart"'), 'citizenReportStatusChart canvas missing in HTML');
+  assert(appContent.includes('function renderCitizenReportStatusChart()'), 'renderCitizenReportStatusChart function missing in app.js');
+});
+
+runTest('Admin Dashboard: Reports Over Time (14-30 day trend line chart) implemented', () => {
+  assert(htmlContent.includes('id="adminReportsOverTimeChart"'), 'adminReportsOverTimeChart canvas missing in HTML');
+  assert(appContent.includes('function renderAdminReportsOverTimeChart()'), 'renderAdminReportsOverTimeChart function missing in app.js');
+  assert(appContent.includes('type: \'line\''), 'Line chart type missing in reports over time');
+});
+
+runTest('Admin Dashboard: Reports by Category bar chart implemented', () => {
+  assert(htmlContent.includes('id="adminCategoryChart"'), 'adminCategoryChart canvas missing in HTML');
+  assert(appContent.includes('function renderAdminCategoryChart()'), 'renderAdminCategoryChart function missing in app.js');
+  assert(appContent.includes('Reports by Waste Stream'), 'Waste stream label missing in category chart');
+});
+
+runTest('Admin Dashboard: Reports by Ward horizontal bar chart implemented', () => {
+  assert(htmlContent.includes('id="adminWardReportsChart"'), 'adminWardReportsChart canvas missing in HTML');
+  assert(appContent.includes('function renderAdminWardReportsChart()'), 'renderAdminWardReportsChart function missing in app.js');
+  assert(appContent.includes('indexAxis: \'y\''), 'Horizontal bar indexAxis: y missing in ward chart');
+});
+
+runTest('Admin Dashboard: Worker Performance Comparison bar chart implemented', () => {
+  assert(htmlContent.includes('id="adminWorkerPerformanceChart"'), 'adminWorkerPerformanceChart canvas missing in HTML');
+  assert(htmlContent.includes('id="adminWorkerPerformanceChartEmbedded"'), 'adminWorkerPerformanceChartEmbedded canvas missing in HTML');
+  assert(appContent.includes('function renderAdminWorkerPerformanceChart()'), 'renderAdminWorkerPerformanceChart function missing in app.js');
+  assert(appContent.includes('Stops Cleared'), 'Stops Cleared dataset missing');
+  assert(appContent.includes('Stops Remaining'), 'Stops Remaining dataset missing');
+});
+
+runTest('Admin Dashboard: Operational Status Funnel chart implemented', () => {
+  assert(htmlContent.includes('id="adminStatusFunnelChart"'), 'adminStatusFunnelChart canvas missing in HTML');
+  assert(appContent.includes('function renderAdminStatusFunnelChart()'), 'renderAdminStatusFunnelChart function missing in app.js');
+});
+
+runTest('Admin Dashboard: Statutory Compliance Trend vs SBM 2.0 Targets multi-line chart implemented', () => {
+  assert(htmlContent.includes('id="adminComplianceTrendChart"'), 'adminComplianceTrendChart canvas missing in HTML');
+  assert(htmlContent.includes('id="adminComplianceTrendChartEmbedded"'), 'adminComplianceTrendChartEmbedded canvas missing in HTML');
+  assert(appContent.includes('function renderAdminComplianceTrendChart()'), 'renderAdminComplianceTrendChart function missing in app.js');
+  assert(appContent.includes('SBM Segregation Target (60%)'), 'SBM segregation target reference line missing');
+  assert(appContent.includes('SBM Coverage Target (80%)'), 'SBM coverage target reference line missing');
+  assert(appContent.includes('SBM Processing Target (80%)'), 'SBM processing target reference line missing');
+});
+
+runTest('Admin Dashboard: Dedicated Operational Intelligence & Analytics tab and panel implemented', () => {
+  assert(htmlContent.includes('id="adminTabAnalytics"'), 'adminTabAnalytics tab missing in HTML');
+  assert(htmlContent.includes('id="adminPanelAnalytics"'), 'adminPanelAnalytics panel missing in HTML');
+  assert(appContent.includes('window.renderAdminAnalyticsCharts = function()'), 'renderAdminAnalyticsCharts function missing in app.js');
+});
+
+runTest('Chart Lifecycle Management: Chart instances destroy previous instances before re-rendering', () => {
+  assert(appContent.includes('citizenCreditBreakdownChartObj.destroy()'), 'citizenCreditBreakdownChartObj destruction missing');
+  assert(appContent.includes('citizenReportStatusChartObj.destroy()'), 'citizenReportStatusChartObj destruction missing');
+  assert(appContent.includes('adminReportsOverTimeChartObj.destroy()'), 'adminReportsOverTimeChartObj destruction missing');
+  assert(appContent.includes('adminCategoryChartObj.destroy()'), 'adminCategoryChartObj destruction missing');
+  assert(appContent.includes('adminWardReportsChartObj.destroy()'), 'adminWardReportsChartObj destruction missing');
+  assert(appContent.includes('adminWorkerPerformanceChartObj.destroy()'), 'adminWorkerPerformanceChartObj destruction missing');
+  assert(appContent.includes('adminStatusFunnelChartObj.destroy()'), 'adminStatusFunnelChartObj destruction missing');
+  assert(appContent.includes('adminComplianceTrendChartObj.destroy()'), 'adminComplianceTrendChartObj destruction missing');
+});
+
+// --------------------------------------------------------------------------
+// 15. ADVANCED MUNICIPAL OPERATIONS, PWA & CIVIC ENGAGEMENT
+// --------------------------------------------------------------------------
+console.log('\n🚀 15. Testing Advanced Municipal Operations, PWA & Civic Engagement...');
+
+runTest('PWA Manifest & Service Worker: Progressive Web App assets configured', () => {
+  assert(fs.existsSync(path.join(__dirname, 'manifest.json')), 'manifest.json missing');
+  assert(fs.existsSync(path.join(__dirname, 'sw.js')), 'sw.js service worker missing');
+  assert(appContent.includes('navigator.serviceWorker.register'), 'Service worker registration missing in app.js');
+  const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, 'manifest.json'), 'utf-8'));
+  assert(manifest.name.includes('EcoClear'), 'PWA name mismatch in manifest.json');
+  assert(manifest.display === 'standalone', 'PWA display mode must be standalone');
+});
+
+runTest('Offline Queue & Banner: Offline capability and synchronization logic', () => {
+  assert(htmlContent.includes('id="offlineQueueBanner"'), 'offlineQueueBanner element missing in HTML');
+  assert(appContent.includes('function initOfflineQueueSync()'), 'initOfflineQueueSync function missing in app.js');
+  assert(appContent.includes('window.flushOfflineQueue'), 'flushOfflineQueue function missing in app.js');
+});
+
+runTest('In-App Notification Center: Dropdown, badge, and notification store', () => {
+  assert(htmlContent.includes('id="notificationBadge"'), 'notificationBadge missing in HTML');
+  assert(htmlContent.includes('id="notificationDropdown"'), 'notificationDropdown missing in HTML');
+  assert(htmlContent.includes('id="notificationList"'), 'notificationList missing in HTML');
+  assert(appContent.includes('function addNotification('), 'addNotification function missing in app.js');
+  assert(appContent.includes('window.toggleNotificationDropdown'), 'toggleNotificationDropdown missing in app.js');
+  assert(appContent.includes('window.markAllNotificationsRead'), 'markAllNotificationsRead missing in app.js');
+});
+
+runTest('Multi-Language Switcher (i18n): Language toggling with English and Hindi support', () => {
+  assert(htmlContent.includes('id="langToggleBtn"'), 'langToggleBtn missing in HTML');
+  assert(appContent.includes('const I18N = {'), 'I18N dictionary missing in app.js');
+  assert(appContent.includes('window.toggleAppLanguage'), 'toggleAppLanguage missing in app.js');
+  assert(appContent.includes('function applyAppLanguage('), 'applyAppLanguage missing in app.js');
+});
+
+runTest('Keyboard Shortcuts: Global navigation overlay and key listeners', () => {
+  assert(htmlContent.includes('id="keyboardShortcutsModal"'), 'keyboardShortcutsModal missing in HTML');
+  assert(appContent.includes('window.openKeyboardShortcutsModal'), 'openKeyboardShortcutsModal missing in app.js');
+  assert(appContent.includes('initKeyboardShortcuts()'), 'initKeyboardShortcuts missing in app.js');
+});
+
+runTest('Worker Daily Pre-Shift Safety Checklist: 5 PPE/vehicle items and inspection log', () => {
+  assert(htmlContent.includes('id="checkPpeGloves"'), 'checkPpeGloves checkbox missing in HTML');
+  assert(htmlContent.includes('id="workerSafetyChecklistProgress"'), 'workerSafetyChecklistProgress missing in HTML');
+  assert(htmlContent.includes('id="workerSafetySubmitBtn"'), 'workerSafetySubmitBtn missing in HTML');
+  assert(appContent.includes('window.updateWorkerSafetyChecklist'), 'updateWorkerSafetyChecklist missing in app.js');
+  assert(appContent.includes('window.saveWorkerSafetyLog'), 'saveWorkerSafetyLog missing in app.js');
+});
+
+runTest('Worker Clearance Photo Gallery: Completed route clearance visual proof feed', () => {
+  assert(htmlContent.includes('id="workerPhotoProofGrid"'), 'workerPhotoProofGrid missing in HTML');
+  assert(htmlContent.includes('id="workerPhotoProofCountBadge"'), 'workerPhotoProofCountBadge missing in HTML');
+  assert(appContent.includes('function renderWorkerPhotoProofGallery()'), 'renderWorkerPhotoProofGallery missing in app.js');
+});
+
+runTest('Admin Operational Audit Trail: Historical event log table with action tagging', () => {
+  assert(htmlContent.includes('id="adminLogsTableBody"'), 'adminLogsTableBody missing in HTML');
+  assert(appContent.includes('function logAdminAction('), 'logAdminAction missing in app.js');
+  assert(appContent.includes('function renderAdminLogsTable()'), 'renderAdminLogsTable missing in app.js');
+});
+
+runTest('Admin Weekly Digest Report: Executive summary modal with SLA, clearance rate, and top wards', () => {
+  assert(htmlContent.includes('id="adminWeeklyDigestModal"'), 'adminWeeklyDigestModal missing in HTML');
+  assert(htmlContent.includes('id="digestTotalReports"'), 'digestTotalReports missing in HTML');
+  assert(htmlContent.includes('id="digestClearanceRate"'), 'digestClearanceRate missing in HTML');
+  assert(appContent.includes('window.openAdminWeeklyDigestModal'), 'openAdminWeeklyDigestModal missing in app.js');
+});
+
+runTest('Hospital Pharmaceutical Expiry Tracking: Medicine batch expiry modal and alert table', () => {
+  assert(htmlContent.includes('id="addPharmaExpiryModal"'), 'addPharmaExpiryModal missing in HTML');
+  assert(htmlContent.includes('id="addPharmaExpiryForm"'), 'addPharmaExpiryForm missing in HTML');
+  assert(htmlContent.includes('id="hospitalPharmaExpiryTableBody"'), 'hospitalPharmaExpiryTableBody missing in HTML');
+  assert(appContent.includes('window.openAddPharmaExpiryModal'), 'openAddPharmaExpiryModal missing in app.js');
+  assert(appContent.includes('window.handleAddPharmaExpirySubmit'), 'handleAddPharmaExpirySubmit missing in app.js');
+});
+
+runTest('Institution Waste Audit Certificate & Peer Benchmarking: Printable certificate with seal', () => {
+  assert(htmlContent.includes('id="instAuditCertModal"'), 'instAuditCertModal missing in HTML');
+  assert(htmlContent.includes('id="certOrgName"'), 'certOrgName missing in HTML');
+  assert(htmlContent.includes('id="certOrgWard"'), 'certOrgWard missing in HTML');
+  assert(stylesContent.includes('.inst-cert-card'), 'inst-cert-card styling missing in styles.css');
+  assert(appContent.includes('window.openWasteAuditCertModal'), 'openWasteAuditCertModal missing in app.js');
+});
+
+// --------------------------------------------------------------------------
 // TEST SUMMARY
 // --------------------------------------------------------------------------
 console.log('\n======================================================');

@@ -11,6 +11,11 @@ document.addEventListener('DOMContentLoaded', () => {
   initVoiceRecorder();
   initSegregationGuide();
   initAdminEventListeners();
+  initPWA();
+  initLanguage();
+  initNotifications();
+  initKeyboardShortcuts();
+  initOfflineQueueSync();
   checkSession();
 });
 
@@ -121,11 +126,80 @@ const SEED_USERS = [
     email: 'crew101@cleanward.org', 
     pass: 'demo123', 
     name: 'Rajesh Singh (Crew #101)', 
+    crewNumber: '101',
     role: 'worker', 
     verificationCode: 'WRK-101',
+    assignedWard: 'Ward G/South - Dadar & Elphinstone',
+    vehicleType: 'Heavy Hydraulic Compactor (10T)',
+    vehicleRegistration: 'MH-01-GA-4401',
+    shiftStatus: 'active',
     lastKnownLat: 19.0200,
     lastKnownLng: 72.8350,
     lastLocationUpdatedAt: Date.now() - 120000
+  },
+  { 
+    id: 'usr-7', 
+    email: 'crew102@cleanward.org', 
+    pass: 'demo123', 
+    name: 'Sunita Devi (Crew #102)', 
+    crewNumber: '102',
+    role: 'worker', 
+    verificationCode: 'WRK-102',
+    assignedWard: 'Ward H/West - Bandra Residential',
+    vehicleType: 'Electric Multi-Bin Tipper Auto (1.5T)',
+    vehicleRegistration: 'MH-02-EV-1088',
+    shiftStatus: 'active',
+    lastKnownLat: 19.0595,
+    lastKnownLng: 72.8295,
+    lastLocationUpdatedAt: Date.now() - 180000
+  },
+  { 
+    id: 'usr-8', 
+    email: 'crew103@cleanward.org', 
+    pass: 'demo123', 
+    name: 'Amit Verma (Crew #103)', 
+    crewNumber: '103',
+    role: 'worker', 
+    verificationCode: 'WRK-103',
+    assignedWard: 'Ward K/East - Andheri Industrial Estate',
+    vehicleType: 'Biomedical Closed-Chamber Van (2T)',
+    vehicleRegistration: 'MH-03-HA-0912',
+    shiftStatus: 'active',
+    lastKnownLat: 19.1136,
+    lastKnownLng: 72.8697,
+    lastLocationUpdatedAt: Date.now() - 240000
+  },
+  { 
+    id: 'usr-9', 
+    email: 'crew104@cleanward.org', 
+    pass: 'demo123', 
+    name: 'Harish Kumar (Crew #104)', 
+    crewNumber: '104',
+    role: 'worker', 
+    verificationCode: 'WRK-104',
+    assignedWard: 'Ward S - Powai Lake & Tech Enclave',
+    vehicleType: 'C&D Debris Hydraulic Dumper (14T)',
+    vehicleRegistration: 'MH-04-CD-5501',
+    shiftStatus: 'active',
+    lastKnownLat: 19.1255,
+    lastKnownLng: 72.9120,
+    lastLocationUpdatedAt: Date.now() - 300000
+  },
+  { 
+    id: 'usr-10', 
+    email: 'crew105@cleanward.org', 
+    pass: 'demo123', 
+    name: 'Sachin Kamble (Crew #105)', 
+    crewNumber: '105',
+    role: 'worker', 
+    verificationCode: 'WRK-105',
+    assignedWard: 'Ward R/Central - Borivali West',
+    vehicleType: 'Mini Tipper E-Rickshaw (0.8T)',
+    vehicleRegistration: 'MH-02-ET-5055',
+    shiftStatus: 'off-shift',
+    lastKnownLat: 19.2307,
+    lastKnownLng: 72.8567,
+    lastLocationUpdatedAt: Date.now() - 3600000
   },
   { 
     id: 'usr-5', 
@@ -153,9 +227,55 @@ const SEED_REPORTS = [
     severity: 'overflowing',
     notes: 'Plastic packaging spillage blocking pedestrian footpath.',
     isEmergency: false,
-    status: 'reported',
+    status: 'assigned',
+    assignedWorkerId: 'usr-4',
+    assignedWorkerName: 'Rajesh Singh (Crew #101)',
     createdAt: Date.now() - 45 * 60 * 1000,
     duplicateCount: 1,
+    isEscalated: false
+  },
+  {
+    id: 'EMG-401',
+    userId: 'usr-1',
+    userName: 'Ananya Sharma',
+    userRole: 'citizen',
+    area: 'Ward G/South - Dadar & Elphinstone',
+    coords: { lat: 19.0190, lng: 72.8420 },
+    latitude: 19.0190,
+    longitude: 72.8420,
+    landmark: 'Dadar Station Road Chemical Hazard Point',
+    resolvedAddress: 'Near Dadar Station East Exit, Ward G/South',
+    category: 'chemical',
+    severity: 'emergency',
+    notes: 'Corrosive industrial battery leakage spreading on pavement.',
+    isEmergency: true,
+    status: 'assigned',
+    assignedWorkerId: 'usr-4',
+    assignedWorkerName: 'Rajesh Singh (Crew #101)',
+    createdAt: Date.now() - 15 * 60 * 1000,
+    duplicateCount: 0,
+    isEscalated: false
+  },
+  {
+    id: 'REP-1004',
+    userId: 'usr-1',
+    userName: 'Ananya Sharma',
+    userRole: 'citizen',
+    area: 'Ward G/South - Dadar & Elphinstone',
+    coords: { lat: 19.0168, lng: 72.8300 },
+    latitude: 19.0168,
+    longitude: 72.8300,
+    landmark: 'Siddhivinayak Temple Perimeter Bins',
+    resolvedAddress: 'SK Bole Marg, Prabhadevi / Dadar, Ward G/South',
+    category: 'organic',
+    severity: 'full',
+    notes: 'Flower offerings and coconut husk bio-waste accumulating.',
+    isEmergency: false,
+    status: 'assigned',
+    assignedWorkerId: 'usr-4',
+    assignedWorkerName: 'Rajesh Singh (Crew #101)',
+    createdAt: Date.now() - 50 * 60 * 1000,
+    duplicateCount: 0,
     isEscalated: false
   },
   {
@@ -174,38 +294,55 @@ const SEED_REPORTS = [
     notes: 'Dry leaves and organic bins filled after morning sweep.',
     isEmergency: false,
     status: 'assigned',
-    assignedWorkerId: 'usr-4',
-    assignedWorkerName: 'Rajesh Singh (Crew #101)',
+    assignedWorkerId: 'usr-7',
+    assignedWorkerName: 'Sunita Devi (Crew #102)',
     createdAt: Date.now() - (26 * 60 * 60 * 1000),
     assignedAt: Date.now() - (25 * 60 * 60 * 1000),
     duplicateCount: 2,
     isEscalated: true
   },
   {
-    id: 'BULK-2001',
-    userId: 'usr-2',
-    userName: 'Bombay Scottish School, Powai',
-    institutionType: 'school',
-    schoolName: 'Bombay Scottish School, Powai',
-    branchId: 'br-dps-main',
-    branchName: 'Powai Senior Campus',
-    userRole: 'institution',
-    area: 'Ward S - Powai Lake & Tech Enclave',
-    coords: { lat: 19.1250, lng: 72.9150 },
-    latitude: 19.1250,
-    longitude: 72.9150,
-    landmark: 'School Cafeteria Loading Dock',
-    resolvedAddress: 'Plot 4 Technology Corridor, Powai, Ward S',
-    category: 'commercial_food',
+    id: 'REP-1005',
+    userId: 'usr-1',
+    userName: 'Ananya Sharma',
+    userRole: 'citizen',
+    area: 'Ward H/West - Bandra Residential',
+    coords: { lat: 19.0620, lng: 72.8270 },
+    latitude: 19.0620,
+    longitude: 72.8270,
+    landmark: 'Pali Hill Market Dry Waste Point',
+    resolvedAddress: 'Nargis Dutt Road, Pali Hill, Bandra West, Ward H/West',
+    category: 'plastic',
     severity: 'overflowing',
-    notes: 'Bulk organic food waste from annual school environmental assembly.',
-    isBulk: true,
-    volumeKg: 350,
-    containerCount: 5,
+    notes: 'Recyclable packaging from weekend organic food stalls.',
     isEmergency: false,
-    status: 'reported',
-    createdAt: Date.now() - 30 * 60 * 1000,
+    status: 'assigned',
+    assignedWorkerId: 'usr-7',
+    assignedWorkerName: 'Sunita Devi (Crew #102)',
+    createdAt: Date.now() - 80 * 60 * 1000,
     duplicateCount: 1,
+    isEscalated: false
+  },
+  {
+    id: 'EMG-402',
+    userId: 'usr-1',
+    userName: 'Ananya Sharma',
+    userRole: 'citizen',
+    area: 'Ward H/West - Bandra Residential',
+    coords: { lat: 19.0550, lng: 72.8340 },
+    latitude: 19.0550,
+    longitude: 72.8340,
+    landmark: 'Bandra Polyclinic Alleyway',
+    resolvedAddress: 'Waterfield Road Lane 3, Bandra West, Ward H/West',
+    category: 'biomedical',
+    severity: 'emergency',
+    notes: 'Illegal dumping of clinic syringes and biohazard bags.',
+    isEmergency: true,
+    status: 'assigned',
+    assignedWorkerId: 'usr-7',
+    assignedWorkerName: 'Sunita Devi (Crew #102)',
+    createdAt: Date.now() - 20 * 60 * 1000,
+    duplicateCount: 0,
     isEscalated: false
   },
   {
@@ -232,11 +369,194 @@ const SEED_REPORTS = [
     containerCount: 6,
     isEmergency: false,
     status: 'assigned',
-    assignedWorkerId: 'usr-4',
-    assignedWorkerName: 'Rajesh Singh (Crew #101)',
+    assignedWorkerId: 'usr-8',
+    assignedWorkerName: 'Amit Verma (Crew #103)',
     createdAt: Date.now() - 60 * 60 * 1000,
     assignedAt: Date.now() - 40 * 60 * 1000,
     duplicateCount: 1,
+    isEscalated: false
+  },
+  {
+    id: 'REP-1006',
+    userId: 'usr-1',
+    userName: 'Ananya Sharma',
+    userRole: 'citizen',
+    area: 'Ward K/East - Andheri Industrial Estate',
+    coords: { lat: 19.1110, lng: 72.8610 },
+    latitude: 19.1110,
+    longitude: 72.8610,
+    landmark: 'Chakala Metro Station Footbridge Bin',
+    resolvedAddress: 'Andheri-Kurla Road, Chakala, Ward K/East',
+    category: 'plastic',
+    severity: 'overflowing',
+    notes: 'Litter accumulation along metro entry stairway.',
+    isEmergency: false,
+    status: 'assigned',
+    assignedWorkerId: 'usr-8',
+    assignedWorkerName: 'Amit Verma (Crew #103)',
+    createdAt: Date.now() - 75 * 60 * 1000,
+    duplicateCount: 0,
+    isEscalated: false
+  },
+  {
+    id: 'EMG-403',
+    userId: 'usr-1',
+    userName: 'Ananya Sharma',
+    userRole: 'citizen',
+    area: 'Ward K/East - Andheri Industrial Estate',
+    coords: { lat: 19.1180, lng: 72.8750 },
+    latitude: 19.1180,
+    longitude: 72.8750,
+    landmark: 'Marol Pipeline Road Industrial Junction',
+    resolvedAddress: 'Marol Pipeline Rd, Andheri East, Ward K/East',
+    category: 'chemical',
+    severity: 'emergency',
+    notes: 'Hazardous solvent barrel punctured; chemical runoff approaching storm drain.',
+    isEmergency: true,
+    status: 'assigned',
+    assignedWorkerId: 'usr-8',
+    assignedWorkerName: 'Amit Verma (Crew #103)',
+    createdAt: Date.now() - 10 * 60 * 1000,
+    duplicateCount: 0,
+    isEscalated: false
+  },
+  {
+    id: 'BULK-2001',
+    userId: 'usr-2',
+    userName: 'Bombay Scottish School, Powai',
+    institutionType: 'school',
+    schoolName: 'Bombay Scottish School, Powai',
+    branchId: 'br-dps-main',
+    branchName: 'Powai Senior Campus',
+    userRole: 'institution',
+    area: 'Ward S - Powai Lake & Tech Enclave',
+    coords: { lat: 19.1250, lng: 72.9150 },
+    latitude: 19.1250,
+    longitude: 72.9150,
+    landmark: 'School Cafeteria Loading Dock',
+    resolvedAddress: 'Plot 4 Technology Corridor, Powai, Ward S',
+    category: 'commercial_food',
+    severity: 'overflowing',
+    notes: 'Bulk organic food waste from annual school environmental assembly.',
+    isBulk: true,
+    volumeKg: 350,
+    containerCount: 5,
+    isEmergency: false,
+    status: 'assigned',
+    assignedWorkerId: 'usr-9',
+    assignedWorkerName: 'Harish Kumar (Crew #104)',
+    createdAt: Date.now() - 30 * 60 * 1000,
+    duplicateCount: 1,
+    isEscalated: false
+  },
+  {
+    id: 'REP-1007',
+    userId: 'usr-1',
+    userName: 'Ananya Sharma',
+    userRole: 'citizen',
+    area: 'Ward S - Powai Lake & Tech Enclave',
+    coords: { lat: 19.1190, lng: 72.9080 },
+    latitude: 19.1190,
+    longitude: 72.9080,
+    landmark: 'Hiranandani Gardens Central Avenue Bins',
+    resolvedAddress: 'Central Ave, Hiranandani Gardens, Powai, Ward S',
+    category: 'plastic',
+    severity: 'full',
+    notes: 'E-commerce delivery carton packaging overflowing community cage.',
+    isEmergency: false,
+    status: 'assigned',
+    assignedWorkerId: 'usr-9',
+    assignedWorkerName: 'Harish Kumar (Crew #104)',
+    createdAt: Date.now() - 95 * 60 * 1000,
+    duplicateCount: 0,
+    isEscalated: false
+  },
+  {
+    id: 'EMG-404',
+    userId: 'usr-1',
+    userName: 'Ananya Sharma',
+    userRole: 'citizen',
+    area: 'Ward S - Powai Lake & Tech Enclave',
+    coords: { lat: 19.1280, lng: 72.9050 },
+    latitude: 19.1280,
+    longitude: 72.9050,
+    landmark: 'Powai Lake Promenade Storm Drain',
+    resolvedAddress: 'JVLR Promenade near IIT Gate, Powai, Ward S',
+    category: 'construction_debris',
+    severity: 'emergency',
+    notes: 'Illegal masonry debris dumping blocking natural storm water runoff during rain alert.',
+    isEmergency: true,
+    status: 'assigned',
+    assignedWorkerId: 'usr-9',
+    assignedWorkerName: 'Harish Kumar (Crew #104)',
+    createdAt: Date.now() - 25 * 60 * 1000,
+    duplicateCount: 0,
+    isEscalated: false
+  },
+  {
+    id: 'REP-1008',
+    userId: 'usr-1',
+    userName: 'Ananya Sharma',
+    userRole: 'citizen',
+    area: 'Ward R/Central - Borivali West',
+    coords: { lat: 19.2295, lng: 72.8570 },
+    latitude: 19.2295,
+    longitude: 72.8570,
+    landmark: 'Borivali Railway Station West Exit',
+    resolvedAddress: 'Station Road West, Borivali West, Ward R/Central',
+    category: 'plastic',
+    severity: 'overflowing',
+    notes: 'Single-use snack wrappers and plastic bottles surrounding ticket counter entrance.',
+    isEmergency: false,
+    status: 'assigned',
+    assignedWorkerId: 'usr-10',
+    assignedWorkerName: 'Sachin Kamble (Crew #105)',
+    createdAt: Date.now() - 110 * 60 * 1000,
+    duplicateCount: 2,
+    isEscalated: false
+  },
+  {
+    id: 'REP-1009',
+    userId: 'usr-1',
+    userName: 'Ananya Sharma',
+    userRole: 'citizen',
+    area: 'Ward R/Central - Borivali West',
+    coords: { lat: 19.2340, lng: 72.8520 },
+    latitude: 19.2340,
+    longitude: 72.8520,
+    landmark: 'Shimpoli Road Vegetable Market Organic Drop-off',
+    resolvedAddress: 'Shimpoli Rd, Borivali West, Ward R/Central',
+    category: 'organic',
+    severity: 'full',
+    notes: 'Vegetable trimmings and wholesale crate greens ready for compost transit.',
+    isEmergency: false,
+    status: 'assigned',
+    assignedWorkerId: 'usr-10',
+    assignedWorkerName: 'Sachin Kamble (Crew #105)',
+    createdAt: Date.now() - 140 * 60 * 1000,
+    duplicateCount: 0,
+    isEscalated: false
+  },
+  {
+    id: 'EMG-405',
+    userId: 'usr-1',
+    userName: 'Ananya Sharma',
+    userRole: 'citizen',
+    area: 'Ward R/Central - Borivali West',
+    coords: { lat: 19.2380, lng: 72.8460 },
+    latitude: 19.2380,
+    longitude: 72.8460,
+    landmark: 'Gorai Creek Bridge Access Road',
+    resolvedAddress: 'Gorai Rd near Creek Gate, Borivali West, Ward R/Central',
+    category: 'hazardous',
+    severity: 'emergency',
+    notes: 'Overturned industrial grease drum blocking one lane of vehicular traffic.',
+    isEmergency: true,
+    status: 'assigned',
+    assignedWorkerId: 'usr-10',
+    assignedWorkerName: 'Sachin Kamble (Crew #105)',
+    createdAt: Date.now() - 18 * 60 * 1000,
+    duplicateCount: 0,
     isEscalated: false
   }
 ];
@@ -314,23 +634,33 @@ const SEED_COMPLIANCE_METRICS = [
 ];
 
 const SEED_FLEET = [
-  { id: 'FLT-CT-401', type: 'Heavy Hydraulic Compactor (10T)', regNo: 'MH-01-GA-4401', ward: 'Ward G/South - Dadar & Elphinstone', driver: 'Rajesh Singh', driverId: 'usr-4', contact: '+91 98112-40192', capacityTon: 10.0, currentPayloadTon: 7.8, fuelPercent: 84, status: 'Active Collection', icon: '🚛', lastKnownLat: 19.0200, lastKnownLng: 72.8350, lastLocationUpdatedAt: Date.now() - 120000 },
-  { id: 'FLT-ET-108', type: 'Electric Multi-Bin Tipper Auto (1.5T)', regNo: 'MH-02-EV-1088', ward: 'Ward H/West - Bandra Residential', driver: 'Sunita Devi', contact: '+91 98711-20984', capacityTon: 1.5, currentPayloadTon: 1.35, fuelPercent: 68, status: 'Transfer Station Transit', icon: '🛺' },
-  { id: 'FLT-BM-09', type: 'Biomedical Closed-Chamber Van (2T)', regNo: 'MH-03-HA-0912', ward: 'Ward K/East - Andheri Industrial Estate', driver: 'Amit Verma', contact: '+91 98104-55120', capacityTon: 2.0, currentPayloadTon: 0.7, fuelPercent: 92, status: 'En Route to CBWTF', icon: '🚐' },
-  { id: 'FLT-CD-550', type: 'C&D Debris Hydraulic Dumper (14T)', regNo: 'MH-04-CD-5501', ward: 'Ward S - Powai Lake & Tech Enclave', driver: 'Harish Kumar', contact: '+91 98119-33829', capacityTon: 14.0, currentPayloadTon: 8.4, fuelPercent: 76, status: 'Active Route', icon: '🚜' }
+  { id: 'FLT-CT-401', type: 'Heavy Hydraulic Compactor (10T)', regNo: 'MH-01-GA-4401', ward: 'Ward G/South - Dadar & Elphinstone', driver: 'Rajesh Singh (Crew #101)', driverId: 'usr-4', contact: '+91 98112-40192', capacityTon: 10.0, currentPayloadTon: 7.8, fuelPercent: 84, status: 'Active Collection', icon: '🚛', lastKnownLat: 19.0200, lastKnownLng: 72.8350, lastLocationUpdatedAt: Date.now() - 120000 },
+  { id: 'FLT-ET-108', type: 'Electric Multi-Bin Tipper Auto (1.5T)', regNo: 'MH-02-EV-1088', ward: 'Ward H/West - Bandra Residential', driver: 'Sunita Devi (Crew #102)', driverId: 'usr-7', contact: '+91 98711-20984', capacityTon: 1.5, currentPayloadTon: 1.35, fuelPercent: 68, status: 'Active Collection', icon: '🛺', lastKnownLat: 19.0595, lastKnownLng: 72.8295, lastLocationUpdatedAt: Date.now() - 180000 },
+  { id: 'FLT-BM-09', type: 'Biomedical Closed-Chamber Van (2T)', regNo: 'MH-03-HA-0912', ward: 'Ward K/East - Andheri Industrial Estate', driver: 'Amit Verma (Crew #103)', driverId: 'usr-8', contact: '+91 98104-55120', capacityTon: 2.0, currentPayloadTon: 0.7, fuelPercent: 92, status: 'Active Collection', icon: '🚐', lastKnownLat: 19.1136, lastKnownLng: 72.8697, lastLocationUpdatedAt: Date.now() - 240000 },
+  { id: 'FLT-CD-550', type: 'C&D Debris Hydraulic Dumper (14T)', regNo: 'MH-04-CD-5501', ward: 'Ward S - Powai Lake & Tech Enclave', driver: 'Harish Kumar (Crew #104)', driverId: 'usr-9', contact: '+91 98119-33829', capacityTon: 14.0, currentPayloadTon: 8.4, fuelPercent: 76, status: 'Active Collection', icon: '🚜', lastKnownLat: 19.1255, lastKnownLng: 72.9120, lastLocationUpdatedAt: Date.now() - 300000 },
+  { id: 'FLT-MR-505', type: 'Mini Tipper E-Rickshaw (0.8T)', regNo: 'MH-02-ET-5055', ward: 'Ward R/Central - Borivali West', driver: 'Sachin Kamble (Crew #105)', driverId: 'usr-10', contact: '+91 98200-88411', capacityTon: 0.8, currentPayloadTon: 0.2, fuelPercent: 95, status: 'Idle / Off-Shift', icon: '🛺', lastKnownLat: 19.2307, lastKnownLng: 72.8567, lastLocationUpdatedAt: Date.now() - 3600000 }
 ];
 
 let currentUser = null;
 let citizenFilter = 'all';
 
 function initDataStores() {
-  if (!localStorage.getItem('swm_users')) localStorage.setItem('swm_users', JSON.stringify(SEED_USERS));
-  if (!localStorage.getItem('swm_reports')) localStorage.setItem('swm_reports', JSON.stringify(SEED_REPORTS));
+  const storedUsers = localStorage.getItem('swm_users');
+  if (!storedUsers || !storedUsers.includes('crew105')) {
+    localStorage.setItem('swm_users', JSON.stringify(SEED_USERS));
+  }
+  const storedReports = localStorage.getItem('swm_reports');
+  if (!storedReports || !storedReports.includes('EMG-405')) {
+    localStorage.setItem('swm_reports', JSON.stringify(SEED_REPORTS));
+  }
+  const storedFleet = localStorage.getItem('swm_fleet');
+  if (!storedFleet || !storedFleet.includes('FLT-MR-505')) {
+    localStorage.setItem('swm_fleet', JSON.stringify(SEED_FLEET));
+  }
   if (!localStorage.getItem('swm_hospital_reports')) localStorage.setItem('swm_hospital_reports', JSON.stringify(SEED_HOSPITAL_REPORTS));
   if (!localStorage.getItem('swm_hospital_staff')) localStorage.setItem('swm_hospital_staff', JSON.stringify(SEED_HOSPITAL_STAFF));
   if (!localStorage.getItem('swm_redemptions')) localStorage.setItem('swm_redemptions', JSON.stringify(SEED_REDEMPTIONS));
   if (!localStorage.getItem('swm_compliance_metrics')) localStorage.setItem('swm_compliance_metrics', JSON.stringify(SEED_COMPLIANCE_METRICS));
-  if (!localStorage.getItem('swm_fleet')) localStorage.setItem('swm_fleet', JSON.stringify(SEED_FLEET));
   if (!localStorage.getItem('swm_broadcasts')) localStorage.setItem('swm_broadcasts', JSON.stringify([
     {
       id: 'BC-101',
@@ -694,9 +1024,14 @@ function demoSwitchRole(role) {
     company: 'infosys@campus.org',
     hospital: 'citycare@hospital.org',
     worker: 'crew101@cleanward.org',
+    worker101: 'crew101@cleanward.org',
+    worker102: 'crew102@cleanward.org',
+    worker103: 'crew103@cleanward.org',
+    worker104: 'crew104@cleanward.org',
+    worker105: 'crew105@cleanward.org',
     admin: 'admin@citygov.org'
   };
-  const targetEmail = roleEmailMap[role] || 'citizen@ecoclear.org';
+  const targetEmail = roleEmailMap[role] || (role && role.includes('@') ? role : 'citizen@ecoclear.org');
   const users = getUsers();
   const found = users.find(u => u.email.toLowerCase() === targetEmail.toLowerCase() || u.role === role);
   if (found) setCurrentUser(found);
@@ -1143,6 +1478,15 @@ function renderCitizenDashboard() {
         isEscalated: false
       };
 
+      if (!navigator.onLine) {
+        queueOfflineReport(newReport);
+        alert('📡 You are currently offline. Report has been saved to your local offline queue and will sync automatically once connection restores.');
+        citizenForm.reset();
+        selectSeverity('getting_full');
+        renderCitizenDashboard();
+        return;
+      }
+
       if (currentUser.priorityPickupCredits > 0) {
         currentUser.priorityPickupCredits--;
         let users = getUsers();
@@ -1161,7 +1505,8 @@ function renderCitizenDashboard() {
         saveReports(reports);
 
         awardCredits(5, 'Base Bin Report Submitted');
-        alert(hasPriorityPass ? '⚡ Priority Bin Report Submitted! +5 EcoCredits credited & pass consumed.' : 'Bin Report Submitted Successfully! +5 EcoCredits credited.');
+        processReferralBonusOnFirstReport(newReport);
+        alert(usedPriorityPass ? '⚡ Priority Bin Report Submitted! +5 EcoCredits credited & pass consumed.' : 'Bin Report Submitted Successfully! +5 EcoCredits credited.');
       }
 
       citizenForm.reset();
@@ -1170,6 +1515,10 @@ function renderCitizenDashboard() {
     };
   }
 
+  renderCitizenStreak();
+  renderCitizenReferralWidget();
+  setTimeout(() => initCitizenNearbyReportsMap(), 150);
+  checkOfflineQueueStatus();
   renderCitizenReportsFeed();
   renderRedemptionStore();
   renderMyRedemptionsList();
@@ -1696,6 +2045,7 @@ function renderInstitutionDashboard() {
   };
 
   renderInstitutionList();
+  renderInstitutionPeerBenchmark();
 }
 
 window.changeInstBranch = function(branchId) {
@@ -1884,6 +2234,7 @@ function renderHospitalDashboard() {
 
   renderHospitalLog();
   renderHospitalStaffTable();
+  renderHospitalPharmaExpiryTable();
 }
 
 window.validateBMWForm = function() {
@@ -1911,6 +2262,7 @@ window.updateHospitalHazardThreshold = function() {
   }
   currentUser.hazardThreshold = val;
   updateUserRecord(currentUser);
+  logAdminAction('Threshold Updated', currentUser?.name || 'Hospital Admin', `Biomedical hazard accumulation threshold adjusted to ${val} kg`);
   alert(`Hazard accumulation threshold updated to ${val} kg.`);
   renderHospitalDashboard();
 };
@@ -2085,7 +2437,9 @@ window.openStaffTrainingModal = function() {
    ========================================================================== */
 function renderWorkerDashboard() {
   evaluateEscalations();
+  renderWorkerSafetyChecklist();
   runSoftwareRouteOptimizer();
+  renderWorkerPhotoProofGallery();
 }
 
 function calcDistance(lat1, lon1, lat2, lon2) {
@@ -2122,15 +2476,63 @@ let activeWorkerTargetStopId = null;
 const PROXIMITY_THRESHOLD_METERS = 50;
 
 function runSoftwareRouteOptimizer() {
-  const reports = getReports().filter(r => r.status !== 'cleared');
+  const allReports = getReports();
+  const unclearedReports = allReports.filter(r => r.status !== 'cleared');
   const container = document.getElementById('workerRouteStopsList');
 
-  const unassigned = reports;
+  // 1. Update Assigned Vehicle & Crew Info Banner
+  const fleet = getFleet();
+  const myVehicle = fleet.find(f => f.driverId === currentUser?.id || f.driver === currentUser?.name || (currentUser?.name && f.driver && currentUser.name.includes(f.driver)) || (currentUser?.name && f.driver && f.driver.includes(currentUser.name))) || fleet[0];
+  const crewNum = currentUser?.crewNumber || currentUser?.name?.match(/Crew #?(\d+)/i)?.[1] || '101';
+
+  const crewElem = document.getElementById('workerCrewNumBanner');
+  const nameElem = document.getElementById('workerNameBanner');
+  const typeElem = document.getElementById('workerVehicleTypeBanner');
+  const regElem = document.getElementById('workerVehicleRegBanner');
+  const wardElem = document.getElementById('workerWardBanner');
+  if (crewElem) crewElem.textContent = `Crew #${crewNum}`;
+  if (nameElem) nameElem.textContent = currentUser?.name || 'Worker';
+  if (typeElem) typeElem.textContent = myVehicle ? myVehicle.type : 'Heavy Hydraulic Compactor (10T)';
+  if (regElem) regElem.textContent = myVehicle ? myVehicle.regNo : 'MH-01-GA-4401';
+  if (wardElem) wardElem.textContent = currentUser?.assignedWard || (myVehicle ? myVehicle.ward : 'Ward G/South - Dadar & Elphinstone');
+
+  // 2. Handle Shift Status (Active vs Off-Shift)
+  const shiftStatus = currentUser?.shiftStatus || 'active';
+  const shiftBtn = document.getElementById('workerShiftToggleBtn');
+  const shiftBadge = document.getElementById('workerShiftStatusBadge');
+  const shiftPrompt = document.getElementById('workerShiftInactivePrompt');
+  if (shiftBtn) {
+    if (shiftStatus === 'off-shift') {
+      shiftBtn.innerHTML = '🟢 Start Shift';
+      shiftBtn.className = 'btn btn-primary btn-sm';
+    } else {
+      shiftBtn.innerHTML = '⏸️ End Shift';
+      shiftBtn.className = 'btn btn-outline btn-sm';
+    }
+  }
+  if (shiftBadge) {
+    if (shiftStatus === 'off-shift') {
+      shiftBadge.textContent = '⏸️ Idle / Off-Shift';
+      shiftBadge.style.background = 'rgba(100, 116, 139, 0.4)';
+    } else {
+      shiftBadge.textContent = '🟢 On Shift - Active';
+      shiftBadge.style.background = 'rgba(16, 185, 129, 0.25)';
+    }
+  }
+  if (shiftPrompt) {
+    shiftPrompt.style.display = shiftStatus === 'off-shift' ? 'block' : 'none';
+  }
+
+  // 3. Filter stops for this specific worker
+  const myUncleared = unclearedReports.filter(r => r.assignedWorkerId === currentUser?.id || (currentUser?.name && r.assignedWorkerName && (r.assignedWorkerName.includes(currentUser.name) || currentUser.name.includes(r.assignedWorkerName))));
+  const unassignedWard = unclearedReports.filter(r => !r.assignedWorkerId && r.area === currentUser?.assignedWard);
+  const stopsToProcess = myUncleared.length > 0 ? myUncleared : (unassignedWard.length > 0 ? unassignedWard : unclearedReports);
+
+  const unassigned = stopsToProcess;
   const emergencyReports = unassigned.filter(r => r.isEmergency);
   const priorityPassReports = unassigned.filter(r => !r.isEmergency && r.isPriorityPickup);
-  const emergencyStops = emergencyReports;
   const priorityPickupStops = priorityPassReports;
-  const regularStops = unassigned.filter(r => !r.isEmergency && !r.isPriorityPickup);
+  const regularStops = stopsToProcess.filter(r => !r.isEmergency && !r.isPriorityPickup);
 
   let currentPos = { lat: workerCurrentPos.lat, lng: workerCurrentPos.lng };
 
@@ -2179,13 +2581,33 @@ function runSoftwareRouteOptimizer() {
   document.getElementById('workerAssignedCount').textContent = finalRoute.length;
   document.getElementById('workerEstDistance').textContent = `${totalDistanceKm.toFixed(1)} km`;
 
-  const totalAll = getReports().length;
-  const clearedAll = getReports().filter(r => r.status === 'cleared').length;
-  const rate = totalAll > 0 ? Math.round((clearedAll / totalAll) * 100) : 0;
-  document.getElementById('workerCompletionRate').textContent = `${rate}%`;
+  // 4. Update Today's Route Summary Card
+  const myAllStops = allReports.filter(r => r.assignedWorkerId === currentUser?.id || (currentUser?.name && r.assignedWorkerName && (r.assignedWorkerName.includes(currentUser.name) || currentUser.name.includes(r.assignedWorkerName))));
+  const totalAssignedToday = myAllStops.length > 0 ? myAllStops.length : finalRoute.length;
+  const completedToday = myAllStops.filter(r => r.status === 'cleared').length;
+  const remainingToday = finalRoute.length;
+  const completionRate = totalAssignedToday > 0 ? Math.round((completedToday / totalAssignedToday) * 100) : 0;
+
+  document.getElementById('workerCompletionRate').textContent = `${completionRate}%`;
+
+  const summaryTotalElem = document.getElementById('workerSummaryTotal');
+  const summaryCompletedElem = document.getElementById('workerSummaryCompleted');
+  const summaryRemainingElem = document.getElementById('workerSummaryRemaining');
+  const summaryEstDistElem = document.getElementById('workerSummaryEstDistance');
+  const summaryPctElem = document.getElementById('workerSummaryProgressPct');
+  const summaryBarElem = document.getElementById('workerSummaryProgressBar');
+
+  const estCoveredKm = (completedToday * 1.8).toFixed(1);
+
+  if (summaryTotalElem) summaryTotalElem.textContent = totalAssignedToday;
+  if (summaryCompletedElem) summaryCompletedElem.textContent = completedToday;
+  if (summaryRemainingElem) summaryRemainingElem.textContent = remainingToday;
+  if (summaryEstDistElem) summaryEstDistElem.textContent = `${estCoveredKm} km`;
+  if (summaryPctElem) summaryPctElem.textContent = `${completionRate}%`;
+  if (summaryBarElem) summaryBarElem.style.width = `${completionRate}%`;
 
   if (finalRoute.length === 0) {
-    container.innerHTML = `<div class="card" style="text-align: center; color: #64748b;">No active stops pending for your shift route.</div>`;
+    if (container) container.innerHTML = `<div class="card" style="text-align: center; color: #64748b;">No active stops pending for your shift route.</div>`;
     initWorkerRouteMap([]);
     return;
   }
@@ -2195,41 +2617,77 @@ function runSoftwareRouteOptimizer() {
     activeWorkerTargetStopId = finalRoute[0].id;
   }
 
-  container.innerHTML = finalRoute.map((stop, idx) => {
-    const isEmg = stop.isEmergency;
-    const isPriority = stop.isPriorityPickup;
-    const isTarget = stop.id === activeWorkerTargetStopId;
-    const originLabel = stop.userRole === 'institution'
-      ? (stop.institutionType === 'school' ? `🏫 ${stop.schoolName || stop.userName}` : `🏢 ${stop.companyName || stop.userName}`)
-      : `👤 Resident (${stop.userName})`;
+  if (container) {
+    container.innerHTML = finalRoute.map((stop, idx) => {
+      const isEmg = stop.isEmergency;
+      const isPriority = stop.isPriorityPickup;
+      const isTarget = stop.id === activeWorkerTargetStopId;
+      const originLabel = stop.userRole === 'institution'
+        ? (stop.institutionType === 'school' ? `🏫 ${stop.schoolName || stop.userName}` : `🏢 ${stop.companyName || stop.userName}`)
+        : `👤 Resident (${stop.userName})`;
 
-    return `
-      <div class="route-stop-card ${isEmg ? 'emergency' : ''} ${isTarget ? 'highlighted-target-stop' : ''}" data-report-id="${stop.id}" onclick="selectWorkerTargetStop('${stop.id}')" style="cursor: pointer; ${isPriority && !isEmg ? 'border-left: 4px solid var(--civic-signal-amber);' : ''}">
-        <div class="stop-number ${isEmg ? 'emergency-stop' : ''}">${isEmg ? '🚨' : idx + 1}</div>
-        <div style="flex: 1;">
-          <div class="report-meta">
-            <span class="badge badge-${stop.status}">${stop.status}</span>
-            ${isEmg ? `<span class="badge badge-emergency">TOP PRIORITY EMERGENCY</span>` : ''}
-            ${isPriority && !isEmg ? `<span class="badge" style="background: var(--civic-signal-amber-soft); color: var(--civic-signal-amber); font-weight: 800;">⚡ PRIORITY PICKUP PASS</span>` : ''}
-            <span>📍 ${stop.area || stop.wardZone}</span>
-            <span>Origin: <strong>${originLabel}</strong></span>
+      return `
+        <div class="route-stop-card ${isEmg ? 'emergency' : ''} ${isTarget ? 'highlighted-target-stop' : ''}" data-report-id="${stop.id}" onclick="selectWorkerTargetStop('${stop.id}')" style="cursor: pointer; ${isPriority && !isEmg ? 'border-left: 4px solid var(--civic-signal-amber);' : ''}">
+          <div class="stop-number ${isEmg ? 'emergency-stop' : ''}">${isEmg ? '🚨' : idx + 1}</div>
+          <div style="flex: 1;">
+            <div class="report-meta">
+              <span class="badge badge-${stop.status}">${stop.status}</span>
+              ${isEmg ? `<span class="badge badge-emergency">TOP PRIORITY EMERGENCY</span>` : ''}
+              ${isPriority && !isEmg ? `<span class="badge" style="background: var(--civic-signal-amber-soft); color: var(--civic-signal-amber); font-weight: 800;">⚡ PRIORITY PICKUP PASS</span>` : ''}
+              <span>📍 ${stop.area || stop.wardZone}</span>
+              <span>Origin: <strong>${originLabel}</strong></span>
+            </div>
+            <div style="font-weight: 700; font-size: 1.1rem;">${stop.landmark}</div>
+            <div style="font-size: 0.88rem; color: #556960;">${stop.notes || 'No extra notes.'}</div>
+            <div style="font-size: 0.78rem; font-family: monospace; color: #64748b; margin-top: 0.2rem;">Coordinates: Lat ${stop.latitude || stop.coords?.lat || 19.0760}, Lng ${stop.longitude || stop.coords?.lng || 72.8777}</div>
           </div>
-          <div style="font-weight: 700; font-size: 1.1rem;">${stop.landmark}</div>
-          <div style="font-size: 0.88rem; color: #556960;">${stop.notes || 'No extra notes.'}</div>
-          <div style="font-size: 0.78rem; font-family: monospace; color: #64748b; margin-top: 0.2rem;">Coordinates: Lat ${stop.latitude || stop.coords?.lat || 19.0760}, Lng ${stop.longitude || stop.coords?.lng || 72.8777}</div>
+          <div style="display: flex; flex-direction: column; gap: 0.4rem; align-items: flex-end;">
+            <button class="btn btn-outline btn-xs" onclick="event.stopPropagation(); selectWorkerTargetStop('${stop.id}')">🎯 Focus Stop</button>
+            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); openWorkerProofModal('${stop.id}')">📷 Mark Collected</button>
+          </div>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 0.4rem; align-items: flex-end;">
-          <button class="btn btn-outline btn-xs" onclick="event.stopPropagation(); selectWorkerTargetStop('${stop.id}')">🎯 Focus Stop</button>
-          <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); openWorkerProofModal('${stop.id}')">📷 Mark Collected</button>
-        </div>
-      </div>
-    `;
-  }).join('');
+      `;
+    }).join('');
+  }
 
   // Initialize and update Turn-by-Turn Leaflet Route Map
   initWorkerRouteMap(finalRoute);
   startWorkerGeolocationWatch(finalRoute);
 }
+
+window.toggleWorkerShift = function() {
+  if (!currentUser) return;
+  const currentStatus = currentUser.shiftStatus || 'active';
+  const newStatus = currentStatus === 'active' ? 'off-shift' : 'active';
+  currentUser.shiftStatus = newStatus;
+  updateUserRecord(currentUser);
+
+  // Update fleet
+  let fleet = getFleet();
+  const fIdx = fleet.findIndex(f => f.driverId === currentUser.id || f.driver === currentUser.name || (currentUser.name && f.driver && currentUser.name.includes(f.driver)));
+  if (fIdx !== -1) {
+    fleet[fIdx].status = newStatus === 'active' ? 'Active Collection' : 'Idle / Off-Shift';
+    saveFleet(fleet);
+  }
+
+  // Backend sync
+  if (isBackendConnected) {
+    fetch('/api/worker-shift', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ workerId: currentUser.id, shiftStatus: newStatus })
+    }).catch(() => {});
+  }
+
+  if (newStatus === 'off-shift' && workerWatchId) {
+    navigator.geolocation.clearWatch(workerWatchId);
+    workerWatchId = null;
+  }
+
+  logAdminAction('Shift Status Change', currentUser?.name || 'Worker', `Shift updated to ${newStatus === 'active' ? 'Active Collection' : 'Idle / Off-Shift'}`);
+  runSoftwareRouteOptimizer();
+  alert(newStatus === 'active' ? 'Shift started! GPS navigation and route optimization are now active.' : 'Shift ended. You are now marked as Idle / Off-Shift.');
+};
 
 function initWorkerRouteMap(finalRoute) {
   const mapElement = document.getElementById('workerRouteMap');
@@ -2412,11 +2870,13 @@ function updateWorkerNavigationGuidance(finalRoute) {
   const titleElem = document.getElementById('workerTargetStopTitle');
   const addrElem = document.getElementById('workerTargetStopAddress');
   const badgeElem = document.getElementById('workerTargetDistanceBadge');
+  const liveReadoutElem = document.getElementById('workerLiveDistanceReadout');
   const proximityElem = document.getElementById('workerProximityNotice');
 
   if (titleElem) titleElem.textContent = `Stop #${stopIdx + 1}: ${targetStop.landmark}`;
   if (addrElem) addrElem.textContent = `📍 ${targetStop.resolvedAddress || targetStop.area || 'Ward Target Point'}`;
   if (badgeElem) badgeElem.textContent = distMeters < 1000 ? `${distMeters} m` : `${distKm.toFixed(2)} km`;
+  if (liveReadoutElem) liveReadoutElem.textContent = distMeters < 1000 ? `${distMeters}m to next stop` : `${distKm.toFixed(2)}km to next stop`;
 
   const isNearby = distMeters <= PROXIMITY_THRESHOLD_METERS;
   if (proximityElem) proximityElem.style.display = isNearby ? 'block' : 'none';
@@ -2570,6 +3030,8 @@ function renderAdminDashboard() {
   renderAdminLogsTable();
   displayActiveBroadcasts();
   initAdminHotspotMap();
+  initAdminWorkerLocationsMap();
+  renderAdminAnalyticsCharts();
 }
 
 function renderAdminFeedTable(customReports) {
@@ -3364,11 +3826,71 @@ function initAdminHotspotMap() {
   });
 }
 
-/* Admin Live Worker Tracking Map Engine */
+/* ==========================================================================
+   Admin Live Worker Tracking Map Engine & Multi-Crew Optimization
+   ========================================================================== */
 let adminWorkerMapObj = null;
 let adminWorkerMarkers = [];
 let adminWorkerRouteLine = null;
 let adminWorkerRouteStopMarkers = [];
+let currentAdminWorkerFilter = 'all';
+let selectedMultiRouteWorkerIds = new Set();
+let adminMultiRoutePolylines = [];
+let adminMultiRouteMarkers = [];
+const MULTI_ROUTE_COLORS = ['#059669', '#1c52d8', '#7c3aed', '#d97706', '#e11d48', '#0891b2'];
+
+window.setAdminWorkerFilter = function(filter) {
+  currentAdminWorkerFilter = filter;
+  const chips = document.querySelectorAll('.admin-filter-chip');
+  chips.forEach(c => {
+    if (c.getAttribute('data-filter') === filter) {
+      c.classList.add('active');
+    } else {
+      c.classList.remove('active');
+    }
+  });
+  initAdminWorkerLocationsMap();
+};
+
+function renderFleetUtilizationSummary(workers, fleet, reports) {
+  const activeCount = workers.filter(w => {
+    const isOff = w.shiftStatus === 'off-shift' || (Date.now() - (w.lastLocationUpdatedAt || 0)) > 30 * 60 * 1000;
+    return !isOff;
+  }).length;
+  const idleCount = workers.length - activeCount;
+
+  let totalStops = 0;
+  workers.forEach(w => {
+    const stops = reports.filter(r => r.status !== 'cleared' && (r.assignedWorkerId === w.id || (w.name && r.assignedWorkerName && (r.assignedWorkerName.includes(w.name) || w.name.includes(r.assignedWorkerName)))));
+    totalStops += stops.length;
+  });
+  const avgStops = workers.length > 0 ? (totalStops / workers.length).toFixed(1) : '0.0';
+
+  const activeEl = document.getElementById('adminStatActiveCrews');
+  const idleEl = document.getElementById('adminStatIdleCrews');
+  const avgEl = document.getElementById('adminStatAvgStops');
+  const totalEl = document.getElementById('adminStatTotalUnits');
+
+  if (activeEl) activeEl.textContent = activeCount;
+  if (idleEl) idleEl.textContent = idleCount;
+  if (avgEl) avgEl.textContent = avgStops;
+  if (totalEl) totalEl.textContent = fleet.length;
+
+  const countAll = document.getElementById('adminFilterCountAll');
+  const countActive = document.getElementById('adminFilterCountActive');
+  const countIdle = document.getElementById('adminFilterCountIdle');
+  const countOnRoute = document.getElementById('adminFilterCountOnRoute');
+
+  const onRouteCount = workers.filter(w => {
+    const stops = reports.filter(r => r.status !== 'cleared' && (r.assignedWorkerId === w.id || (w.name && r.assignedWorkerName && (r.assignedWorkerName.includes(w.name) || w.name.includes(r.assignedWorkerName)))));
+    return stops.length > 0;
+  }).length;
+
+  if (countAll) countAll.textContent = workers.length;
+  if (countActive) countActive.textContent = activeCount;
+  if (countIdle) countIdle.textContent = idleCount;
+  if (countOnRoute) countOnRoute.textContent = onRouteCount;
+}
 
 function initAdminWorkerLocationsMap(forceRefresh) {
   const mapElement = document.getElementById('adminWorkerLocationsMap');
@@ -3394,30 +3916,59 @@ function initAdminWorkerLocationsMap(forceRefresh) {
   const fleet = getFleet();
   const reports = getReports().filter(r => r.status !== 'cleared');
 
-  workers.forEach(w => {
+  // Update Fleet Utilization Summary
+  renderFleetUtilizationSummary(workers, fleet, reports);
+
+  // Filter workers based on status filter
+  const filteredWorkers = workers.filter(w => {
+    const isIdle = w.shiftStatus === 'off-shift' || (Date.now() - (w.lastLocationUpdatedAt || 0)) > 30 * 60 * 1000;
+    const isActive = !isIdle;
+    const assignedStops = reports.filter(r => r.assignedWorkerId === w.id || (w.name && r.assignedWorkerName && (r.assignedWorkerName.includes(w.name) || w.name.includes(r.assignedWorkerName))));
+    const isOnRoute = assignedStops.length > 0;
+
+    if (currentAdminWorkerFilter === 'active') return isActive;
+    if (currentAdminWorkerFilter === 'idle') return isIdle;
+    if (currentAdminWorkerFilter === 'on_route') return isOnRoute;
+    return true; // 'all'
+  });
+
+  const countBadge = document.getElementById('adminFilteredWorkerCount');
+  if (countBadge) countBadge.textContent = `${filteredWorkers.length} Crews Shown`;
+
+  // Plot markers for filtered workers
+  filteredWorkers.forEach(w => {
     const lat = w.lastKnownLat || 19.0200;
     const lng = w.lastKnownLng || 72.8350;
     const vehicle = fleet.find(f => f.driverId === w.id || f.driver === w.name || (w.name && f.driver && w.name.includes(f.driver)) || (w.name && f.driver && f.driver.includes(w.name))) || fleet[0];
-    const assignedStops = reports.filter(r => r.assignedWorkerId === w.id || !r.assignedWorkerId);
-    const updatedStr = w.lastLocationUpdatedAt ? new Date(w.lastLocationUpdatedAt).toLocaleTimeString() : 'Just now';
+    const assignedStops = reports.filter(r => r.assignedWorkerId === w.id || (w.name && r.assignedWorkerName && (r.assignedWorkerName.includes(w.name) || w.name.includes(r.assignedWorkerName))));
+    const isIdle = w.shiftStatus === 'off-shift' || (Date.now() - (w.lastLocationUpdatedAt || 0)) > 30 * 60 * 1000;
+    const updatedStr = w.lastLocationUpdatedAt ? formatTimeAgo(w.lastLocationUpdatedAt) : 'Just now';
 
     const marker = L.marker([lat, lng], {
       icon: L.divIcon({
         className: 'custom-admin-worker-icon',
-        html: `<div class="admin-worker-marker" style="cursor: pointer;">👷 ${w.name.split(' ')[0]}</div>`,
-        iconSize: [90, 28],
-        iconAnchor: [45, 14]
+        html: `<div class="admin-worker-marker ${isIdle ? 'idle' : ''}" style="cursor: pointer;">${isIdle ? '⏸️' : '👷'} ${w.name.split(' ')[0]}</div>`,
+        iconSize: [95, 28],
+        iconAnchor: [47, 14]
       })
     }).addTo(adminWorkerMapObj);
 
     marker.bindPopup(`
-      <div style="min-width: 220px; font-family: var(--font-body);">
-        <h4 style="margin: 0 0 0.35rem 0; font-size: 1rem;">👷 ${w.name}</h4>
-        <div style="font-size: 0.78rem; color: #64748b;">Worker ID: <code>${w.id}</code></div>
-        <div style="font-size: 0.82rem; margin: 0.35rem 0;">🚛 Vehicle: <strong>${vehicle ? vehicle.type : 'Heavy Compactor'}</strong> (${vehicle ? vehicle.regNo : 'MH-01-GA-4401'})</div>
-        <div style="font-size: 0.82rem; margin-bottom: 0.35rem;">📋 Stops Remaining: <strong>${assignedStops.length}</strong></div>
-        <div style="font-size: 0.75rem; color: #64748b;">🕒 Last Updated: ${updatedStr}</div>
-        <button class="btn btn-primary btn-xs" style="width: 100%; margin-top: 0.5rem;" onclick="adminOverlayWorkerRoute('${w.id}')">🗺️ Overlay Assigned Route</button>
+      <div style="min-width: 240px; font-family: var(--font-body);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+          <h4 style="margin: 0; font-size: 1rem;">👷 ${w.name}</h4>
+          <span class="badge" style="font-size: 0.68rem; ${isIdle ? 'background: #64748b; color: #fff;' : 'background: rgba(16, 185, 129, 0.2); color: #047857;'}">
+            ${isIdle ? '⏸️ Idle / Off-Shift' : '🟢 Active Shift'}
+          </span>
+        </div>
+        <div style="font-size: 0.78rem; color: #64748b;">Crew ID: <code>${w.id}</code> (Crew #${w.crewNumber || '101'})</div>
+        <div style="font-size: 0.82rem; margin: 0.35rem 0;">🚛 Vehicle: <strong>${vehicle ? vehicle.type : 'Compactor'}</strong> (<code style="background: rgba(0,0,0,0.06); padding: 1px 4px; border-radius: 3px;">${vehicle ? vehicle.regNo : 'MH-01'}</code>)</div>
+        <div style="font-size: 0.82rem; margin-bottom: 0.35rem;">📋 Stops Remaining: <strong>${assignedStops.length}</strong> ${assignedStops.some(s => s.isEmergency) ? '<span style="color: #dc2626; font-weight: 800;">🚨 (Includes Emergency)</span>' : ''}</div>
+        <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 0.6rem;">🕒 Last Updated: ${updatedStr} &bull; Ward: ${w.assignedWard || 'Mumbai'}</div>
+        <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+          <button class="btn btn-primary btn-xs" style="width: 100%;" onclick="adminOverlayWorkerRoute('${w.id}')">🗺️ Overlay Assigned Route</button>
+          <button class="btn btn-outline btn-xs" style="width: 100%;" onclick="reassignNearestWorkerStop('${w.id}')">🔄 Reassign Nearest Stop</button>
+        </div>
       </div>
     `);
 
@@ -3428,10 +3979,275 @@ function initAdminWorkerLocationsMap(forceRefresh) {
     adminWorkerMarkers.push({ id: w.id, marker, worker: w });
   });
 
+  // Render Worker List Panel beside the map
+  const listPanel = document.getElementById('adminWorkerListPanel');
+  if (listPanel) {
+    if (filteredWorkers.length === 0) {
+      listPanel.innerHTML = `<div style="text-align: center; color: #64748b; padding: 1.5rem; font-size: 0.85rem;">No workers match the "${currentAdminWorkerFilter}" filter criteria.</div>`;
+    } else {
+      listPanel.innerHTML = filteredWorkers.map(w => {
+        const vehicle = fleet.find(f => f.driverId === w.id || f.driver === w.name || (w.name && f.driver && w.name.includes(f.driver)) || (w.name && f.driver && f.driver.includes(w.name))) || fleet[0];
+        const assignedStops = reports.filter(r => r.assignedWorkerId === w.id || (w.name && r.assignedWorkerName && (r.assignedWorkerName.includes(w.name) || w.name.includes(r.assignedWorkerName))));
+        const isIdle = w.shiftStatus === 'off-shift' || (Date.now() - (w.lastLocationUpdatedAt || 0)) > 30 * 60 * 1000;
+        const updatedStr = w.lastLocationUpdatedAt ? formatTimeAgo(w.lastLocationUpdatedAt) : 'Just now';
+        const hasEmg = assignedStops.some(s => s.isEmergency);
+
+        return `
+          <div class="admin-worker-card" data-worker-id="${w.id}" onclick="focusAdminWorkerMarker('${w.id}')">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.35rem;">
+              <div>
+                <strong style="font-size: 0.88rem; color: var(--civic-forest-ink);">${w.name}</strong>
+                <div style="font-size: 0.74rem; color: #64748b;">Crew #${w.crewNumber || '101'} &bull; ${w.assignedWard ? w.assignedWard.split('-')[1] || w.assignedWard : 'Mumbai'}</div>
+              </div>
+              <span class="badge" style="font-size: 0.68rem; ${isIdle ? 'background: #64748b; color: #fff;' : 'background: rgba(16, 185, 129, 0.2); color: #047857;'}">
+                ${isIdle ? '⏸️ Idle' : '🟢 Active'}
+              </span>
+            </div>
+
+            <div style="font-size: 0.78rem; color: #475569; margin-bottom: 0.35rem;">
+              🚛 ${vehicle ? vehicle.type : 'Vehicle'} (<code style="font-size: 0.72rem;">${vehicle ? vehicle.regNo : 'MH-01'}</code>)
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #64748b; margin-bottom: 0.5rem;">
+              <span>Stops: <strong style="color: ${hasEmg ? '#dc2626' : 'var(--civic-cobalt-accent)'};">${assignedStops.length} remaining</strong> ${hasEmg ? '🚨' : ''}</span>
+              <span>🕒 ${updatedStr}</span>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--civic-border); padding-top: 0.4rem;" onclick="event.stopPropagation();">
+              <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; cursor: pointer; color: var(--civic-forest-ink); font-weight: 700; margin: 0;">
+                <input type="checkbox" class="worker-compare-checkbox" ${selectedMultiRouteWorkerIds.has(w.id) ? 'checked' : ''} onchange="toggleWorkerMultiRouteCompare('${w.id}', this.checked)">
+                Compare Route
+              </label>
+              <button type="button" class="btn btn-outline btn-xs" onclick="focusAdminWorkerMarker('${w.id}')">📍 Focus Map</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
   setTimeout(() => {
     if (adminWorkerMapObj) adminWorkerMapObj.invalidateSize();
   }, 200);
 }
+
+window.focusAdminWorkerMarker = function(workerId) {
+  if (!adminWorkerMapObj) return;
+  const workers = getUsers().filter(u => u.role === 'worker');
+  const w = workers.find(x => x.id === workerId);
+  if (!w) return;
+  const lat = w.lastKnownLat || 19.0200;
+  const lng = w.lastKnownLng || 72.8350;
+
+  adminWorkerMapObj.setView([lat, lng], 14);
+
+  const found = adminWorkerMarkers.find(m => m.id === workerId);
+  if (found) {
+    found.marker.openPopup();
+  }
+
+  adminOverlayWorkerRoute(workerId);
+
+  // Highlight active row in panel
+  const cards = document.querySelectorAll('.admin-worker-card');
+  cards.forEach(c => {
+    if (c.getAttribute('data-worker-id') === workerId) {
+      c.classList.add('active-focused');
+      c.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else {
+      c.classList.remove('active-focused');
+    }
+  });
+};
+
+window.toggleWorkerMultiRouteCompare = function(workerId, isChecked) {
+  if (isChecked) {
+    selectedMultiRouteWorkerIds.add(workerId);
+  } else {
+    selectedMultiRouteWorkerIds.delete(workerId);
+  }
+  renderMultiWorkerRouteOverlays();
+};
+
+window.renderMultiWorkerRouteOverlays = function() {
+  if (!adminWorkerMapObj) return;
+
+  // Clear previous multi-route lines & markers
+  adminMultiRoutePolylines.forEach(p => p.remove());
+  adminMultiRoutePolylines = [];
+  adminMultiRouteMarkers.forEach(m => m.remove());
+  adminMultiRouteMarkers = [];
+
+  const legend = document.getElementById('adminMultiRouteLegend');
+  const legendItems = document.getElementById('adminMultiRouteLegendItems');
+
+  if (selectedMultiRouteWorkerIds.size === 0) {
+    if (legend) legend.style.display = 'none';
+    return;
+  }
+
+  if (legend) legend.style.display = 'block';
+  if (legendItems) legendItems.innerHTML = '';
+
+  const workers = getUsers().filter(u => u.role === 'worker');
+  const fleet = getFleet();
+  const allReports = getReports().filter(r => r.status !== 'cleared');
+
+  let colorIdx = 0;
+  const allBoundsCoords = [];
+
+  selectedMultiRouteWorkerIds.forEach(wId => {
+    const w = workers.find(usr => usr.id === wId);
+    if (!w) return;
+
+    const color = MULTI_ROUTE_COLORS[colorIdx % MULTI_ROUTE_COLORS.length];
+    colorIdx++;
+
+    const wLat = w.lastKnownLat || 19.0200;
+    const wLng = w.lastKnownLng || 72.8350;
+    const assignedStops = allReports.filter(r => r.assignedWorkerId === w.id || (w.name && r.assignedWorkerName && (r.assignedWorkerName.includes(w.name) || w.name.includes(r.assignedWorkerName))));
+
+    const pathCoords = [
+      [wLat, wLng],
+      ...assignedStops.map(s => [
+        s.latitude !== undefined ? s.latitude : (s.coords?.lat || 19.0760),
+        s.longitude !== undefined ? s.longitude : (s.coords?.lng || 72.8777)
+      ])
+    ];
+
+    allBoundsCoords.push(...pathCoords);
+
+    if (pathCoords.length > 1) {
+      const poly = L.polyline(pathCoords, {
+        color: color,
+        weight: 4,
+        opacity: 0.9,
+        dashArray: '6, 6'
+      }).addTo(adminWorkerMapObj);
+      adminMultiRoutePolylines.push(poly);
+    }
+
+    assignedStops.forEach((stop, idx) => {
+      const lat = stop.latitude !== undefined ? stop.latitude : (stop.coords?.lat || 19.0760);
+      const lng = stop.longitude !== undefined ? stop.longitude : (stop.coords?.lng || 72.8777);
+      const m = L.marker([lat, lng], {
+        icon: L.divIcon({
+          html: `<div style="background: ${color}; color: #fff; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 10px; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">${stop.isEmergency ? '🚨' : idx + 1}</div>`,
+          iconSize: [22, 22],
+          iconAnchor: [11, 11]
+        })
+      }).addTo(adminWorkerMapObj);
+      m.bindPopup(`<strong>${w.name.split(' ')[0]} - Stop #${idx + 1}: ${stop.landmark}</strong><br>Status: ${stop.status.toUpperCase()}<br>Ward: ${stop.area || stop.wardZone}`);
+      adminMultiRouteMarkers.push(m);
+    });
+
+    if (legendItems) {
+      const v = fleet.find(f => f.driverId === w.id || f.driver === w.name) || {};
+      const itemEl = document.createElement('span');
+      itemEl.className = 'multi-route-pill';
+      itemEl.innerHTML = `<span class="multi-route-swatch" style="background: ${color};"></span> <strong>${w.name}</strong> (${assignedStops.length} stops, ${v.type || 'Vehicle'})`;
+      legendItems.appendChild(itemEl);
+    }
+  });
+
+  if (allBoundsCoords.length > 1) {
+    adminWorkerMapObj.fitBounds(L.latLngBounds(allBoundsCoords), { padding: [35, 35] });
+  }
+};
+
+window.clearAllWorkerRouteOverlays = function() {
+  selectedMultiRouteWorkerIds.clear();
+  adminMultiRoutePolylines.forEach(p => p.remove());
+  adminMultiRoutePolylines = [];
+  adminMultiRouteMarkers.forEach(m => m.remove());
+  adminMultiRouteMarkers = [];
+
+  const legend = document.getElementById('adminMultiRouteLegend');
+  if (legend) legend.style.display = 'none';
+
+  clearAdminWorkerRouteOverlay();
+
+  const checkboxes = document.querySelectorAll('.worker-compare-checkbox');
+  checkboxes.forEach(cb => cb.checked = false);
+};
+
+window.reassignNearestWorkerStop = function(fromWorkerId) {
+  const workers = getUsers().filter(u => u.role === 'worker');
+  const fromWorker = workers.find(w => w.id === fromWorkerId) || workers[0];
+  if (!fromWorker) return;
+
+  let allReports = getReports();
+  const fromWorkerStops = allReports.filter(r => r.status !== 'cleared' && (r.assignedWorkerId === fromWorker.id || (fromWorker.name && r.assignedWorkerName && (r.assignedWorkerName.includes(fromWorker.name) || fromWorker.name.includes(r.assignedWorkerName)))));
+
+  if (fromWorkerStops.length === 0) {
+    alert(`Worker ${fromWorker.name} has no remaining stops to reassign.`);
+    return;
+  }
+
+  // Pick their next stop (prioritize emergency if any, else first stop)
+  const stopToReassign = fromWorkerStops.find(s => s.isEmergency) || fromWorkerStops[0];
+  const stopLat = stopToReassign.latitude !== undefined ? stopToReassign.latitude : (stopToReassign.coords?.lat || 19.0760);
+  const stopLng = stopToReassign.longitude !== undefined ? stopToReassign.longitude : (stopToReassign.coords?.lng || 72.8777);
+
+  // Find other workers
+  const otherWorkers = workers.filter(w => w.id !== fromWorker.id);
+  if (otherWorkers.length === 0) {
+    alert('No other municipal workers available for reassignment.');
+    return;
+  }
+
+  // Filter for active ones first
+  const activeOthers = otherWorkers.filter(w => {
+    const isOff = w.shiftStatus === 'off-shift' || (Date.now() - (w.lastLocationUpdatedAt || 0)) > 30 * 60 * 1000;
+    return !isOff;
+  });
+  const candidates = activeOthers.length > 0 ? activeOthers : otherWorkers;
+
+  let bestWorker = null;
+  let minDistanceKm = Infinity;
+
+  candidates.forEach(cand => {
+    const cLat = cand.lastKnownLat || 19.0760;
+    const cLng = cand.lastKnownLng || 72.8777;
+    const dist = calcDistance(stopLat, stopLng, cLat, cLng);
+    if (dist < minDistanceKm) {
+      minDistanceKm = dist;
+      bestWorker = cand;
+    }
+  });
+
+  if (!bestWorker) {
+    bestWorker = otherWorkers[0];
+    minDistanceKm = calcDistance(stopLat, stopLng, bestWorker.lastKnownLat || 19.0760, bestWorker.lastKnownLng || 72.8777);
+  }
+
+  // Reassign the stop
+  const repIdx = allReports.findIndex(r => r.id === stopToReassign.id);
+  if (repIdx !== -1) {
+    allReports[repIdx].assignedWorkerId = bestWorker.id;
+    allReports[repIdx].assignedWorkerName = bestWorker.name;
+    allReports[repIdx].assignedAt = Date.now();
+    saveReports(allReports);
+
+    addAuditLog('Admin', 'REASSIGN_NEAREST_STOP', `Manually reassigned stop ${stopToReassign.id} (${stopToReassign.landmark}) from ${fromWorker.name} to ${bestWorker.name} (${minDistanceKm.toFixed(2)} km away).`);
+
+    if (isBackendConnected) {
+      fetch('/api/reassign-stop', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reportId: stopToReassign.id, toWorkerId: bestWorker.id })
+      }).catch(() => {});
+    }
+
+    alert(`✅ Reassigned Stop #${stopToReassign.id} (${stopToReassign.landmark}) to nearest crew: ${bestWorker.name} (${minDistanceKm.toFixed(2)} km away)!\n\nRoutes and stop queues recalculated for both workers.`);
+
+    // Re-run route optimizer if current user is worker
+    runSoftwareRouteOptimizer();
+    // Refresh admin tracking map and list panel
+    initAdminWorkerLocationsMap();
+    if (adminWorkerMapObj) adminOverlayWorkerRoute(bestWorker.id);
+  }
+};
 
 window.adminOverlayWorkerRoute = function(workerId) {
   if (!adminWorkerMapObj) return;
@@ -3448,7 +4264,7 @@ window.adminOverlayWorkerRoute = function(workerId) {
   const fleet = getFleet();
   const vehicle = fleet.find(f => f.driverId === worker.id || f.driver === worker.name || (worker.name && f.driver && worker.name.includes(f.driver)) || (worker.name && f.driver && f.driver.includes(worker.name))) || fleet[0];
   const reports = getReports().filter(r => r.status !== 'cleared');
-  const assignedStops = reports.filter(r => r.assignedWorkerId === worker.id || !r.assignedWorkerId);
+  const assignedStops = reports.filter(r => r.assignedWorkerId === worker.id || (worker.name && r.assignedWorkerName && (r.assignedWorkerName.includes(worker.name) || worker.name.includes(r.assignedWorkerName))));
 
   // Draw overlay path connecting worker's location through their stops in order
   const pathCoords = [
@@ -3476,12 +4292,12 @@ window.adminOverlayWorkerRoute = function(workerId) {
     const lng = stop.longitude !== undefined ? stop.longitude : (stop.coords?.lng || 72.8777);
     const m = L.marker([lat, lng], {
       icon: L.divIcon({
-        html: `<div style="background: #059669; color: #fff; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">${idx + 1}</div>`,
+        html: `<div style="background: ${stop.isEmergency ? '#dc2626' : '#059669'}; color: #fff; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">${stop.isEmergency ? '🚨' : idx + 1}</div>`,
         iconSize: [22, 22],
         iconAnchor: [11, 11]
       })
     }).addTo(adminWorkerMapObj);
-    m.bindPopup(`<strong>Stop #${idx + 1}: ${stop.landmark}</strong><br>Status: ${stop.status.toUpperCase()}<br>Ward: ${stop.area || stop.wardZone}`);
+    m.bindPopup(`<strong>Stop #${idx + 1}: ${stop.landmark}</strong><br>Status: ${stop.status.toUpperCase()}<br>Ward: ${stop.area || stop.wardZone}<br><button class="btn btn-outline btn-xs" style="margin-top:0.35rem;" onclick="reassignNearestWorkerStop('${worker.id}')">🔄 Reassign Nearest</button>`);
     adminWorkerRouteStopMarkers.push(m);
   });
 
@@ -3497,7 +4313,8 @@ window.adminOverlayWorkerRoute = function(workerId) {
   if (listElem) {
     listElem.innerHTML = assignedStops.length === 0 
       ? 'No active pending stops assigned.'
-      : assignedStops.map((s, idx) => `<div style="padding: 0.25rem 0; border-bottom: 1px dashed var(--civic-border);"><strong>${idx + 1}.</strong> ${s.landmark} <span style="color: #64748b;">(${s.area || s.wardZone})</span></div>`).join('');
+      : `<div style="margin-bottom: 0.5rem;"><button type="button" class="btn btn-outline btn-xs" onclick="reassignNearestWorkerStop('${worker.id}')">🔄 Reassign Next Stop to Nearest Crew</button></div>` +
+        assignedStops.map((s, idx) => `<div style="padding: 0.25rem 0; border-bottom: 1px dashed var(--civic-border);"><strong>${idx + 1}.</strong> ${s.landmark} <span style="color: #64748b;">(${s.area || s.wardZone})</span> ${s.isEmergency ? '<span style="color: #dc2626; font-weight: 800;">🚨 EMERGENCY</span>' : ''}</div>`).join('');
   }
 };
 
@@ -3514,6 +4331,514 @@ window.clearAdminWorkerRouteOverlay = function() {
 
 window.renderAdminWorkerLocationsMap = function(forceRefresh) {
   initAdminWorkerLocationsMap(forceRefresh);
+};
+
+/* ==========================================================================
+   Visual Charts & Analytics Engine (Chart.js Role-Scoped Visualizations)
+   ========================================================================== */
+let citizenCreditBreakdownChartObj = null;
+let citizenReportStatusChartObj = null;
+let adminReportsOverTimeChartObj = null;
+let adminCategoryChartObj = null;
+let adminWardReportsChartObj = null;
+let adminWorkerPerformanceChartObj = null;
+let adminWorkerPerformanceChartEmbeddedObj = null;
+let adminStatusFunnelChartObj = null;
+let adminComplianceTrendChartObj = null;
+let adminComplianceTrendChartEmbeddedObj = null;
+
+function renderCitizenCreditBreakdownChart() {
+  const canvas = document.getElementById('citizenCreditBreakdownChart');
+  if (!canvas || typeof Chart === 'undefined') return;
+
+  if (citizenCreditBreakdownChartObj) {
+    citizenCreditBreakdownChartObj.destroy();
+    citizenCreditBreakdownChartObj = null;
+  }
+
+  const history = currentUser?.creditHistory || [];
+  let baseReports = 0;
+  let segregationBonuses = 0;
+  let emergencyTier = 0;
+  let welcomeBonus = 0;
+  let tierAdjustments = 0;
+
+  history.forEach(item => {
+    const reason = (item.reason || item.description || '').toLowerCase();
+    const amt = Math.abs(item.amount || item.credits || 0);
+    if (reason.includes('welcome') || reason.includes('signup')) welcomeBonus += amt;
+    else if (reason.includes('emergency')) emergencyTier += amt;
+    else if (reason.includes('segregat')) segregationBonuses += amt;
+    else if (reason.includes('adjust') || reason.includes('duplicate') || reason.includes('split')) tierAdjustments += amt;
+    else baseReports += amt;
+  });
+
+  if (baseReports + segregationBonuses + emergencyTier + welcomeBonus + tierAdjustments === 0) {
+    baseReports = 25;
+    segregationBonuses = 20;
+    emergencyTier = 25;
+    welcomeBonus = 10;
+    tierAdjustments = 5;
+  }
+
+  citizenCreditBreakdownChartObj = new Chart(canvas, {
+    type: 'doughnut',
+    data: {
+      labels: ['Base Reports', 'Segregation Bonus', 'Emergency Tier', 'Welcome Bonus', 'Tier Adjustments'],
+      datasets: [{
+        data: [baseReports, segregationBonuses, emergencyTier, welcomeBonus, tierAdjustments],
+        backgroundColor: ['#1c52d8', '#059669', '#dc2626', '#d97706', '#7c3aed'],
+        borderWidth: 1,
+        borderColor: '#ffffff'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
+      }
+    }
+  });
+}
+
+function renderCitizenReportStatusChart() {
+  const canvas = document.getElementById('citizenReportStatusChart');
+  if (!canvas || typeof Chart === 'undefined') return;
+
+  if (citizenReportStatusChartObj) {
+    citizenReportStatusChartObj.destroy();
+    citizenReportStatusChartObj = null;
+  }
+
+  const reports = getReports();
+  const myReports = reports.filter(r => r.userId === currentUser?.id || r.userName === currentUser?.name);
+
+  let reported = 0, assigned = 0, cleared = 0, escalated = 0;
+  if (myReports.length > 0) {
+    myReports.forEach(r => {
+      if (r.isEscalated) escalated++;
+      else if (r.status === 'cleared') cleared++;
+      else if (r.status === 'assigned') assigned++;
+      else reported++;
+    });
+  } else {
+    reported = 1; assigned = 2; cleared = 3; escalated = 1;
+  }
+
+  citizenReportStatusChartObj = new Chart(canvas, {
+    type: 'doughnut',
+    data: {
+      labels: ['Reported (Pending)', 'Assigned (In Route)', 'Cleared (Resolved)', 'Escalated (>24h)'],
+      datasets: [{
+        data: [reported, assigned, cleared, escalated],
+        backgroundColor: ['#94a3b8', '#1c52d8', '#059669', '#dc2626'],
+        borderWidth: 1,
+        borderColor: '#ffffff'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
+      }
+    }
+  });
+}
+
+function renderAdminReportsOverTimeChart() {
+  const canvas = document.getElementById('adminReportsOverTimeChart');
+  if (!canvas || typeof Chart === 'undefined') return;
+
+  if (adminReportsOverTimeChartObj) {
+    adminReportsOverTimeChartObj.destroy();
+    adminReportsOverTimeChartObj = null;
+  }
+
+  const reports = getReports();
+  const days = 14;
+  const labels = [];
+  const counts = new Array(days).fill(0);
+  const now = Date.now();
+  const dayMs = 24 * 60 * 60 * 1000;
+
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(now - i * dayMs);
+    labels.push(`${d.getDate()} ${d.toLocaleString('default', { month: 'short' })}`);
+  }
+
+  reports.forEach(r => {
+    const ageDays = Math.floor((now - (r.createdAt || now)) / dayMs);
+    if (ageDays >= 0 && ageDays < days) {
+      counts[days - 1 - ageDays]++;
+    }
+  });
+
+  const totalInCounts = counts.reduce((a, b) => a + b, 0);
+  let displayData = counts;
+  if (totalInCounts < 6) {
+    displayData = [2, 3, 1, 4, 3, 5, 4, 6, 5, 8, 7, 9, 8, reports.length || 15];
+  }
+
+  adminReportsOverTimeChartObj = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'City-Wide Incident Volume',
+        data: displayData,
+        borderColor: '#1c52d8',
+        backgroundColor: 'rgba(28, 82, 216, 0.12)',
+        fill: true,
+        tension: 0.35,
+        borderWidth: 2,
+        pointRadius: 3,
+        pointBackgroundColor: '#1c52d8'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+        x: { grid: { display: false } }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+}
+
+function renderAdminCategoryChart() {
+  const canvas = document.getElementById('adminCategoryChart');
+  if (!canvas || typeof Chart === 'undefined') return;
+
+  if (adminCategoryChartObj) {
+    adminCategoryChartObj.destroy();
+    adminCategoryChartObj = null;
+  }
+
+  const reports = getReports();
+  const catMap = {
+    'Plastic': 0,
+    'Organic': 0,
+    'Biomedical': 0,
+    'C&D Debris': 0,
+    'Office Paper': 0,
+    'Chemical/Hazardous': 0
+  };
+
+  reports.forEach(r => {
+    const c = (r.category || '').toLowerCase();
+    if (c.includes('plastic')) catMap['Plastic']++;
+    else if (c.includes('organic') || c.includes('food')) catMap['Organic']++;
+    else if (c.includes('biomedical') || c.includes('hospital')) catMap['Biomedical']++;
+    else if (c.includes('c_and_d') || c.includes('debris') || c.includes('construction')) catMap['C&D Debris']++;
+    else if (c.includes('paper')) catMap['Office Paper']++;
+    else catMap['Chemical/Hazardous']++;
+  });
+
+  adminCategoryChartObj = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: Object.keys(catMap),
+      datasets: [{
+        label: 'Reports by Waste Stream',
+        data: Object.values(catMap),
+        backgroundColor: ['#0891b2', '#059669', '#dc2626', '#d97706', '#2563eb', '#7c3aed'],
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+        x: { grid: { display: false } }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+}
+
+function renderAdminWardReportsChart() {
+  const canvas = document.getElementById('adminWardReportsChart');
+  if (!canvas || typeof Chart === 'undefined') return;
+
+  if (adminWardReportsChartObj) {
+    adminWardReportsChartObj.destroy();
+    adminWardReportsChartObj = null;
+  }
+
+  const reports = getReports();
+  const wardMap = {
+    'Ward G/South (Dadar)': 0,
+    'Ward H/West (Bandra)': 0,
+    'Ward K/East (Andheri)': 0,
+    'Ward S (Powai)': 0,
+    'Ward R/Central (Borivali)': 0,
+    'Ward A (Colaba)': 0
+  };
+
+  reports.forEach(r => {
+    const a = (r.area || r.wardZone || '').toLowerCase();
+    if (a.includes('dadar') || a.includes('g/south')) wardMap['Ward G/South (Dadar)']++;
+    else if (a.includes('bandra') || a.includes('h/west')) wardMap['Ward H/West (Bandra)']++;
+    else if (a.includes('andheri') || a.includes('k/east')) wardMap['Ward K/East (Andheri)']++;
+    else if (a.includes('powai') || a.includes('ward s')) wardMap['Ward S (Powai)']++;
+    else if (a.includes('borivali') || a.includes('r/central')) wardMap['Ward R/Central (Borivali)']++;
+    else wardMap['Ward A (Colaba)']++;
+  });
+
+  const sortedPairs = Object.entries(wardMap).sort((a, b) => b[1] - a[1]);
+
+  adminWardReportsChartObj = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: sortedPairs.map(p => p[0]),
+      datasets: [{
+        label: 'Complaint Reports',
+        data: sortedPairs.map(p => p[1]),
+        backgroundColor: '#059669',
+        borderRadius: 4
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+        y: { grid: { display: false } }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+}
+
+function renderAdminWorkerPerformanceChart() {
+  const canvases = [
+    document.getElementById('adminWorkerPerformanceChart'),
+    document.getElementById('adminWorkerPerformanceChartEmbedded')
+  ];
+
+  if (adminWorkerPerformanceChartObj) {
+    adminWorkerPerformanceChartObj.destroy();
+    adminWorkerPerformanceChartObj = null;
+  }
+  if (adminWorkerPerformanceChartEmbeddedObj) {
+    adminWorkerPerformanceChartEmbeddedObj.destroy();
+    adminWorkerPerformanceChartEmbeddedObj = null;
+  }
+
+  if (typeof Chart === 'undefined') return;
+
+  const workers = getUsers().filter(u => u.role === 'worker');
+  const allReports = getReports();
+
+  const labels = workers.map(w => w.name.split(' ')[0] + ' (' + (w.crewNumber ? '#' + w.crewNumber : 'Crew') + ')');
+  const clearedData = [];
+  const assignedData = [];
+
+  workers.forEach(w => {
+    const stops = allReports.filter(r => r.assignedWorkerId === w.id || (w.name && r.assignedWorkerName && (r.assignedWorkerName.includes(w.name) || w.name.includes(r.assignedWorkerName))));
+    const cleared = stops.filter(s => s.status === 'cleared').length;
+    const remaining = stops.filter(s => s.status !== 'cleared').length;
+    clearedData.push(cleared);
+    assignedData.push(remaining);
+  });
+
+  const chartConfig = {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Stops Cleared',
+          data: clearedData,
+          backgroundColor: '#059669',
+          borderRadius: 4
+        },
+        {
+          label: 'Stops Remaining',
+          data: assignedData,
+          backgroundColor: '#1c52d8',
+          borderRadius: 4
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+        x: { grid: { display: false } }
+      },
+      plugins: {
+        legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } }
+      }
+    }
+  };
+
+  if (canvases[0]) {
+    adminWorkerPerformanceChartObj = new Chart(canvases[0], chartConfig);
+  }
+  if (canvases[1]) {
+    adminWorkerPerformanceChartEmbeddedObj = new Chart(canvases[1], JSON.parse(JSON.stringify(chartConfig)));
+  }
+}
+
+function renderAdminStatusFunnelChart() {
+  const canvas = document.getElementById('adminStatusFunnelChart');
+  if (!canvas || typeof Chart === 'undefined') return;
+
+  if (adminStatusFunnelChartObj) {
+    adminStatusFunnelChartObj.destroy();
+    adminStatusFunnelChartObj = null;
+  }
+
+  const reports = getReports();
+  const reported = reports.filter(r => r.status === 'reported' && !r.isEscalated).length;
+  const assigned = reports.filter(r => r.status === 'assigned' && !r.isEscalated).length;
+  const cleared = reports.filter(r => r.status === 'cleared').length;
+  const escalated = reports.filter(r => r.isEscalated).length;
+
+  adminStatusFunnelChartObj = new Chart(canvas, {
+    type: 'doughnut',
+    data: {
+      labels: ['Reported (Pending)', 'Assigned (In Route)', 'Cleared (Sanitized)', 'Escalated (>24h SLA)'],
+      datasets: [{
+        data: [reported, assigned, cleared, escalated],
+        backgroundColor: ['#94a3b8', '#1c52d8', '#059669', '#dc2626'],
+        borderWidth: 1,
+        borderColor: '#ffffff'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11 } } }
+      }
+    }
+  });
+}
+
+function renderAdminComplianceTrendChart() {
+  const canvases = [
+    document.getElementById('adminComplianceTrendChart'),
+    document.getElementById('adminComplianceTrendChartEmbedded')
+  ];
+
+  if (adminComplianceTrendChartObj) {
+    adminComplianceTrendChartObj.destroy();
+    adminComplianceTrendChartObj = null;
+  }
+  if (adminComplianceTrendChartEmbeddedObj) {
+    adminComplianceTrendChartEmbeddedObj.destroy();
+    adminComplianceTrendChartEmbeddedObj = null;
+  }
+
+  if (typeof Chart === 'undefined') return;
+
+  const weeks = ['Wk 1', 'Wk 2', 'Wk 3', 'Wk 4', 'Wk 5', 'Wk 6 (Current)'];
+  const sbmTargetSegregation = [60, 60, 60, 60, 60, 60];
+  const sbmTargetCoverage = [80, 80, 80, 80, 80, 80];
+  const sbmTargetProcessing = [80, 80, 80, 80, 80, 80];
+
+  const actualSegregation = [52, 56, 59, 63, 67, 72];
+  const actualCoverage = [71, 75, 78, 83, 86, 90];
+  const actualProcessing = [66, 70, 72, 77, 80, 84];
+
+  const chartConfig = {
+    type: 'line',
+    data: {
+      labels: weeks,
+      datasets: [
+        {
+          label: 'Segregation Rate (%)',
+          data: actualSegregation,
+          borderColor: '#059669',
+          backgroundColor: '#059669',
+          borderWidth: 2,
+          pointRadius: 3,
+          tension: 0.3
+        },
+        {
+          label: 'SBM Segregation Target (60%)',
+          data: sbmTargetSegregation,
+          borderColor: '#059669',
+          borderDash: [6, 6],
+          borderWidth: 1.5,
+          pointRadius: 0,
+          fill: false
+        },
+        {
+          label: 'Door-to-Door Coverage (%)',
+          data: actualCoverage,
+          borderColor: '#1c52d8',
+          backgroundColor: '#1c52d8',
+          borderWidth: 2,
+          pointRadius: 3,
+          tension: 0.3
+        },
+        {
+          label: 'SBM Coverage Target (80%)',
+          data: sbmTargetCoverage,
+          borderColor: '#1c52d8',
+          borderDash: [6, 6],
+          borderWidth: 1.5,
+          pointRadius: 0,
+          fill: false
+        },
+        {
+          label: 'Scientific Processing (%)',
+          data: actualProcessing,
+          borderColor: '#7c3aed',
+          backgroundColor: '#7c3aed',
+          borderWidth: 2,
+          pointRadius: 3,
+          tension: 0.3
+        },
+        {
+          label: 'SBM Processing Target (80%)',
+          data: sbmTargetProcessing,
+          borderColor: '#7c3aed',
+          borderDash: [6, 6],
+          borderWidth: 1.5,
+          pointRadius: 0,
+          fill: false
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: { min: 40, max: 100, grid: { color: 'rgba(0,0,0,0.05)' } },
+        x: { grid: { display: false } }
+      },
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
+      }
+    }
+  };
+
+  if (canvases[0]) {
+    adminComplianceTrendChartObj = new Chart(canvases[0], chartConfig);
+  }
+  if (canvases[1]) {
+    adminComplianceTrendChartEmbeddedObj = new Chart(canvases[1], JSON.parse(JSON.stringify(chartConfig)));
+  }
+}
+
+window.renderAdminAnalyticsCharts = function() {
+  renderAdminReportsOverTimeChart();
+  renderAdminCategoryChart();
+  renderAdminWardReportsChart();
+  renderAdminWorkerPerformanceChart();
+  renderAdminStatusFunnelChart();
+  renderAdminComplianceTrendChart();
 };
 
 function renderAdminRedemptionsQueue() {
@@ -3567,6 +4892,7 @@ window.switchAdminTab = function(tabName) {
     { id: 'adminPanelCompliance', tab: 'adminTabCompliance', name: 'compliance' },
     { id: 'adminPanelHotspot', tab: 'adminTabHotspot', name: 'hotspot' },
     { id: 'adminPanelWorkerLocations', tab: 'adminTabWorkerLocations', name: 'workerLocations' },
+    { id: 'adminPanelAnalytics', tab: 'adminTabAnalytics', name: 'analytics' },
     { id: 'adminPanelHospital', tab: 'adminTabHospital', name: 'hospital' },
     { id: 'adminPanelWorkers', tab: 'adminTabWorkers', name: 'workers' },
     { id: 'adminPanelRedemptions', tab: 'adminTabRedemptions', name: 'redemptions' },
@@ -3584,11 +4910,18 @@ window.switchAdminTab = function(tabName) {
   if (tabName === 'fleet') renderAdminFleet();
   if (tabName === 'grievance') renderAdminGrievanceTable();
   if (tabName === 'leaderboard') renderAdminLeaderboardTable();
-  if (tabName === 'compliance') renderAdminComplianceTable();
+  if (tabName === 'compliance') {
+    renderAdminComplianceTable();
+    setTimeout(() => renderAdminComplianceTrendChart(), 150);
+  }
   if (tabName === 'hotspot') setTimeout(() => initAdminHotspotMap(), 150);
   if (tabName === 'workerLocations') setTimeout(() => initAdminWorkerLocationsMap(), 150);
+  if (tabName === 'analytics') setTimeout(() => renderAdminAnalyticsCharts(), 150);
   if (tabName === 'hospital') renderAdminHospitalTable();
-  if (tabName === 'workers') renderAdminWorkerTable();
+  if (tabName === 'workers') {
+    renderAdminWorkerTable();
+    setTimeout(() => renderAdminWorkerPerformanceChart(), 150);
+  }
   if (tabName === 'redemptions') renderAdminRedemptionsQueue();
   if (tabName === 'logs') renderAdminLogsTable();
 };
@@ -3606,6 +4939,7 @@ window.reassignWorker = function(reportId, workerId) {
     reports[index].assignedAt = Date.now();
     saveReports(reports);
 
+    logAdminAction('Reassign Stop', 'Admin (MCGM)', `Reassigned report ${reportId} to ${w ? w.name : 'Unassigned'}`);
     alert(`Task ${reportId} assigned to ${w ? w.name : 'Unassigned'}!`);
     renderAdminDashboard();
   }
@@ -3618,6 +4952,7 @@ window.adminForceClear = function(reportId) {
     reports[index].status = 'cleared';
     reports[index].clearedAt = Date.now();
     saveReports(reports);
+    logAdminAction('Force Clear Override', 'Admin (MCGM)', `Administrative force clear issued for report ${reportId} (${reports[index].landmark})`);
     renderAdminDashboard();
   }
 };
@@ -3979,6 +5314,11 @@ function renderPersonalImpactTracker() {
       plugins: { legend: { position: 'top' } }
     }
   });
+
+  setTimeout(() => {
+    renderCitizenCreditBreakdownChart();
+    renderCitizenReportStatusChart();
+  }, 50);
 }
 
 function formatTimeAgo(timestamp) {
@@ -3988,4 +5328,707 @@ function formatTimeAgo(timestamp) {
   const hours = Math.floor(mins / 60);
   if (hours < 24) return `${hours}h ago`;
   return `${Math.floor(hours / 24)}d ago`;
+}
+
+/* ==========================================================================
+   15. CITIZEN STREAK TRACKER, REFERRAL PROGRAM & NEARBY COMMUNITY MAP
+   ========================================================================== */
+function renderCitizenStreak() {
+  const badge = document.getElementById('citizenStreakBadge');
+  const count = document.getElementById('citizenStreakCount');
+  if (!badge || !count) return;
+  const streak = currentUser?.streakWeeks || 4;
+  count.textContent = streak;
+}
+
+function renderCitizenReferralWidget() {
+  const input = document.getElementById('citizenReferralCodeInput');
+  if (!input || !currentUser) return;
+  if (!currentUser.referralCode) {
+    const rawId = currentUser.id ? currentUser.id.replace('usr-', '') : '4821';
+    currentUser.referralCode = `MUM-REF-${rawId.padStart(4, '0')}`;
+    updateUserRecord(currentUser);
+  }
+  input.value = currentUser.referralCode;
+}
+
+window.copyCitizenReferralLink = function() {
+  const input = document.getElementById('citizenReferralCodeInput');
+  const feedback = document.getElementById('referralCopyFeedback');
+  if (!input) return;
+  const link = `${window.location.origin}/#ref=${input.value}`;
+  navigator.clipboard.writeText(link).catch(() => {});
+  if (feedback) {
+    feedback.style.display = 'block';
+    setTimeout(() => { feedback.style.display = 'none'; }, 3000);
+  }
+};
+
+function processReferralBonusOnFirstReport(newReport) {
+  if (currentUser && currentUser.referredBy && !currentUser.hasAwardedReferralBonus) {
+    currentUser.hasAwardedReferralBonus = true;
+    awardCredits(15, 'Referral Bonus: First Verified Report Submitted');
+
+    let users = getUsers();
+    const referrer = users.find(u => u.referralCode === currentUser.referredBy || u.id === currentUser.referredBy);
+    if (referrer) {
+      referrer.credits = (referrer.credits || 0) + 15;
+      if (!referrer.creditHistory) referrer.creditHistory = [];
+      referrer.creditHistory.unshift({
+        date: new Date().toISOString().replace('T', ' ').slice(0, 16),
+        reason: `Referral Bonus: Neighbor (${currentUser.name}) submitted first report`,
+        amount: 15
+      });
+      saveUsers(users);
+    }
+    updateUserRecord(currentUser);
+    addNotification('🎁 Referral Bonus Awarded', 'You and your neighbor each received +15 EcoCredits!', 'credit');
+  }
+}
+
+/* Nearby Open Reports Read-Only Community Map */
+let citizenNearbyMap = null;
+let citizenNearbyMarkers = [];
+
+function initCitizenNearbyReportsMap() {
+  const container = document.getElementById('citizenNearbyReportsMap');
+  if (!container || typeof L === 'undefined') return;
+
+  if (citizenNearbyMap) {
+    citizenNearbyMap.invalidateSize();
+  } else {
+    citizenNearbyMap = L.map('citizenNearbyReportsMap', { zoomControl: true }).setView([19.0760, 72.8777], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(citizenNearbyMap);
+  }
+
+  citizenNearbyMarkers.forEach(m => m.remove());
+  citizenNearbyMarkers = [];
+
+  const reports = getReports();
+  const openReports = reports.filter(r => r.status !== 'cleared');
+  const badge = document.getElementById('citizenNearbyCountBadge');
+  if (badge) badge.textContent = `${openReports.length} Open in Ward Area`;
+
+  openReports.forEach(r => {
+    const lat = r.latitude || r.coords?.lat || 19.0760;
+    const lng = r.longitude || r.coords?.lng || 72.8777;
+    const isEmg = r.isEmergency;
+    const marker = L.circleMarker([lat, lng], {
+      radius: isEmg ? 8 : 6,
+      color: isEmg ? '#dc2626' : (r.status === 'assigned' ? '#1c52d8' : '#d97706'),
+      fillColor: isEmg ? '#ef4444' : (r.status === 'assigned' ? '#3b82f6' : '#f59e0b'),
+      fillOpacity: 0.85,
+      weight: 2
+    }).addTo(citizenNearbyMap);
+
+    marker.bindPopup(`
+      <div style="font-size: 0.82rem; line-height: 1.4;">
+        <strong>${r.landmark || 'Community Report'}</strong><br>
+        <span style="color: #64748b;">${r.area || 'Mumbai'} &bull; ${formatTimeAgo(r.createdAt)}</span><br>
+        <span class="badge badge-${r.status}" style="margin-top: 0.25rem;">${r.status}</span>
+        ${isEmg ? '<span class="badge badge-emergency">EMERGENCY</span>' : ''}
+        <div style="font-size: 0.75rem; color: #475569; margin-top: 0.2rem;">${r.notes || 'No description provided'}</div>
+      </div>
+    `);
+    citizenNearbyMarkers.push(marker);
+  });
+
+  setTimeout(() => citizenNearbyMap && citizenNearbyMap.invalidateSize(), 200);
+}
+
+/* Offline-Queued Reports System */
+function getOfflineQueue() {
+  return JSON.parse(localStorage.getItem('swm_offline_queue') || '[]');
+}
+function saveOfflineQueue(queue) {
+  localStorage.setItem('swm_offline_queue', JSON.stringify(queue));
+}
+function queueOfflineReport(report) {
+  const queue = getOfflineQueue();
+  queue.push(report);
+  saveOfflineQueue(queue);
+  checkOfflineQueueStatus();
+}
+function checkOfflineQueueStatus() {
+  const banner = document.getElementById('offlineQueueBanner');
+  const countEl = document.getElementById('offlineQueueCount');
+  const queue = getOfflineQueue();
+  if (banner && countEl) {
+    if (!navigator.onLine || queue.length > 0) {
+      banner.style.display = 'flex';
+      countEl.textContent = queue.length;
+    } else {
+      banner.style.display = 'none';
+    }
+  }
+}
+window.flushOfflineQueue = function() {
+  const queue = getOfflineQueue();
+  if (queue.length === 0) {
+    alert('No offline reports pending synchronization.');
+    checkOfflineQueueStatus();
+    return;
+  }
+  let reports = getReports();
+  queue.forEach(r => {
+    r.status = 'reported';
+    reports.unshift(r);
+    awardCredits(5, 'Offline Report Synced');
+  });
+  saveReports(reports);
+  saveOfflineQueue([]);
+  checkOfflineQueueStatus();
+  renderCitizenDashboard();
+  addNotification('📡 Reports Synced', `${queue.length} offline reports successfully uploaded to municipal system!`, 'sync');
+  alert(`✓ Successfully synced ${queue.length} offline reports to the municipal system!`);
+};
+
+function initOfflineQueueSync() {
+  window.addEventListener('online', () => {
+    const queue = getOfflineQueue();
+    if (queue.length > 0) {
+      window.flushOfflineQueue();
+    }
+    checkOfflineQueueStatus();
+  });
+  window.addEventListener('offline', () => {
+    checkOfflineQueueStatus();
+  });
+  checkOfflineQueueStatus();
+}
+
+/* ==========================================================================
+   16. INSTITUTION WASTE AUDIT CERTIFICATE & PEER BENCHMARKING
+   ========================================================================== */
+window.openWasteAuditCertModal = function() {
+  const modal = document.getElementById('instAuditCertModal');
+  if (!modal) return;
+  const orgNameEl = document.getElementById('certOrgName');
+  const orgWardEl = document.getElementById('certOrgWard');
+  const auditRatingEl = document.getElementById('certAuditRating');
+  const tonnageEl = document.getElementById('certTonnageDiverted');
+  const docIdEl = document.getElementById('certDocId');
+  const dateEl = document.getElementById('certDateIssued');
+
+  const audits = currentUser?.selfAudits || [];
+  const latestRate = audits.length > 0 ? audits[0].rate : 92;
+  const reports = getReports().filter(r => r.userId === currentUser?.id);
+  const totalVolume = reports.reduce((sum, r) => sum + (r.volumeKg || 0), 0) || 1250;
+
+  if (orgNameEl) orgNameEl.textContent = currentUser?.schoolName || currentUser?.companyName || currentUser?.name || 'Institution Campus';
+  if (orgWardEl) orgWardEl.textContent = currentUser?.branches?.[0]?.ward || 'Ward K/East - Andheri';
+  if (auditRatingEl) auditRatingEl.textContent = `${latestRate}%`;
+  if (tonnageEl) tonnageEl.textContent = `${totalVolume} kg`;
+  if (docIdEl) docIdEl.textContent = `MCGM-SWM-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+  if (dateEl) dateEl.textContent = new Date().toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+
+  modal.classList.add('active');
+};
+
+function renderInstitutionPeerBenchmark() {
+  const card = document.getElementById('instPeerBenchmarkCard');
+  if (!card) return;
+  const yourRateEl = document.getElementById('instBenchmarkYourRate');
+  const wardRateEl = document.getElementById('instBenchmarkWardRate');
+  const orgTypeEl = document.getElementById('instBenchmarkOrgType');
+  const fillEl = document.getElementById('instBenchmarkBarFill');
+  const noticeEl = document.getElementById('instBenchmarkNotice');
+
+  const audits = currentUser?.selfAudits || [];
+  const yourRate = audits.length > 0 ? audits[0].rate : 92;
+  const isSchool = currentUser?.institutionType === 'school';
+  const orgTypeLabel = isSchool ? 'Schools & Colleges' : 'Corporate Offices';
+  const wardBenchmark = isSchool ? 74 : 76;
+  const diff = yourRate - wardBenchmark;
+
+  if (yourRateEl) yourRateEl.textContent = `${yourRate}%`;
+  if (wardRateEl) wardRateEl.textContent = `${wardBenchmark}%`;
+  if (orgTypeEl) orgTypeEl.textContent = orgTypeLabel;
+  if (fillEl) fillEl.style.width = `${Math.min(100, yourRate)}%`;
+  if (noticeEl) {
+    if (diff >= 0) {
+      noticeEl.innerHTML = `⭐ Outperforming ward average for ${orgTypeLabel} by <strong>+${diff}%</strong>. Eligible for expedited municipal bulk dispatch tier.`;
+    } else {
+      noticeEl.innerHTML = `⚠️ Currently <strong>${Math.abs(diff)}%</strong> below ward average for ${orgTypeLabel}. Improve organic separation to boost municipal score.`;
+    }
+  }
+}
+
+/* ==========================================================================
+   17. HOSPITAL PHARMACEUTICAL EXPIRY REMINDERS & BIO-MEDICAL DISPOSAL
+   ========================================================================== */
+const SEED_PHARMA_EXPIRY = [
+  { id: 'ph-1', medName: 'Amoxicillin 500mg (Sterile Vials)', batchId: 'BATCH-AMX-2041', department: 'Emergency Ward Shelf A', expiryDate: new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10), weightKg: 3.5 },
+  { id: 'ph-2', medName: 'Formaldehyde 10% Disinfectant', batchId: 'BATCH-FRM-9022', department: 'Pathology Lab Bay 2', expiryDate: new Date(Date.now() + 22 * 86400000).toISOString().slice(0, 10), weightKg: 8.0 },
+  { id: 'ph-3', medName: 'Insulin Glargine Multi-Dose', batchId: 'BATCH-INS-4105', department: 'ICU Cold Storage #1', expiryDate: new Date(Date.now() + 85 * 86400000).toISOString().slice(0, 10), weightKg: 1.2 }
+];
+
+function getHospitalPharmaExpiry() {
+  let list = JSON.parse(localStorage.getItem('swm_hospital_pharma_expiry') || '[]');
+  if (list.length === 0) {
+    list = SEED_PHARMA_EXPIRY;
+    localStorage.setItem('swm_hospital_pharma_expiry', JSON.stringify(list));
+  }
+  return list;
+}
+function saveHospitalPharmaExpiry(list) {
+  localStorage.setItem('swm_hospital_pharma_expiry', JSON.stringify(list));
+}
+
+function renderHospitalPharmaExpiryTable() {
+  const tbody = document.getElementById('hospitalPharmaExpiryTableBody');
+  if (!tbody) return;
+  const list = getHospitalPharmaExpiry();
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #64748b;">No expiring pharmaceutical stock logged.</td></tr>`;
+    return;
+  }
+  const now = Date.now();
+  const dayMs = 86400000;
+
+  tbody.innerHTML = list.map(item => {
+    const expTime = new Date(item.expiryDate).getTime();
+    const daysLeft = Math.ceil((expTime - now) / dayMs);
+    let badgeClass = 'pharma-badge-safe';
+    let statusText = 'Safe (&gt;30d)';
+
+    if (daysLeft <= 7) {
+      badgeClass = 'pharma-badge-critical';
+      statusText = 'Critical (&le;7d)';
+    } else if (daysLeft <= 30) {
+      badgeClass = 'pharma-badge-approaching';
+      statusText = 'Approaching (&le;30d)';
+    }
+
+    return `
+      <tr>
+        <td><strong>${item.medName}</strong></td>
+        <td><code>${item.batchId}</code></td>
+        <td>${item.department}</td>
+        <td>${item.expiryDate}</td>
+        <td><strong>${daysLeft > 0 ? daysLeft + ' days' : 'EXPIRED'}</strong></td>
+        <td><span class="${badgeClass}">${statusText}</span></td>
+        <td>
+          <button type="button" class="btn btn-outline btn-xs" onclick="logPharmaAsExpiredBMW('${item.id}')">
+            ⚠️ Log as Expired BMW
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+window.openAddPharmaExpiryModal = function() {
+  document.getElementById('addPharmaExpiryModal')?.classList.add('active');
+};
+
+window.handleAddPharmaExpirySubmit = function(e) {
+  e.preventDefault();
+  const medName = document.getElementById('pharmaMedName').value.trim();
+  const batchId = document.getElementById('pharmaBatchId').value.trim();
+  const department = document.getElementById('pharmaDepartment').value.trim();
+  const expiryDate = document.getElementById('pharmaExpiryDate').value;
+  const weightKg = parseFloat(document.getElementById('pharmaWeightKg').value) || 2.0;
+
+  let list = getHospitalPharmaExpiry();
+  list.unshift({
+    id: 'ph-' + Date.now(),
+    medName,
+    batchId,
+    department,
+    expiryDate,
+    weightKg
+  });
+  saveHospitalPharmaExpiry(list);
+  closeModal('addPharmaExpiryModal');
+  e.target.reset();
+  renderHospitalPharmaExpiryTable();
+  alert(`Added ${medName} to pharmacy expiry tracking list!`);
+};
+
+window.logPharmaAsExpiredBMW = function(pharmaId) {
+  const list = getHospitalPharmaExpiry();
+  const item = list.find(p => p.id === pharmaId);
+  if (!item) return;
+
+  const catSelect = document.getElementById('bmwCategory');
+  const wardInput = document.getElementById('hospitalWard');
+  const codeInput = document.getElementById('bmwContainerCode');
+  const weightInput = document.getElementById('bmwWeight');
+
+  if (catSelect) catSelect.value = 'biomed_black';
+  if (wardInput) wardInput.value = item.department;
+  if (codeInput) codeInput.value = item.batchId;
+  if (weightInput) weightInput.value = item.weightKg;
+
+  window.validateBMWForm && window.validateBMWForm();
+  document.getElementById('hospitalBMWForm')?.scrollIntoView({ behavior: 'smooth' });
+  alert(`Pre-populated BMW registration form for expired pharmaceutical item (${item.medName}). Verify details and click 'Register Hazardous Disposal Stream'.`);
+};
+
+/* ==========================================================================
+   18. WORKER DAILY PRE-SHIFT SAFETY LOG & PHOTO PROOF GALLERY
+   ========================================================================== */
+function renderWorkerSafetyChecklist() {
+  const card = document.getElementById('workerSafetyChecklistCard');
+  if (!card) return;
+  const log = JSON.parse(localStorage.getItem(`swm_safety_log_${currentUser?.id}`) || 'null');
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const statusBadge = document.getElementById('workerSafetyLogStatus');
+
+  if (log && log.date === todayStr && log.verified) {
+    if (statusBadge) {
+      statusBadge.textContent = `✓ Verified Today (${log.time})`;
+      statusBadge.style.background = 'rgba(5, 150, 105, 0.2)';
+      statusBadge.style.color = '#059669';
+    }
+    ['checkPpeGloves', 'checkPpeVest', 'checkPpeBoots', 'checkVehicleHydraulics', 'checkFirstAidKit'].forEach(id => {
+      const cb = document.getElementById(id);
+      if (cb) {
+        cb.checked = true;
+        cb.disabled = true;
+        cb.closest('.safety-checklist-item')?.classList.add('checked');
+      }
+    });
+    const submitBtn = document.getElementById('workerSafetySubmitBtn');
+    if (submitBtn) {
+      submitBtn.textContent = '✓ Verified for Shift';
+      submitBtn.disabled = true;
+    }
+  } else {
+    if (statusBadge) {
+      statusBadge.textContent = 'Pending Check';
+      statusBadge.style.background = 'rgba(100, 116, 139, 0.2)';
+      statusBadge.style.color = '#64748b';
+    }
+  }
+}
+
+window.updateWorkerSafetyChecklist = function() {
+  const ids = ['checkPpeGloves', 'checkPpeVest', 'checkPpeBoots', 'checkVehicleHydraulics', 'checkFirstAidKit'];
+  let checkedCount = 0;
+  ids.forEach(id => {
+    const cb = document.getElementById(id);
+    const parent = cb?.closest('.safety-checklist-item');
+    if (cb && cb.checked) {
+      checkedCount++;
+      parent?.classList.add('checked');
+    } else {
+      parent?.classList.remove('checked');
+    }
+  });
+
+  const progressEl = document.getElementById('workerSafetyChecklistProgress');
+  const submitBtn = document.getElementById('workerSafetySubmitBtn');
+  if (progressEl) progressEl.textContent = `${checkedCount} of 5 safety items verified`;
+  if (submitBtn) {
+    submitBtn.disabled = checkedCount < 5;
+  }
+};
+
+window.saveWorkerSafetyLog = function() {
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const timeStr = new Date().toLocaleTimeString();
+  const logData = { date: todayStr, time: timeStr, verified: true, workerId: currentUser?.id, workerName: currentUser?.name };
+  localStorage.setItem(`swm_safety_log_${currentUser?.id}`, JSON.stringify(logData));
+
+  logAdminAction('Safety Log Verified', currentUser?.name || 'Worker', `Completed pre-shift inspection: 5 PPE/vehicle items verified at ${timeStr}`);
+  renderWorkerSafetyChecklist();
+  addNotification('🛡️ Safety Log Recorded', 'Pre-shift inspection logged for Admin review.', 'safety');
+  alert('✓ Safety and pre-trip inspection verified! Recorded in municipal operational log.');
+};
+
+function renderWorkerPhotoProofGallery() {
+  const grid = document.getElementById('workerPhotoProofGrid');
+  const countBadge = document.getElementById('workerPhotoProofCountBadge');
+  if (!grid) return;
+
+  const myClearedReports = getReports().filter(r => 
+    r.status === 'cleared' && (r.assignedWorkerId === currentUser?.id || (currentUser?.name && r.assignedWorkerName && r.assignedWorkerName.includes(currentUser.name)))
+  );
+
+  if (countBadge) countBadge.textContent = `${myClearedReports.length} Proofs Logged`;
+
+  if (myClearedReports.length === 0) {
+    grid.innerHTML = `<div style="padding: 1.5rem; text-align: center; color: #64748b; font-size: 0.85rem; grid-column: 1 / -1;">No photo proofs logged for this crew shift yet. Completed clearance photos will appear here.</div>`;
+    return;
+  }
+
+  grid.innerHTML = myClearedReports.map(r => `
+    <div class="photo-gallery-card">
+      <div class="photo-gallery-thumb">📷</div>
+      <div style="padding: 0.5rem 0.65rem;">
+        <div style="font-weight: 700; font-size: 0.78rem;">${r.landmark}</div>
+        <div style="color: #64748b; font-size: 0.72rem;">${r.area || 'Mumbai'}</div>
+        <div style="color: #059669; font-weight: 700; margin-top: 0.2rem; font-size: 0.72rem;">✓ Cleared & Sanitized</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ==========================================================================
+   19. ADMIN OPERATIONAL AUDIT TRAIL & WEEKLY DIGEST REPORT
+   ========================================================================== */
+function getAdminAuditTrail() {
+  let logs = JSON.parse(localStorage.getItem('swm_admin_audit_log') || '[]');
+  if (logs.length === 0) {
+    logs = [
+      { timestamp: Date.now() - 3600000 * 5, actor: 'Admin (MCGM)', action: 'Auto-Assign Optimization', details: 'Smart crew assignment dispatched 4 pending tickets across Dadar and Bandra zones.' },
+      { timestamp: Date.now() - 3600000 * 3, actor: 'Rajesh Singh (Crew #101)', action: 'Shift Status Change', details: 'Started shift; vehicle MH-01-GA-4401 marked Active Collection.' },
+      { timestamp: Date.now() - 3600000 * 2, actor: 'Admin (MCGM)', action: 'Reassign Stop', details: 'Reassigned stop EMG-401 to nearest available crew (#101 Dadar).' },
+      { timestamp: Date.now() - 3600000 * 1, actor: 'Admin (MCGM)', action: 'Compliance Benchmark Update', details: 'Updated SBM 2.0 statutory targets for Ward K/East.' }
+    ];
+    localStorage.setItem('swm_admin_audit_log', JSON.stringify(logs));
+  }
+  return logs;
+}
+
+function logAdminAction(action, actor, details) {
+  let logs = getAdminAuditTrail();
+  logs.unshift({
+    timestamp: Date.now(),
+    actor: actor || 'Admin (MCGM)',
+    action,
+    details
+  });
+  localStorage.setItem('swm_admin_audit_log', JSON.stringify(logs));
+  renderAdminLogsTable();
+}
+
+function renderAdminLogsTable() {
+  const tbody = document.getElementById('adminLogsTableBody');
+  if (!tbody) return;
+  const logs = getAdminAuditTrail();
+
+  tbody.innerHTML = logs.map(l => {
+    let badgeClass = 'audit-badge-clear';
+    if (l.action.toLowerCase().includes('reassign')) badgeClass = 'audit-badge-reassign';
+    else if (l.action.toLowerCase().includes('threshold') || l.action.toLowerCase().includes('compliance')) badgeClass = 'audit-badge-threshold';
+    else if (l.action.toLowerCase().includes('shift') || l.action.toLowerCase().includes('safety')) badgeClass = 'audit-badge-shift';
+
+    return `
+      <tr>
+        <td style="font-family: monospace; font-size: 0.78rem;">${new Date(l.timestamp).toLocaleString()}</td>
+        <td><strong>${l.actor}</strong></td>
+        <td><span class="audit-log-badge ${badgeClass}">${l.action}</span></td>
+        <td style="font-size: 0.82rem; color: #334155;">${l.details}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+window.openAdminWeeklyDigestModal = function() {
+  const modal = document.getElementById('adminWeeklyDigestModal');
+  if (!modal) return;
+  const reports = getReports();
+  const cleared = reports.filter(r => r.status === 'cleared').length;
+  const total = reports.length || 15;
+  const clearanceRate = Math.round((cleared / total) * 100);
+
+  document.getElementById('digestTotalReports').textContent = total;
+  document.getElementById('digestClearanceRate').textContent = `${clearanceRate}%`;
+  document.getElementById('digestAvgSla').textContent = '3.8h';
+  document.getElementById('digestCreditsAwarded').textContent = '420';
+
+  const topWardsEl = document.getElementById('digestTopWardsList');
+  if (topWardsEl) {
+    topWardsEl.innerHTML = `
+      <div style="display: flex; justify-content: space-between;"><span>🥇 <strong>Ward G/South (Dadar)</strong> &bull; 92% Cleared</span><span>1.8h Avg SLA</span></div>
+      <div style="display: flex; justify-content: space-between;"><span>🥈 <strong>Ward K/East (Andheri)</strong> &bull; 88% Cleared</span><span>2.4h Avg SLA</span></div>
+      <div style="display: flex; justify-content: space-between;"><span>🥉 <strong>Ward H/West (Bandra)</strong> &bull; 85% Cleared</span><span>3.1h Avg SLA</span></div>
+    `;
+  }
+
+  modal.classList.add('active');
+};
+
+/* ==========================================================================
+   20. CROSS-CUTTING: I18N MULTI-LANGUAGE, NOTIFICATIONS & KEYBOARD SHORTCUTS
+   ========================================================================== */
+const I18N = {
+  en: {
+    langBtn: '🌐 EN | हिं',
+    welcome: 'Welcome',
+    reportTitle: 'Submit Bin Report (+5 Credits)',
+    walletBalance: 'Wallet Balance',
+    submitReport: 'Submit Bin Report (+5 Credits)',
+    signOut: 'Sign Out'
+  },
+  hi: {
+    langBtn: '🌐 हिं | EN',
+    welcome: 'स्वागत है',
+    reportTitle: 'कचरा डिब्बा रिपोर्ट दर्ज करें (+5)',
+    walletBalance: 'वॉलेट बैलेंस',
+    submitReport: 'रिपोर्ट सबमिट करें (+5)',
+    signOut: 'साइन आउट'
+  }
+};
+let currentLang = localStorage.getItem('swm_lang') || 'en';
+
+window.toggleAppLanguage = function() {
+  currentLang = currentLang === 'en' ? 'hi' : 'en';
+  localStorage.setItem('swm_lang', currentLang);
+  applyAppLanguage(currentLang);
+};
+
+function applyAppLanguage(lang) {
+  const dict = I18N[lang] || I18N.en;
+  const langBtns = [document.getElementById('langToggleBtn'), document.getElementById('guestLangToggleBtn')];
+  langBtns.forEach(b => { if (b) b.textContent = dict.langBtn; });
+
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) logoutBtn.textContent = dict.signOut;
+
+  const submitBtn = document.querySelector('#citizenReportForm button[type="submit"]');
+  if (submitBtn) submitBtn.textContent = dict.submitReport;
+}
+
+function initLanguage() {
+  applyAppLanguage(currentLang);
+}
+
+/* In-App Notification Center */
+function getNotifications() {
+  let list = JSON.parse(localStorage.getItem('swm_notifications') || '[]');
+  if (list.length === 0) {
+    list = [
+      { id: 'notif-1', title: '🌱 Welcome to EcoClear Network', message: 'Report civic bins and verify segregation to earn EcoCredits.', time: Date.now() - 3600000, read: false },
+      { id: 'notif-2', title: '🎁 Referral Bonus Active', message: 'Invite neighbors to earn +15 credits on their first report.', time: Date.now() - 7200000, read: false },
+      { id: 'notif-3', title: '🏛️ SBM 2.0 Civic Drive', message: 'Municipal compactor crews prioritizing wet waste separation this week.', time: Date.now() - 14400000, read: true }
+    ];
+    localStorage.setItem('swm_notifications', JSON.stringify(list));
+  }
+  return list;
+}
+function saveNotifications(list) {
+  localStorage.setItem('swm_notifications', JSON.stringify(list));
+  updateNotificationBadge();
+}
+function addNotification(title, message, type = 'general') {
+  let list = getNotifications();
+  list.unshift({ id: 'notif-' + Date.now(), title, message, type, time: Date.now(), read: false });
+  saveNotifications(list);
+  renderNotificationDropdown();
+}
+function updateNotificationBadge() {
+  const list = getNotifications();
+  const unreadCount = list.filter(n => !n.read).length;
+  const badge = document.getElementById('notificationBadge');
+  if (badge) {
+    if (unreadCount > 0) {
+      badge.textContent = unreadCount;
+      badge.style.display = 'inline-block';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+}
+window.toggleNotificationDropdown = function() {
+  const dropdown = document.getElementById('notificationDropdown');
+  if (!dropdown) return;
+  dropdown.classList.toggle('active');
+  renderNotificationDropdown();
+};
+function renderNotificationDropdown() {
+  const container = document.getElementById('notificationList');
+  if (!container) return;
+  const list = getNotifications();
+  if (list.length === 0) {
+    container.innerHTML = `<div style="padding: 1.5rem; text-align: center; color: #64748b; font-size: 0.82rem;">No notifications right now.</div>`;
+    return;
+  }
+  container.innerHTML = list.map(n => `
+    <div class="notification-item ${n.read ? '' : 'unread'}" onclick="markNotificationRead('${n.id}')">
+      <div>
+        <div style="font-weight: 700;">${n.title}</div>
+        <div style="color: #475569; font-size: 0.78rem;">${n.message}</div>
+        <div class="notification-time">${formatTimeAgo(n.time)}</div>
+      </div>
+    </div>
+  `).join('');
+  updateNotificationBadge();
+}
+window.markAllNotificationsRead = function() {
+  let list = getNotifications();
+  list.forEach(n => n.read = true);
+  saveNotifications(list);
+  renderNotificationDropdown();
+};
+window.markNotificationRead = function(id) {
+  let list = getNotifications();
+  const item = list.find(n => n.id === id);
+  if (item) {
+    item.read = true;
+    saveNotifications(list);
+    renderNotificationDropdown();
+  }
+};
+function initNotifications() {
+  updateNotificationBadge();
+}
+
+/* Keyboard Shortcuts Help Panel */
+window.openKeyboardShortcutsModal = function() {
+  document.getElementById('keyboardShortcutsModal')?.classList.add('active');
+};
+function initKeyboardShortcuts() {
+  document.addEventListener('keydown', (e) => {
+    const tag = e.target.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
+      if (e.key === 'Escape') {
+        closeAllModals();
+      }
+      return;
+    }
+
+    if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+      e.preventDefault();
+      const modal = document.getElementById('keyboardShortcutsModal');
+      if (modal?.classList.contains('active')) {
+        closeModal('keyboardShortcutsModal');
+      } else {
+        window.openKeyboardShortcutsModal();
+      }
+    } else if (e.key === 'Escape') {
+      closeAllModals();
+      document.getElementById('notificationDropdown')?.classList.remove('active');
+    } else if (e.key === '1') {
+      quickSwitchDemoRole('citizen');
+    } else if (e.key === '2') {
+      quickSwitchDemoRole('institution');
+    } else if (e.key === '3') {
+      quickSwitchDemoRole('hospital');
+    } else if (e.key === '4') {
+      quickSwitchDemoRole('worker');
+    } else if (e.key === '5') {
+      quickSwitchDemoRole('admin');
+    } else if (e.key.toLowerCase() === 't') {
+      window.location.href = 'transparency.html';
+    } else if (e.key.toLowerCase() === 'n') {
+      window.toggleNotificationDropdown();
+    } else if (e.key.toLowerCase() === 'a') {
+      if (currentUser?.role === 'admin') {
+        switchAdminTab('analytics');
+      }
+    }
+  });
+}
+function closeAllModals() {
+  document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
+}
+
+/* PWA Service Worker Registration */
+function initPWA() {
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').then((reg) => {
+        console.log('EcoClear PWA Service Worker registered:', reg.scope);
+      }).catch((err) => {
+        console.warn('PWA SW registration error:', err);
+      });
+    });
+  }
 }
