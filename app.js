@@ -1250,6 +1250,7 @@ function checkSession() {
       renderAdminDashboard();
     }
   }
+  applyAppLanguage(currentLang);
 }
 
 /* ==========================================================================
@@ -1827,15 +1828,15 @@ function audioBufferToWav(buffer) {
 
 /* Dedicated Credit Store (Waste-Specific Civic Rewards Catalog) */
 const CREDIT_STORE_CATALOG = [
-  { id: 'sapling', name: 'Sapling / Native Fruit Plant', cost: 50, icon: '🌱', isPhysical: true, desc: 'Native guava, mango, or neem sapling delivered for residential terrace or park planting.', featured: true },
-  { id: 'segregation_bin_set', name: 'Home Segregation Bin Set (Wet/Dry Color-Coded)', cost: 70, icon: '🗑️', isPhysical: true, desc: 'A pair of color-coded mini bins with labels for correct source segregation at home, matching municipal waste categories.' },
-  { id: 'compost_kit', name: 'Home Aerobic Compost Starter Kit', cost: 100, icon: '🪴', isPhysical: true, desc: 'Twin aerated bin system with bio-inoculant microbial brick for kitchen food peels.' },
-  { id: 'ewaste_voucher', name: 'E-Waste Drop-off Voucher', cost: 45, icon: '🔌', isPhysical: true, desc: 'Redeemable at a partnered authorized e-waste collection point for safe disposal of old electronics, batteries, and cables.' },
-  { id: 'seed_paper', name: 'Plantable Seed Paper Stationery', cost: 30, icon: '📜', isPhysical: true, desc: 'Post-consumer waste handmade paper embedded with marigold and basil seeds.' },
-  { id: 'priority_pickup_pass', name: 'Priority Pickup Pass', cost: 90, icon: '⚡', isPhysical: false, desc: 'Your next submitted report is guaranteed same-day collection, jumping ahead of the standard queue.' },
-  { id: 'recycler_marketplace_credit', name: 'Local Recycler Marketplace Credit', cost: 65, icon: '♻️', isPhysical: true, desc: '₹40 credit redeemable with your area\'s registered informal waste collectors (kabadiwalas) for scrap and recyclables.' },
-  { id: 'recycled_notebook', name: '100% Recycled Paper Notebook', cost: 35, icon: '📓', isPhysical: true, desc: '120-page ruled notebook manufactured entirely from post-consumer recovered office paper.' },
-  { id: 'digital_badge', name: 'Digital Eco-Champion Public Recognition Badge', cost: 0, icon: '🥇', isPhysical: false, desc: 'Official digital recognition credential displayed on your civic resident profile.' }
+  { id: 'sapling', name: 'Sapling / Native Fruit Plant', name_hi: 'देशी फल/छायादार पौधा (अमरूद/नीम)', cost: 50, icon: '🌱', isPhysical: true, desc: 'Native guava, mango, or neem sapling delivered for residential terrace or park planting.', desc_hi: 'घर की छत या पार्क में रोपण हेतु स्थानीय अमरूद, आम या नीम का पौधा।', featured: true },
+  { id: 'segregation_bin_set', name: 'Home Segregation Bin Set (Wet/Dry Color-Coded)', name_hi: 'घरेलू कचरा पृथक्करण डिब्बा सेट (गीला/सूखा)', cost: 70, icon: '🗑️', isPhysical: true, desc: 'A pair of color-coded mini bins with labels for correct source segregation at home, matching municipal waste categories.', desc_hi: 'घर पर गीले और सूखे कचरे को अलग रखने के लिए रंग-कोडित मिनी डिब्बे।', featured: false },
+  { id: 'compost_kit', name: 'Home Aerobic Compost Starter Kit', name_hi: 'घरेलू एरोबिक कम्पोस्ट किट', cost: 100, icon: '🪴', isPhysical: true, desc: 'Twin aerated bin system with bio-inoculant microbial brick for kitchen food peels.', desc_hi: 'रसोई के छिलकों से जैविक खाद बनाने हेतु ट्विन बिन और बायो-इनोक्युलेंट किट।', featured: false },
+  { id: 'ewaste_voucher', name: 'E-Waste Drop-off Voucher', name_hi: 'ई-कचरा ड्रॉप-ऑफ वाउचर', cost: 45, icon: '🔌', isPhysical: true, desc: 'Redeemable at a partnered authorized e-waste collection point for safe disposal of old electronics, batteries, and cables.', desc_hi: 'पुराने इलेक्ट्रॉनिक्स और बैटरी के सुरक्षित निपटान हेतु अधिकृत वाउचर।', featured: false },
+  { id: 'seed_paper', name: 'Plantable Seed Paper Stationery', name_hi: 'बीज युक्त इको-पेपर स्टेशनरी', cost: 30, icon: '📜', isPhysical: true, desc: 'Post-consumer waste handmade paper embedded with marigold and basil seeds.', desc_hi: 'गेंदा और तुलसी के बीजों से युक्त हस्तनिर्मित रिसाइकल पेपर।', featured: false },
+  { id: 'priority_pickup_pass', name: 'Priority Pickup Pass', name_hi: 'प्रायोरिटी पिकअप पास (तुरंत उठाव)', cost: 90, icon: '⚡', isPhysical: false, desc: 'Your next submitted report is guaranteed same-day collection, jumping ahead of the standard queue.', desc_hi: 'आपकी अगली कचरा रिपोर्ट को प्राथमिकता देकर उसी दिन त्वरित सफाई सुनिश्चित होगी।', featured: false },
+  { id: 'recycler_marketplace_credit', name: 'Local Recycler Marketplace Credit', name_hi: 'स्थानीय कबाड़ीवाला / रीसायकल क्रेडिट', cost: 65, icon: '♻️', isPhysical: true, desc: '₹40 credit redeemable with your area\'s registered informal waste collectors (kabadiwalas) for scrap and recyclables.', desc_hi: 'क्षेत्र के पंजीकृत कबाड़ीवालों के पास ₹40 का कबाड़/रीसायकल क्रेडिट।', featured: false },
+  { id: 'recycled_notebook', name: '100% Recycled Paper Notebook', name_hi: '100% रीसाइकिल्ड पेपर नोटबुक', cost: 35, icon: '📓', isPhysical: true, desc: '120-page ruled notebook manufactured entirely from post-consumer recovered office paper.', desc_hi: 'कार्यालयी रद्दी कागज से बनी 120 पृष्ठों की पर्यावरण-अनुकूल नोटबुक।', featured: false },
+  { id: 'digital_badge', name: 'Digital Eco-Champion Public Recognition Badge', name_hi: 'डिजिटल ईको-चैंपियन नागरिक बैज', cost: 0, icon: '🥇', isPhysical: false, desc: 'Official digital recognition credential displayed on your civic resident profile.', desc_hi: 'आपके नागरिक प्रोफाइल पर प्रदर्शित होने वाला आधिकारिक डिजिटल सम्मान प्रमाण।', featured: false }
 ];
 
 /* Reward Specific Inline SVG Icons */
@@ -1869,12 +1870,16 @@ function renderRedemptionStore() {
   if (!container) return;
 
   const userBalance = currentUser.credits || 0;
+  const isHi = (typeof currentLang !== 'undefined' && currentLang === 'hi');
 
   container.innerHTML = CREDIT_STORE_CATALOG.map(item => {
     const isAffordable = userBalance >= item.cost;
-    const costText = item.cost === 0 ? 'FREE' : `${item.cost} Credits`;
-    const btnLabel = isAffordable ? 'Redeem Item' : `Need ${item.cost - userBalance} more credits`;
+    const costText = item.cost === 0 ? (isHi ? 'मुफ्त / 0 क्रेडिट' : 'FREE') : (isHi ? `${item.cost} क्रेडिट` : `${item.cost} Credits`);
+    const btnLabel = isAffordable ? (isHi ? 'रिडीम करें' : 'Redeem Item') : (isHi ? `${item.cost - userBalance} और क्रेडिट चाहिए` : `Need ${item.cost - userBalance} more credits`);
     const svgIcon = getRewardSvgIcon(item.id);
+    const itemName = (isHi && item.name_hi) ? item.name_hi : item.name;
+    const itemDesc = (isHi && item.desc_hi) ? item.desc_hi : item.desc;
+    const featuredLabel = isHi ? 'विशेष पर्यावरण पुरस्कार' : 'Featured Sustainability Reward';
 
     if (item.featured) {
       return `
@@ -1883,9 +1888,9 @@ function renderRedemptionStore() {
             ${svgIcon || item.icon}
           </div>
           <div>
-            <div style="font-size: 0.72rem; font-weight: 800; color: var(--civic-spruce-green); text-transform: uppercase;">Featured Sustainability Reward</div>
-            <h4 style="font-size: 1.25rem; margin: 0.25rem 0;">${item.name}</h4>
-            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 0.5rem;">${item.desc}</p>
+            <div style="font-size: 0.72rem; font-weight: 800; color: var(--civic-spruce-green); text-transform: uppercase;">${featuredLabel}</div>
+            <h4 style="font-size: 1.25rem; margin: 0.25rem 0;">${itemName}</h4>
+            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 0.5rem;">${itemDesc}</p>
             <div class="reward-cost">${costText}</div>
           </div>
           <div>
@@ -1901,8 +1906,8 @@ function renderRedemptionStore() {
           <div class="reward-icon" style="display: flex; align-items: center; gap: 0.35rem;">
             ${svgIcon || item.icon}
           </div>
-          <h4 style="font-size: 1rem; margin-bottom: 0.25rem;">${item.name}</h4>
-          <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 0.75rem;">${item.desc}</p>
+          <h4 style="font-size: 1rem; margin-bottom: 0.25rem;">${itemName}</h4>
+          <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 0.75rem;">${itemDesc}</p>
         </div>
         <div>
           <div class="reward-cost">${costText}</div>
@@ -5559,28 +5564,28 @@ function evaluateEscalations() {
 }
 
 const SEGREGATION_ITEMS = [
-  { name: 'Vegetable & Fruit Peels', bin: 'Wet Organic Waste', tag: 'bin-tag-green', tip: 'Compostable at home or municipal biomethanation plants.' },
-  { name: 'Milk Pouches & Wrappers', bin: 'Dry Recyclable', tag: 'bin-tag-blue', tip: 'Rinse with water and dry before bin placement.' },
-  { name: 'AA/AAA Alkaline Batteries', bin: 'Domestic Hazardous', tag: 'bin-tag-yellow', tip: 'Contains heavy metals; deposit at authorized e-waste points.' },
-  { name: 'Used CFL Bulbs & Tubelights', bin: 'Domestic Hazardous', tag: 'bin-tag-yellow', tip: 'Mercury hazard; wrap in paper before yellow bin disposal.' },
-  { name: 'Corrugated Delivery Boxes', bin: 'Dry Recyclable', tag: 'bin-tag-blue', tip: 'Flatten cardboard boxes to optimize vehicle volume.' },
-  { name: 'Sanitary Napkins & Diapers', bin: 'Sanitary Waste', tag: 'bin-tag-red', tip: 'Wrap securely in newspaper marked with a red cross.' },
-  { name: 'Glass Beverage Bottles', bin: 'Dry Recyclable', tag: 'bin-tag-blue', tip: 'Infinitely recyclable; rinse clean of organic residues.' }
+  { name: 'Vegetable & Fruit Peels', name_hi: 'सब्जी और फलों के छिलके', bin: 'Wet Organic Waste', bin_hi: 'गीला जैविक कचरा (हरा डिब्बा)', tag: 'bin-tag-green', tip: 'Compostable at home or municipal biomethanation plants.', tip_hi: 'घर पर खाद बनाएं या नगरपालिका बायोमिथेनेशन संयंत्र में भेजें।' },
+  { name: 'Milk Pouches & Wrappers', name_hi: 'दूध की थैलियां और प्लास्टिक रैपर', bin: 'Dry Recyclable', bin_hi: 'सूखा पुनर्चक्रण योग्य (नीला डिब्बा)', tag: 'bin-tag-blue', tip: 'Rinse with water and dry before bin placement.', tip_hi: 'कचरे के डिब्बे में डालने से पहले पानी से धोकर सुखा लें।' },
+  { name: 'AA/AAA Alkaline Batteries', name_hi: 'इस्तेमाल की गई बैटरी (AA/AAA)', bin: 'Domestic Hazardous', bin_hi: 'घरेलू हानिकारक कचरा (पीला डिब्बा)', tag: 'bin-tag-yellow', tip: 'Contains heavy metals; deposit at authorized e-waste points.', tip_hi: 'भारी धातुएं होती हैं; अधिकृत ई-कचरा केंद्र में जमा करें।' },
+  { name: 'Used CFL Bulbs & Tubelights', name_hi: 'सीएफएल बल्ब और ट्यूबलाइट्स', bin: 'Domestic Hazardous', bin_hi: 'घरेलू हानिकारक कचरा (पीला डिब्बा)', tag: 'bin-tag-yellow', tip: 'Mercury hazard; wrap in paper before yellow bin disposal.', tip_hi: 'पारे का खतरा; फेंकने से पहले अखबार में अच्छी तरह लपेटें।' },
+  { name: 'Corrugated Delivery Boxes', name_hi: 'कार्डबोर्ड / डिलीवरी बॉक्स', bin: 'Dry Recyclable', bin_hi: 'सूखा पुनर्चक्रण योग्य (नीला डिब्बा)', tag: 'bin-tag-blue', tip: 'Flatten cardboard boxes to optimize vehicle volume.', tip_hi: 'कचरा वाहन की जगह बचाने के लिए बक्से को चपटा कर लें।' },
+  { name: 'Sanitary Napkins & Diapers', name_hi: 'सैनिटरी नैपकिन और डायपर', bin: 'Sanitary Waste', bin_hi: 'सैनिटरी कचरा (लाल डिब्बा)', tag: 'bin-tag-red', tip: 'Wrap securely in newspaper marked with a red cross.', tip_hi: 'लाल क्रॉस के निशान वाले अखबार में अच्छी तरह लपेटें।' },
+  { name: 'Glass Beverage Bottles', name_hi: 'कांच की बोतलें और जार', bin: 'Dry Recyclable', bin_hi: 'सूखा पुनर्चक्रण योग्य (नीला डिब्बा)', tag: 'bin-tag-blue', tip: 'Infinitely recyclable; rinse clean of organic residues.', tip_hi: 'अनंत बार रीसायकल योग्य; पानी से धोकर साफ करें।' }
 ];
 
 /* Category SVG Icons for Waste Segregation Guide */
 function getCategorySvgIcon(binName = '') {
   const b = binName.toLowerCase();
-  if (b.includes('dry') || b.includes('recycl')) {
+  if (b.includes('dry') || b.includes('recycl') || b.includes('सूखा')) {
     return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><path d="M7 19H4.815a1.83 1.83 0 0 1-1.57-.881 1.785 1.785 0 0 1-.004-1.784L7.196 9.5"/><path d="M11 19h8.2a1.8 1.8 0 0 0 1.57-.88 1.8 1.8 0 0 0 0-1.79L18 12"/><path d="M9.171 4.872l3.414 5.914a1.8 1.8 0 0 0 1.56.914h5.669"/><polyline points="14 16 11 19 14 22"/><polyline points="5 11 7 8 10 9"/><polyline points="17 7 20 7 19 10"/></svg>`;
   }
-  if (b.includes('wet') || b.includes('organic') || b.includes('compost')) {
+  if (b.includes('wet') || b.includes('organic') || b.includes('compost') || b.includes('गीला')) {
     return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>`;
   }
-  if (b.includes('hazard') || b.includes('domestic')) {
+  if (b.includes('hazard') || b.includes('domestic') || b.includes('हानिकारक')) {
     return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
   }
-  if (b.includes('sanitary') || b.includes('red')) {
+  if (b.includes('sanitary') || b.includes('red') || b.includes('सैनिटरी')) {
     return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="14"/><line x1="9" y1="11" x2="15" y2="11"/></svg>`;
   }
   return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: -2px; margin-right: 4px;"><circle cx="12" cy="12" r="10"/></svg>`;
@@ -5592,15 +5597,21 @@ function initSegregationGuide() {
   if (!grid) return;
 
   function render(items) {
-    grid.innerHTML = items.map(i => `
-      <div class="guide-item-card">
-        <div>
-          <strong>${i.name}</strong>
-          <div><span class="bin-tag ${i.tag}">${getCategorySvgIcon(i.bin)}${i.bin}</span></div>
+    const isHi = (typeof currentLang !== 'undefined' && currentLang === 'hi');
+    grid.innerHTML = items.map(i => {
+      const displayName = isHi && i.name_hi ? i.name_hi : i.name;
+      const displayBin = isHi && i.bin_hi ? i.bin_hi : i.bin;
+      const displayTip = isHi && i.tip_hi ? i.tip_hi : i.tip;
+      return `
+        <div class="guide-item-card">
+          <div>
+            <strong>${displayName}</strong>
+            <div><span class="bin-tag ${i.tag}">${getCategorySvgIcon(i.bin)}${displayBin}</span></div>
+          </div>
+          <div style="font-size: 0.78rem; color: #64748b; margin-top: 0.4rem;">${displayTip}</div>
         </div>
-        <div style="font-size: 0.78rem; color: #64748b; margin-top: 0.4rem;">${i.tip}</div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
 
   render(SEGREGATION_ITEMS);
@@ -5609,7 +5620,12 @@ function initSegregationGuide() {
     input.addEventListener('input', (e) => {
       const q = e.target.value.toLowerCase().trim();
       const filtered = SEGREGATION_ITEMS.filter(i => 
-        i.name.toLowerCase().includes(q) || i.bin.toLowerCase().includes(q)
+        i.name.toLowerCase().includes(q) || 
+        (i.name_hi && i.name_hi.toLowerCase().includes(q)) ||
+        i.bin.toLowerCase().includes(q) || 
+        (i.bin_hi && i.bin_hi.toLowerCase().includes(q)) ||
+        i.tip.toLowerCase().includes(q) || 
+        (i.tip_hi && i.tip_hi.toLowerCase().includes(q))
       );
       render(filtered);
     });
@@ -6197,19 +6213,167 @@ window.openAdminWeeklyDigestModal = function() {
 const I18N = {
   en: {
     langBtn: '🌐 EN | हिं',
+    langBtnTitle: 'Switch Language / भाषा बदलें',
     welcome: 'Welcome',
     reportTitle: 'Submit Bin Report (+5 Credits)',
     walletBalance: 'Wallet Balance',
     submitReport: 'Submit Bin Report (+5 Credits)',
-    signOut: 'Sign Out'
+    signOut: 'Sign Out',
+    brandSubtitle: 'Municipal Waste Network',
+    publicTransparency: '🌐 Public Transparency',
+    aboutProject: 'ℹ️ About Project',
+    apiOnline: '🟢 REST API Online',
+    notifCenter: '🔔 Notification Center',
+    markRead: 'Mark Read',
+    authPill: 'Municipal Civic Utility',
+    authTitle: 'Smart Waste Management Platform',
+    authSubtitle: 'An urban digital framework replacing high-cost hardware with crowdsourced reporting, precise GPS verification, route optimization, and statutory biomedical waste tracking.',
+    tabLogin: 'Sign In',
+    tabSignup: 'Register Account',
+    googleSignIn: 'Sign in with Google',
+    labelEmail: 'Email Address',
+    labelPassword: 'Password',
+    placeholderEmail: 'e.g. citizen@ecoclear.org',
+    btnSignIn: 'Sign In',
+    demoRoleHeading: '⚡ Quick Demo: Switch Role',
+    roleCitizen: 'Citizen',
+    roleCitizenDesc: 'Resident',
+    roleInstitution: 'Institution',
+    roleInstitutionDesc: 'School / Office',
+    roleHospital: 'Hospital',
+    roleHospitalDesc: 'Bio-Medical',
+    roleWorker: 'Worker',
+    roleWorkerDesc: 'Crew Driver',
+    roleAdmin: 'Admin',
+    roleAdminDesc: 'Directorate',
+    labelName: 'Contact Person Name',
+    placeholderName: 'e.g. Ananya Sharma or Facility Officer',
+    btnCreateAccount: 'Create Account',
+    citizenGreeting: 'Welcome, ',
+    citizenSubtitle: 'Report bin overflows, verify segregation, and redeem EcoCredits at the municipal store.',
+    citizenStreak: 'Week Green Streak',
+    historyBtn: '📜 History',
+    creditStoreBtn: '🎁 Credit Store',
+    emergencyBannerTitle: '🚨 Urgent Hazardous Waste Spill or Blockage?',
+    emergencyBannerText: 'Emergency dispatches bypass standard queues for instant crew response (+25 Credits).',
+    emergencyBtn: 'Submit Emergency Hazard',
+    offlineBannerText: 'Offline Mode Active:',
+    impactTitle: '🌱 Personal Environmental Impact (Current Month)',
+    guideTitle: '🔍 Waste Segregation Guide',
+    guideSubtitle: 'Look up common household items for the correct municipal bin stream.',
+    guideSearchPlaceholder: 'Search item (e.g. milk pouch, battery, peels, box)...',
+    photoSegTitle: '📷 Photo Segregation Verification',
+    photoSegSub: 'Upload a photo of your sorted wet and dry bins before morning collection.',
+    photoSegBtn: 'Submit Verification (+15 Credits)',
+    referralTitle: '🎁 Invite a Neighbor to CleanMumbai',
+    referralSub: 'Share your referral code. Both of you receive +15 EcoCredits as soon as your neighbor submits their first verified report!',
+    copyLinkBtn: '📋 Copy Link',
+    locationMapLabel: 'Location on Map *',
+    locateBtn: '📍 Use My Current Location',
+    landmarkLabel: 'Resolved Address / Landmark *',
+    landmarkPlaceholder: 'Auto-fills from pin or enter landmark (e.g. Near Bus Stand #3)',
+    wardLabel: 'Municipal Ward Location',
+    severityLabel: 'Severity Level *',
+    sevGettingFull: 'Getting Full',
+    sevFull: '100% Full',
+    sevOverflowing: 'Overflowing',
+    voiceTitle: '🎙️ Voice Message Note (Optional)',
+    voiceStatus: 'Click to record verbal observations',
+    notesLabel: 'Details / Observations',
+    notesPlaceholder: 'e.g. Cardboard boxes and plastic bottles obstructing pedestrian path...',
+    neighborhoodTitle: '🗺️ Neighborhood Activity Map',
+    neighborhoodSub: 'Live open reports submitted by fellow residents near your ward.',
+    myReportsTitle: 'My Submitted Reports',
+    filterAll: 'All',
+    filterPending: 'Pending',
+    filterAssigned: 'Assigned',
+    filterCleared: 'Cleared',
+    storeCatalogTitle: 'Municipal Eco-Reward Catalog',
+    storeCatalogSub: 'Redeem earned EcoCredits for civic perks and physical sustainability products.',
+    storeLedgerBtn: 'Ledger',
+    redemptionsHistoryTitle: '📜 My Redemptions History'
   },
   hi: {
     langBtn: '🌐 हिं | EN',
+    langBtnTitle: 'अंग्रेज़ी में बदलें / Switch to English',
     welcome: 'स्वागत है',
     reportTitle: 'कचरा डिब्बा रिपोर्ट दर्ज करें (+5)',
     walletBalance: 'वॉलेट बैलेंस',
     submitReport: 'रिपोर्ट सबमिट करें (+5)',
-    signOut: 'साइन आउट'
+    signOut: 'साइन आउट',
+    brandSubtitle: 'नगर निगम अपशिष्ट प्रबंधन नेटवर्क',
+    publicTransparency: '🌐 जन पारदर्शिता',
+    aboutProject: 'ℹ️ परियोजना विवरण',
+    apiOnline: '🟢 सर्वर ऑनलाइन',
+    notifCenter: '🔔 सूचना केंद्र',
+    markRead: 'पढ़ा गया चिह्नित करें',
+    authPill: 'नगर निगम जन सुविधा',
+    authTitle: 'स्मार्ट अपशिष्ट प्रबंधन पोर्टल',
+    authSubtitle: 'नागरिक सहभागिता, सटीक जीपीएस सत्यापन, कचरा वाहन रूट अनुकूलन और बायोमेडिकल ट्रैकिंग युक्त आधुनिक शहरी मंच।',
+    tabLogin: 'लॉग इन',
+    tabSignup: 'नया खाता बनाएं',
+    googleSignIn: 'Google से साइन इन करें',
+    labelEmail: 'ईमेल पता',
+    labelPassword: 'पासवर्ड',
+    placeholderEmail: 'उदा. citizen@ecoclear.org',
+    btnSignIn: 'साइन इन करें',
+    demoRoleHeading: '⚡ तुरंत डेमो भूमिका बदलें',
+    roleCitizen: 'नागरिक',
+    roleCitizenDesc: 'स्थानीय निवासी',
+    roleInstitution: 'संस्थान',
+    roleInstitutionDesc: 'स्कूल / कार्यालय',
+    roleHospital: 'अस्पताल',
+    roleHospitalDesc: 'बायो-मेडिकल',
+    roleWorker: 'सफाई कर्मचारी',
+    roleWorkerDesc: 'वाहन चालक / दल',
+    roleAdmin: 'प्रशासक',
+    roleAdminDesc: 'नगर पालिका अधिकारी',
+    labelName: 'संपर्क व्यक्ति का नाम',
+    placeholderName: 'उदा. अनन्य शर्मा या स्वच्छता अधिकारी',
+    btnCreateAccount: 'खाता बनाएं',
+    citizenGreeting: 'स्वागत है, ',
+    citizenSubtitle: 'कचरा डिब्बा ओवरफ्लो की रिपोर्ट करें, पृथक्करण सत्यापित करें और रिवार्ड्स प्राप्त करें।',
+    citizenStreak: 'सप्ताह की ग्रीन स्ट्रीक',
+    historyBtn: '📜 इतिहास',
+    creditStoreBtn: '🎁 क्रेडिट स्टोर',
+    emergencyBannerTitle: '🚨 तत्काल खतरनाक कचरा या रुकावट?',
+    emergencyBannerText: 'आपातकालीन रिपोर्ट तुरंत विशेष सफाई दल को भेजी जाती है (+25 क्रेडिट)।',
+    emergencyBtn: 'आपातकालीन खतरा दर्ज करें',
+    offlineBannerText: 'ऑफ़लाइन मोड सक्रिय:',
+    impactTitle: '🌱 व्यक्तिगत पर्यावरण प्रभाव (चालू माह)',
+    guideTitle: '🔍 कचरा पृथक्करण गाइड (SBM 2.0)',
+    guideSubtitle: 'सही डिब्बे में कचरा डालने के लिए घरेलू वस्तुओं के नियम देखें।',
+    guideSearchPlaceholder: 'कचरा खोजें (जैसे: दूध की थैली, बैटरी, छिलके, डिब्बा)...',
+    photoSegTitle: '📷 कचरा पृथक्करण फोटो सत्यापन',
+    photoSegSub: 'सुबह के कचरा संग्रहण से पहले अपने अलग किए गए डिब्बों की फोटो अपलोड करें।',
+    photoSegBtn: 'सत्यापन सबमिट करें (+15 क्रेडिट)',
+    referralTitle: '🎁 पड़ोसी को स्वच्छ मुंबई में आमंत्रित करें',
+    referralSub: 'अपना रेफरल कोड साझा करें। पड़ोसी की पहली रिपोर्ट पर दोनों को +15 ईको-क्रेडिट मिलेंगे!',
+    copyLinkBtn: '📋 लिंक कॉपी करें',
+    locationMapLabel: 'मानचित्र पर स्थान *',
+    locateBtn: '📍 मेरा वर्तमान स्थान उपयोग करें',
+    landmarkLabel: 'पता / निकटतम पहचान स्थल *',
+    landmarkPlaceholder: 'पिन से स्वतः भरा जाएगा या स्थल दर्ज करें (उदा. बस स्टॉप #3 के पास)',
+    wardLabel: 'नगर निगम वार्ड क्षेत्र',
+    severityLabel: 'गंभीरता / भराव स्तर *',
+    sevGettingFull: 'भरने वाला है',
+    sevFull: '100% भर गया',
+    sevOverflowing: 'कचरा बाहर फैल रहा है',
+    voiceTitle: '🎙️ वॉइस संदेश नोट (वैकल्पिक)',
+    voiceStatus: 'मौखिक अवलोकन रिकॉर्ड करने के लिए क्लिक करें',
+    notesLabel: 'अतिरिक्त विवरण / टिप्पणी',
+    notesPlaceholder: 'उदा. गत्ते के डिब्बे और प्लास्टिक की बोतलें पैदल रास्ते में बिखरी हैं...',
+    neighborhoodTitle: '🗺️ आस-पड़ोस गतिविधि मानचित्र',
+    neighborhoodSub: 'आपके वार्ड के साथी नागरिकों द्वारा दर्ज की गई खुली रिपोर्ट्स।',
+    myReportsTitle: 'मेरी दर्ज की गई रिपोर्ट्स',
+    filterAll: 'सभी',
+    filterPending: 'लंबित',
+    filterAssigned: 'सौंपी गई',
+    filterCleared: 'साफ की गई',
+    storeCatalogTitle: 'नगर निगम ईको-रिवार्ड्स कैटलॉग',
+    storeCatalogSub: 'अर्जित ईको-क्रेडिट से नागरिक सुविधाएं व पौधे रिडीम करें।',
+    storeLedgerBtn: 'खाता बही',
+    redemptionsHistoryTitle: '📜 मेरी रिडेम्पशन हिस्ट्री'
   }
 };
 let currentLang = localStorage.getItem('swm_lang') || 'en';
@@ -6218,18 +6382,241 @@ window.toggleAppLanguage = function() {
   currentLang = currentLang === 'en' ? 'hi' : 'en';
   localStorage.setItem('swm_lang', currentLang);
   applyAppLanguage(currentLang);
+  if (typeof addNotification === 'function') {
+    addNotification(
+      currentLang === 'hi' ? '🌐 भाषा बदली गई' : '🌐 Language Switched',
+      currentLang === 'hi' ? 'हिन्दी भाषा सक्रिय की गई है।' : 'Switched to English interface.',
+      'general'
+    );
+  }
 };
 
 function applyAppLanguage(lang) {
   const dict = I18N[lang] || I18N.en;
-  const langBtns = [document.getElementById('langToggleBtn'), document.getElementById('guestLangToggleBtn')];
-  langBtns.forEach(b => { if (b) b.textContent = dict.langBtn; });
+  const isHi = lang === 'hi';
 
+  // 1. Language buttons
+  const langBtns = [document.getElementById('langToggleBtn'), document.getElementById('guestLangToggleBtn')];
+  langBtns.forEach(b => { 
+    if (b) {
+      b.textContent = dict.langBtn;
+      b.title = dict.langBtnTitle;
+      if (isHi) {
+        b.classList.add('active-hindi');
+      } else {
+        b.classList.remove('active-hindi');
+      }
+    }
+  });
+
+  // 2. Navbar & Subtitles
+  const brandSub = document.querySelector('#navBrandLogo span:nth-child(2)');
+  if (brandSub) brandSub.textContent = dict.brandSubtitle;
+  const guestTrans = document.getElementById('guestNavTransparencyBtn');
+  if (guestTrans) guestTrans.textContent = dict.publicTransparency;
+  const guestAbout = document.getElementById('guestNavAboutBtn');
+  if (guestAbout) guestAbout.textContent = dict.aboutProject;
+  const guestPill = document.getElementById('guestBackendStatusPill');
+  if (guestPill) guestPill.textContent = dict.apiOnline;
+  const notifHeader = document.querySelector('#notificationDropdown .notification-header h4');
+  if (notifHeader) notifHeader.textContent = dict.notifCenter;
+  const notifMarkRead = document.querySelector('#notificationDropdown .notification-header button');
+  if (notifMarkRead) notifMarkRead.textContent = dict.markRead;
   const logoutBtn = document.getElementById('logoutBtn');
   if (logoutBtn) logoutBtn.textContent = dict.signOut;
 
-  const submitBtn = document.querySelector('#citizenReportForm button[type="submit"]');
-  if (submitBtn) submitBtn.textContent = dict.submitReport;
+  // 3. Auth / Login / Signup View
+  const authPill = document.querySelector('#authView .role-pill');
+  if (authPill) authPill.textContent = dict.authPill;
+  const authH1 = document.querySelector('#authView .auth-hero-card h1');
+  if (authH1) authH1.textContent = dict.authTitle;
+  const authP = document.querySelector('#authView .auth-hero-card p');
+  if (authP) authP.textContent = dict.authSubtitle;
+  const tabLogin = document.getElementById('tabLogin');
+  if (tabLogin) tabLogin.textContent = dict.tabLogin;
+  const tabSignup = document.getElementById('tabSignup');
+  if (tabSignup) tabSignup.textContent = dict.tabSignup;
+  const googleBtn = document.querySelector('#loginForm .btn-google');
+  if (googleBtn) {
+    const svg = googleBtn.querySelector('svg');
+    googleBtn.innerHTML = '';
+    if (svg) googleBtn.appendChild(svg);
+    googleBtn.appendChild(document.createTextNode(' ' + dict.googleSignIn));
+  }
+  const emailLabel = document.querySelector('label[for="loginEmail"]');
+  if (emailLabel) emailLabel.textContent = dict.labelEmail;
+  const emailInput = document.getElementById('loginEmail');
+  if (emailInput) emailInput.placeholder = dict.placeholderEmail;
+  const passLabel = document.querySelector('label[for="loginPassword"]');
+  if (passLabel) passLabel.textContent = dict.labelPassword;
+  const loginSubmit = document.getElementById('loginSubmitBtn');
+  if (loginSubmit) loginSubmit.textContent = dict.btnSignIn;
+  const signupSubmit = document.querySelector('#signupForm button[type="submit"]');
+  if (signupSubmit) signupSubmit.textContent = dict.btnCreateAccount;
+  const signupNameLabel = document.querySelector('label[for="signupName"]');
+  if (signupNameLabel) signupNameLabel.textContent = dict.labelName;
+  const signupNameInput = document.getElementById('signupName');
+  if (signupNameInput) signupNameInput.placeholder = dict.placeholderName;
+  const signupEmailLabel = document.querySelector('label[for="signupEmail"]');
+  if (signupEmailLabel) signupEmailLabel.textContent = dict.labelEmail;
+  const signupPassLabel = document.querySelector('label[for="signupPassword"]');
+  if (signupPassLabel) signupPassLabel.textContent = dict.labelPassword;
+
+  // Role cards in signup
+  const roleCards = {
+    citizen: { title: dict.roleCitizen, desc: dict.roleCitizenDesc },
+    institution: { title: dict.roleInstitution, desc: dict.roleInstitutionDesc },
+    hospital: { title: dict.roleHospital, desc: dict.roleHospitalDesc },
+    worker: { title: dict.roleWorker, desc: dict.roleWorkerDesc },
+    admin: { title: dict.roleAdmin, desc: dict.roleAdminDesc }
+  };
+  Object.keys(roleCards).forEach(r => {
+    const card = document.querySelector(`.role-select-card[data-role="${r}"]`);
+    if (card) {
+      const t = card.querySelector('.role-card-title');
+      const d = card.querySelector('.role-card-desc');
+      if (t) t.textContent = roleCards[r].title;
+      if (d) d.textContent = roleCards[r].desc;
+    }
+  });
+
+  // Demo Role Heading
+  const demoHeading = document.querySelector('#quickDemoSwitchRole div');
+  if (demoHeading) {
+    demoHeading.innerHTML = `<span>⚡</span> <span>${dict.demoRoleHeading}</span>`;
+  }
+
+  // 4. Citizen Dashboard
+  const citizenH2 = document.querySelector('#citizenDashboard .dashboard-title');
+  if (citizenH2) {
+    citizenH2.innerHTML = `${dict.citizenGreeting}<span id="citizenWelcomeName">${currentUser ? currentUser.name : 'Resident'}</span>`;
+  }
+  const citizenSub = document.querySelector('#citizenDashboard .dashboard-subtitle');
+  if (citizenSub) citizenSub.textContent = dict.citizenSubtitle;
+
+  const streakBadge = document.getElementById('citizenStreakBadge');
+  if (streakBadge) {
+    const count = document.getElementById('citizenStreakCount') ? document.getElementById('citizenStreakCount').textContent : '3';
+    streakBadge.innerHTML = `🔥 <span id="citizenStreakCount">${count}</span>-${dict.citizenStreak}`;
+  }
+
+  // Emergency banner
+  const emergCard = document.querySelector('#citizenDashboard div[style*="civic-signal-crimson-soft"]');
+  if (emergCard) {
+    const eTitle = emergCard.querySelector('div[style*="font-weight: 800"]');
+    if (eTitle) eTitle.textContent = dict.emergencyBannerTitle;
+    const eSub = emergCard.querySelector('div[style*="color: #556960"]');
+    if (eSub) eSub.textContent = dict.emergencyBannerText;
+    const eBtn = emergCard.querySelector('button');
+    if (eBtn) eBtn.textContent = dict.emergencyBtn;
+  }
+
+  // Impact tracker
+  const impactH3 = document.querySelector('#citizenDashboard .card h3');
+  if (impactH3 && (impactH3.textContent.includes('Impact') || impactH3.textContent.includes('पर्यावरण प्रभाव'))) {
+    impactH3.textContent = dict.impactTitle;
+  }
+
+  // Segregation guide
+  const allCards = document.querySelectorAll('#citizenDashboard .card');
+  allCards.forEach(c => {
+    const h3 = c.querySelector('h3');
+    if (h3 && (h3.textContent.includes('Segregation Guide') || h3.textContent.includes('कचरा पृथक्करण'))) {
+      h3.textContent = dict.guideTitle;
+      const p = c.querySelector('p');
+      if (p) p.textContent = dict.guideSubtitle;
+    }
+  });
+  const segInput = document.getElementById('segregationSearchInput');
+  if (segInput) segInput.placeholder = dict.guideSearchPlaceholder;
+
+  // Photo Segregation
+  const photoSegH3 = Array.from(document.querySelectorAll('#citizenDashboard h3')).find(h => h.textContent.includes('Photo Segregation') || h.textContent.includes('फोटो सत्यापन'));
+  if (photoSegH3) {
+    photoSegH3.textContent = dict.photoSegTitle;
+    const p = photoSegH3.parentElement.querySelector('p');
+    if (p) p.textContent = dict.photoSegSub;
+    const btn = photoSegH3.parentElement.querySelector('button[type="submit"]');
+    if (btn) btn.textContent = dict.photoSegBtn;
+  }
+
+  // Referral Card
+  const refCard = document.getElementById('citizenReferralCard');
+  if (refCard) {
+    const h4 = refCard.querySelector('h4');
+    if (h4) h4.textContent = dict.referralTitle;
+    const p = refCard.querySelector('p');
+    if (p) p.innerHTML = dict.referralSub;
+    const btn = refCard.querySelector('button');
+    if (btn) btn.textContent = dict.copyLinkBtn;
+  }
+
+  // Bin Report Form
+  const reportForm = document.getElementById('citizenReportForm');
+  if (reportForm) {
+    const h3 = reportForm.parentElement.querySelector('h3');
+    if (h3) h3.textContent = dict.reportTitle;
+    const locBtn = document.getElementById('citizenLocateBtn');
+    if (locBtn) locBtn.textContent = dict.locateBtn;
+    const lmarkLabel = document.querySelector('label[for="citizenLandmark"]');
+    if (lmarkLabel) lmarkLabel.innerHTML = `${dict.landmarkLabel} <span style="color: var(--civic-signal-crimson);">*</span>`;
+    const lmarkInput = document.getElementById('citizenLandmark');
+    if (lmarkInput) lmarkInput.placeholder = dict.landmarkPlaceholder;
+    const wardLabel = document.querySelector('label[for="citizenArea"]');
+    if (wardLabel) wardLabel.textContent = dict.wardLabel;
+    const notesLabel = document.querySelector('label[for="citizenNotes"]');
+    if (notesLabel) notesLabel.textContent = dict.notesLabel;
+    const notesInput = document.getElementById('citizenNotes');
+    if (notesInput) notesInput.placeholder = dict.notesPlaceholder;
+    const micStatus = document.getElementById('micStatusText');
+    if (micStatus && !micStatus.textContent.includes('recorded') && !micStatus.textContent.includes('रिकॉर्ड')) {
+      micStatus.textContent = dict.voiceStatus;
+    }
+
+    // Severity buttons
+    const sBtns = reportForm.querySelectorAll('.severity-btn');
+    sBtns.forEach(sb => {
+      const sev = sb.getAttribute('data-severity');
+      if (sev === 'getting_full') sb.textContent = dict.sevGettingFull;
+      if (sev === 'full') sb.textContent = dict.sevFull;
+      if (sev === 'overflowing') sb.textContent = dict.sevOverflowing;
+    });
+
+    const submitBtn = reportForm.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.textContent = dict.submitReport;
+  }
+
+  // Reports feed
+  const reportsH3 = Array.from(document.querySelectorAll('#citizenDashboard h3')).find(h => h.textContent.includes('Submitted Reports') || h.textContent.includes('दर्ज की गई रिपोर्ट्स'));
+  if (reportsH3) reportsH3.textContent = dict.myReportsTitle;
+
+  // Filter buttons
+  const filterBtns = document.querySelectorAll('.filter-group .filter-btn');
+  if (filterBtns.length >= 4) {
+    filterBtns[0].textContent = dict.filterAll;
+    filterBtns[1].textContent = dict.filterPending;
+    filterBtns[2].textContent = dict.filterAssigned;
+    filterBtns[3].textContent = dict.filterCleared;
+  }
+
+  // Store Catalog
+  const storeSection = document.getElementById('redemptionStoreSection');
+  if (storeSection) {
+    const h3 = storeSection.querySelector('h3');
+    if (h3) h3.textContent = dict.storeCatalogTitle;
+    const p = storeSection.querySelector('p');
+    if (p) p.textContent = dict.storeCatalogSub;
+    const h4 = storeSection.querySelector('h4');
+    if (h4) h4.textContent = dict.redemptionsHistoryTitle;
+  }
+
+  // Refresh dynamic widgets in current language
+  if (typeof initSegregationGuide === 'function') {
+    initSegregationGuide();
+  }
+  if (typeof renderRedemptionStore === 'function' && document.getElementById('rewardStoreGrid')) {
+    renderRedemptionStore();
+  }
 }
 
 function initLanguage() {

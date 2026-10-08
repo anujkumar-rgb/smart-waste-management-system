@@ -1469,6 +1469,12 @@ button, input, select, textarea {
 .lang-toggle-btn:hover {
   border-color: var(--civic-cobalt-accent);
 }
+.lang-toggle-btn.active-hindi {
+  background: var(--civic-cobalt-accent);
+  color: #ffffff;
+  border-color: var(--civic-cobalt-accent);
+  box-shadow: 0 0 0 2px rgba(28, 82, 216, 0.2);
+}
 
 /* Citizen Streak Tracker Badge */
 .streak-badge {
