@@ -671,11 +671,6 @@ function initDataStores() {
       active: true
     }
   ]));
-  if (!localStorage.getItem('swm_audit_logs')) localStorage.setItem('swm_audit_logs', JSON.stringify([
-    { id: 'log-1', timestamp: Date.now() - 3 * 60 * 60 * 1000, actor: 'System', action: 'INIT', details: 'Municipal Waste Management Platform Initialized.' },
-    { id: 'log-2', timestamp: Date.now() - 2 * 60 * 60 * 1000, actor: 'Admin', action: 'BROADCAST', details: 'Transmitted Monsoon Protocol directive to all citizen wards.' },
-    { id: 'log-3', timestamp: Date.now() - 40 * 60 * 1000, actor: 'Admin', action: 'CREW_ASSIGNED', details: 'Assigned bulk paper collection BULK-2002 to Rajesh Singh (Crew #101).' }
-  ]));
 }
 
 function getFleet() { return JSON.parse(localStorage.getItem('swm_fleet') || '[]'); }
@@ -699,30 +694,10 @@ function saveRedemptions(r) { localStorage.setItem('swm_redemptions', JSON.strin
 function getBroadcasts() { return JSON.parse(localStorage.getItem('swm_broadcasts') || '[]'); }
 function saveBroadcasts(b) { localStorage.setItem('swm_broadcasts', JSON.stringify(b)); }
 
-function getAuditLogs() { return JSON.parse(localStorage.getItem('swm_audit_logs') || '[]'); }
-function saveAuditLogs(l) { localStorage.setItem('swm_audit_logs', JSON.stringify(l)); }
-
 function addAuditLog(actor, action, details) {
-  const logs = getAuditLogs();
-  const entry = {
-    id: `log-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-    timestamp: Date.now(),
-    actor: actor || (currentUser ? currentUser.name : 'System'),
-    action,
-    details
-  };
-  logs.unshift(entry);
-  if (logs.length > 200) logs.pop();
-  saveAuditLogs(logs);
-
-  if (isBackendConnected) {
-    fetch('/api/logs', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(entry)
-    }).catch(() => {});
+  if (typeof logAdminAction === 'function') {
+    return logAdminAction(action, actor, details);
   }
-  return entry;
 }
 
 // REST API Integration & Sync Engine
@@ -800,7 +775,7 @@ async function syncWithBackend() {
     }
     if (logsRes && logsRes.ok) {
       const data = await logsRes.json();
-      if (Array.isArray(data)) saveAuditLogs(data);
+      if (Array.isArray(data)) localStorage.setItem('swm_admin_audit_log', JSON.stringify(data));
     }
 
     displayActiveBroadcasts();
@@ -3747,37 +3722,8 @@ window.handleUpdateComplianceSubmit = function(e) {
   renderAdminComplianceTable();
 };
 
-function renderAdminLogsTable() {
-  const tbody = document.getElementById('adminLogsTableBody');
-  if (!tbody) return;
-
-  const logs = getAuditLogs();
-  if (logs.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #64748b; padding: 1.5rem;">No system audit entries logged yet.</td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = logs.map(l => {
-    let badgeClass = 'audit-badge-create';
-    if (l.action.includes('CLEAR') || l.action.includes('FULFILL')) badgeClass = 'audit-badge-clear';
-    if (l.action.includes('ALERT') || l.action.includes('BOOST') || l.action.includes('BROADCAST')) badgeClass = 'audit-badge-alert';
-    if (l.action.includes('ESCALAT') || l.action.includes('DELETE') || l.action.includes('CITATION')) badgeClass = 'audit-badge-escalate';
-    if (l.action.includes('DISPATCH') || l.action.includes('ASSIGN')) badgeClass = 'audit-badge-dispatch';
-
-    const timeStr = new Date(l.timestamp).toLocaleString();
-    return `
-      <tr>
-        <td><small style="font-family: monospace;">${timeStr}</small></td>
-        <td><strong>${l.actor}</strong></td>
-        <td><span class="audit-badge ${badgeClass}">${l.action}</span></td>
-        <td>${l.details}</td>
-      </tr>
-    `;
-  }).join('');
-}
-
 window.exportAdminLogsCSV = function() {
-  const logs = getAuditLogs();
+  const logs = getAdminAuditTrail();
   if (logs.length === 0) {
     alert('No operational logs available to export.');
     return;
@@ -6150,26 +6096,46 @@ function getAdminAuditTrail() {
 
 function logAdminAction(action, actor, details) {
   let logs = getAdminAuditTrail();
-  logs.unshift({
+  const entry = {
+    id: `log-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
     timestamp: Date.now(),
-    actor: actor || 'Admin (MCGM)',
+    actor: actor || (currentUser ? currentUser.name : 'Admin (MCGM)'),
     action,
     details
-  });
+  };
+  logs.unshift(entry);
+  if (logs.length > 200) logs.pop();
   localStorage.setItem('swm_admin_audit_log', JSON.stringify(logs));
   renderAdminLogsTable();
+
+  if (isBackendConnected) {
+    fetch('/api/logs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(entry)
+    }).catch(() => {});
+  }
+  return entry;
 }
 
 function renderAdminLogsTable() {
   const tbody = document.getElementById('adminLogsTableBody');
   if (!tbody) return;
   const logs = getAdminAuditTrail();
+  if (logs.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #64748b; padding: 1.5rem;">No system audit entries logged yet.</td></tr>`;
+    return;
+  }
 
   tbody.innerHTML = logs.map(l => {
     let badgeClass = 'audit-badge-clear';
-    if (l.action.toLowerCase().includes('reassign')) badgeClass = 'audit-badge-reassign';
-    else if (l.action.toLowerCase().includes('threshold') || l.action.toLowerCase().includes('compliance')) badgeClass = 'audit-badge-threshold';
-    else if (l.action.toLowerCase().includes('shift') || l.action.toLowerCase().includes('safety')) badgeClass = 'audit-badge-shift';
+    const act = (l.action || '').toLowerCase();
+    if (act.includes('reassign')) badgeClass = 'audit-badge-reassign';
+    else if (act.includes('threshold') || act.includes('compliance')) badgeClass = 'audit-badge-threshold';
+    else if (act.includes('shift') || act.includes('safety')) badgeClass = 'audit-badge-shift';
+    else if (act.includes('dispatch') || act.includes('assign')) badgeClass = 'audit-badge-dispatch';
+    else if (act.includes('alert') || act.includes('boost') || act.includes('broadcast')) badgeClass = 'audit-badge-alert';
+    else if (act.includes('escalat') || act.includes('delete') || act.includes('citation')) badgeClass = 'audit-badge-escalate';
 
     return `
       <tr>
